@@ -1,0 +1,15 @@
+[Unit]
+Description=Run Backup to Proxmox Backup Server
+After=network-online.target
+
+[Service]
+Type=oneshot
+{% if pve_backup.host.healtcheck_ping_url %}
+Environment=HEALTHCHECK_URI={{ pve_backup.host.healtcheck_ping_url }}
+ExecStartPre=bash -c 'curl -fsS -m 10 --retry 5 -o /dev/null $HEALTHCHECK_URI/start'
+ExecStopPost=bash -c 'curl -fsS -m 10 --retry 5 -o /dev/null $HEALTHCHECK_URI/$EXIT_STATUS'
+{% endif %}
+ExecStart=/usr/local/bin/backup-vehost
+
+[Install]
+WantedBy=default.target

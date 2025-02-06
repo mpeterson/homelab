@@ -1,0 +1,7 @@
+---
+- hosts: proxmox:&pve
+
+  name: Proxmox PVE setup
+
+  roles:
+    - proxmox_pve

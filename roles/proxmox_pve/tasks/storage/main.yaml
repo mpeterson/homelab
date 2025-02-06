@@ -1,0 +1,6 @@
+---
+- name: Setup storage backends
+  ansible.builtin.include_tasks: setup_storage.yaml
+  with_items: "{{ pve_storage | default({}, true) | dict2items }}"
+  loop_control:
+    loop_var: storage_config

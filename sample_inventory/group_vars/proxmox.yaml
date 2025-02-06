@@ -1,0 +1,98 @@
+---
+pve_storage:
+  pbs-01:
+    content: backup
+    datastore: myDatastore
+    encryption-key: '{"kdf":null,"created":"2024-12-28T17:33:07+02:00","modified":"2024-12-28T17:33:07+02:00","data":"__REDACTED__","fingerprint":"__REDACTED__"}'
+    namespace: myNamespace
+    prune-backups: keep-all=1
+    server: pbs-01.example.com
+    type: pbs
+    username: user@pbs
+    password: __REDACTED__
+
+pve_storage_contents:
+  local:
+    isos:
+      - url: https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.9.0-amd64-netinst.iso
+        checksum: sha256:1257373c706d8c07e6917942736a865dfff557d21d76ea3040bb1039eb72a054
+      - url: https://download.sys.truenas.net/TrueNAS-SCALE-ElectricEel/24.10.2/TrueNAS-SCALE-24.10.2.iso
+        checksum: sha256:33e29ed62517bc5d4aed6c80b9134369e201bb143e13fefdec5dbf3820f4b946
+      - url: https://repo.almalinux.org/almalinux/9.5/isos/x86_64/AlmaLinux-9.5-x86_64-minimal.iso
+        checksum: sha256:eef492206912252f2e24a74d3133b46cb4d240b54ffb3300a94000905b2590d3
+    ct_templates:
+      - ubuntu-24.04-standard_24.04-2_amd64.tar.zst
+
+pve_backup:
+  host:
+    enabled: 1
+    storage: pbs-01
+      healtcheck_ping_url: https://hc-ping.com/123e4567-e89b-12d3-a456-426614174000
+    schedule: '*-*-* 03:00:00'
+  workload_schedules:
+    backup-all-2100:
+      all: 1
+      enabled: 1
+      mode: snapshot
+      notes-template: '{{ "{{guestname}}" }}'
+      schedule: '21:00'
+      storage: pbs-01
+
+pve_notification:
+  webhooks:
+    pushover-normal:
+      body: __REDACTED_BASE64_BODY__
+      header:
+      - name=Content-Type,value=YXBwbGljYXRpb24vanNvbg==
+      method: post
+      secret:
+      - name=apikey,value=__REDACTED_BASE64_SECRET__
+      - name=userkey,value=__REDACTED_BASE64_SECRET__
+      url: https://api.pushover.net/1/messages.json
+    healthcheck-backup-fail:
+      method: get
+      url: https://healthchecks.peterson.com.ar/ping/b4f8d84d-e44d-4552-8cd5-6aaf52856a7d/fail
+    healthcheck-backup-success:
+      method: get
+      url: https://healthchecks.peterson.com.ar/ping/b4f8d84d-e44d-4552-8cd5-6aaf52856a7d
+    pushover-high:
+      body: __REDACTED_BASE64_BODY__
+      header:
+      - name=Content-Type,value=YXBwbGljYXRpb24vanNvbg==
+      method: post
+      secret:
+      - name=apikey,value=__REDACTED_BASE64_SECRET__
+      - name=userkey,value=__REDACTED_BASE64_SECRET__
+      url: https://api.pushover.net/1/messages.json
+
+  matchers:
+    errors:
+      comment: Route errors
+      match-severity:
+      - error
+      mode: all
+      target:
+      - pushover-high
+    default:
+      comment: Route non error notifications
+      match-severity:
+      - info,notice,warning,unknown
+      mode: all
+      target:
+      - pushover-normal
+    backup-success:
+      match-field:
+      - exact:type=vzdump
+      match-severity:
+      - info,notice,unknown
+      mode: all
+      target:
+      - healthcheck-backup-success
+    backup-fail:
+      match-field:
+      - exact:type=vzdump
+      match-severity:
+      - error
+      mode: all
+      target:
+      - healthcheck-backup-fail

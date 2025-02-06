@@ -1,0 +1,22 @@
+---
+- name: Update GRUB
+  ansible.builtin.command: update-grub
+  changed_when: true
+  notify: Reboot
+
+- name: Update initramfs
+  ansible.builtin.command: update-initramfs -u
+  changed_when: true
+  notify: Reboot
+
+- name: Reboot
+  ansible.builtin.reboot:
+
+- name: Reboot if not running workloads
+  ansible.builtin.include_tasks: complex_handlers/reboot_if_not_running_workloads.yaml
+
+- name: Restart nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: restarted
+    daemon_reload: yes

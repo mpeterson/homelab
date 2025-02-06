@@ -1,0 +1,121 @@
+---
+- name: Update VM configuration VM-{{ vm.key }}
+  vars:
+    set_name: >-
+      {{ ' --name "' + vm.value.name + '" '
+      if vm.value.name | default('', true) | length > 0 and
+      vm.value.name | default('', true) != vm_config.name | default('')
+      else '' }}
+    delete_name: >-
+      {{ 'name,' if vm.value.name | default('', true) | length == 0 and
+      vm_config.name | default('', true) | length > 0 else '' }}
+
+    set_cores: >-
+      {{ ' --cores ' + vm.value.cores | default(pve_vm_defaults.cores, true) | string
+      if vm.value.cores | default(pve_vm_defaults.cores) != vm_config.cores | default(1, true) else '' }}
+
+    set_cpu: >-
+      {{ ' --cpu ' + vm.value.cpu | default(pve_vm_defaults.cpu, true) | string
+      if vm.value.cpu | default(pve_vm_defaults.cpu) != vm_config.cpu | default(1, true) else '' }}
+
+    set_sockets: >-
+      {{ ' --sockets ' + vm.value.sockets | default(pve_vm_defaults.sockets, true) | string
+      if vm.value.sockets | default(pve_vm_defaults.sockets) != vm_config.sockets | default(1, true) else '' }}
+
+    set_memory: >-
+      {{ ' --memory ' + vm.value.memory | default(pve_vm_defaults.memory, true) | string
+      if vm.value.memory | default(pve_vm_defaults.memory) != vm_config.memory | default(512, true) else '' }}
+
+    set_agent: >-
+      {{ ' --agent ' + vm.value.agent | default(pve_vm_defaults.agent) | ternary(1, 0, true) | string
+      if vm.value.agent | default(pve_vm_defaults.agent) | ternary('1', '0') != vm_config.agent | default('0', true) else '' }}
+
+    set_onboot: >-
+      {{ ' --onboot ' + vm.value.onboot | default(pve_vm_defaults.onboot) | ternary(1, 0, true) | string
+      if vm.value.onboot | default(pve_vm_defaults.onboot) | ternary(1, 0) != vm_config.onboot | default(0, true) else '' }}
+
+    set_scsihw: >-
+      {{ ' --scsihw ' + vm.value.scsihw | default(pve_vm_defaults.scsihw)
+      if vm.value.scsihw | default(pve_vm_defaults.scsihw) != vm_config.scsihw | default('', true) else '' }}
+
+    vm_tags: "{{ (vm.value.tags | default([]) + [managed_by_ansible_tag]) | sort | join(';', true) }}"
+    set_tags: "{{ ' --tags ' + vm_tags if vm_tags != '' and vm_tags != vm_config.tags | default('', true) else '' }}"
+
+    set_vga: >-
+      {{ ' --vga ' + vm.value.vga | default(pve_vm_defaults.vga)
+      if vm.value.vga | default(pve_vm_defaults.vga) != vm_config.vga | default('', true) else '' }}
+
+    set_ci_user: >-
+      {{ ' --ciuser "' + vm.value.ci.user + '" '
+      if vm.value.ci.user | default('', true) | length > 0 and
+      vm.value.ci.user | default('', true) != vm_config.ciuser | default('')
+      else '' }}
+    delete_ci_user: >-
+      {{ 'ciuser,' if vm.value.ci.user | default('', true) | length == 0 and
+      vm_config.ciuser | default('', true) | length > 0 else '' }}
+
+    set_ci_password: >-
+      {{ ' --cipassword "' + vm.value.ci.password + '" '
+      if vm.value.ci.password | default('', true) | length > 0 and
+      (vm_config.cipassword | default('', true) | length == 0 or vm.value.ci.forcepassword | default(false))
+      else '' }}
+    delete_ci_password: >-
+      {{ 'cipassword,' if vm.value.ci.password | default('', true) | length == 0 and
+      vm_config.cipassword | default('', true) | length > 0 else '' }}
+
+    set_ssh_keys: >-
+      {{ ' --sshkeys "' + vm.value.ci.ssh_keys | urlencode | replace('/', '%2f') + '" '
+      if vm.value.ci.ssh_keys | default('', true) | length > 0 and
+      vm.value.ci.ssh_keys | default('') | urlencode | replace('/', '%2f') != vm_config.sshkeys | default('', true) | string
+      else '' }}
+    delete_ssh_keys: >-
+      {{ 'sshkeys,' if vm.value.ci.ssh_keys | default('', true) | length == 0 and
+      vm_config.sshkeys | string | default('', true) | length > 0 else '' }}
+
+    set_nameserver: >-
+      {{ ' --nameserver "' + vm.value.ci.nameserver + '" '
+      if vm.value.ci.nameserver | default('', true) | length > 0 and
+      vm.value.ci.nameserver | default('', true) != vm_config.nameserver | default('')
+      else '' }}
+    delete_nameserver: >-
+      {{ 'nameserver,' if vm.value.ci.nameserver | default('', true) | length == 0 and
+      vm_config.nameserver | default('', true) | length > 0 else '' }}
+
+    set_searchdomain: >-
+      {{ ' --searchdomain "' + vm.value.ci.searchdomain + '" '
+      if vm.value.ci.searchdomain | default('', true) | length > 0 and
+      vm.value.ci.searchdomain | default('', true) != vm_config.searchdomain | default('')
+      else '' }}
+    delete_searchdomain: >-
+      {{ 'searchdomain,' if vm.value.ci.searchdomain | default('', true) | length == 0 and
+      vm_config.searchdomain | default('', true) | length > 0 else '' }}
+
+    to_delete: "\
+      {{ delete_name }}\
+      {{ delete_ci_user }}\
+      {{ delete_ci_password }}\
+      {{ delete_ssh_keys }}\
+      {{ delete_nameserver }}\
+      {{ delete_searchdomain }}"
+    delete_cfg: "{{ ' --delete ' + to_delete if to_delete | trim != '' else '' }}"
+
+    to_update: "\
+      {{ set_name }}\
+      {{ set_cores }}\
+      {{ set_cpu }}\
+      {{ set_sockets }}\
+      {{ set_memory }}\
+      {{ set_agent }}\
+      {{ set_onboot }}\
+      {{ set_scsihw }}\
+      {{ set_ci_user }}\
+      {{ set_ci_password }}\
+      {{ set_ssh_keys }}\
+      {{ set_nameserver }}\
+      {{ set_searchdomain }}\
+      {{ set_tags }}\
+      {{ delete_cfg }}"
+  ansible.builtin.command: >-
+    pvesh create /nodes/{{ ansible_facts.hostname }}/qemu/{{ vm.key }}/config {{ to_update | trim }}
+  when: to_update | trim != ''
+  changed_when: true

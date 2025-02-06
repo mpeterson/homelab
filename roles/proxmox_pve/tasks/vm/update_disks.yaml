@@ -1,0 +1,30 @@
+---
+- name: Resize VM disk VM-{{ vm.key }}
+  vars:
+    current_size: "{{ vm_config[disk.key] | default('', true) | \
+      regex_search('size=([0-9]+)([KMGT]?)', '\\1', '\\2') }}"
+    current_size_in_gb: "{% if current_size[1] == '' %}{{ current_size[0] | int / 1024 / 1024 / 1024 }}\
+      {% elif current_size[1] == 'G' %}{{ current_size[0] | int }} \
+      {% elif current_size[1] == 'M' %}{{ current_size[0] | int / 1024 }} \
+      {% elif current_size[1] == 'K' %}{{ current_size[0] | int / 1024 / 1024 }} \
+      {% elif current_size[1] == 'T' %}{{ current_size[0] | int * 1024 }}\
+      {% endif %}"
+  ansible.builtin.command: >-
+    pvesh set /nodes/{{ ansible_facts.hostname }}/qemu/{{ vm.key }}/resize
+    --disk {{ disk.key }}
+    --size {{ disk.value.size }}G
+  when: vm_config[disk.key] is defined and current_size_in_gb | float < disk.value.size
+  changed_when: true
+  with_items: "{{ vm.value.disks | dict2items }}"
+  loop_control:
+    loop_var: disk
+
+- name: Create VM disk VM-{{ vm.key }}
+  ansible.builtin.command: >-
+    pvesh set /nodes/{{ ansible_facts.hostname }}/qemu/{{ vm.key }}/config
+    --{{ disk.key }} {{ disk.value.storage | default(vm.value.storage, true) }}:{{ disk.value.size }}
+  when: vm_config[disk.key] is not defined
+  changed_when: true
+  with_items: "{{ vm.value.disks | dict2items }}"
+  loop_control:
+    loop_var: disk

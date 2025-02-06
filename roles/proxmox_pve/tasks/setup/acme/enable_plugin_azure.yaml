@@ -1,0 +1,20 @@
+---
+- name: Get plugins
+  ansible.builtin.shell: pvesh get /cluster/acme/plugins --output-format json
+  register: acme_plugins
+  changed_when: false
+
+- name: Enable azure DNS plugin
+  vars:
+    acme_plugin_data: |
+      AZUREDNS_SUBSCRIPTIONID={{ aproxmox_acme.plugin_settings.azure_subscriptionid }}
+      AZUREDNS_TENANTID={{ proxmox_acme.plugin_settings.azure_tenantid }}
+      AZUREDNS_APPID={{ proxmox_acme.plugin_settings.azure_appid }}
+      AZUREDNS_CLIENTSECRET={{ proxmox_acme.plugin_settings.azure_clientsecret }}
+  ansible.builtin.shell: >
+    pvesh create /cluster/acme/plugins
+    --id {{ acme_plugin_name }}
+    --api azure
+    --type dns
+    --data {{ acme_plugin_data | b64encode }}
+  when: "'azure' not in acme_plugins.stdout | from_json | json_query('[].plugin')"

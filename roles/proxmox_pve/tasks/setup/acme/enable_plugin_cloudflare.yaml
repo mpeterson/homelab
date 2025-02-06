@@ -1,0 +1,19 @@
+---
+- name: Get plugins
+  ansible.builtin.command: pvesh get /cluster/acme/plugins --output-format json
+  register: acme_plugins
+  changed_when: false
+
+- name: Enable cloudflare DNS plugin
+  vars:
+    acme_plugin_data: |
+      CF_Email={{ proxmox_acme.plugin_settings.cloudflare_email }}
+      CF_Token={{ aproxmox_acme.plugin_settings.cloudflare_token }}
+  ansible.builtin.command: >
+    pvesh create /cluster/acme/plugins
+    --id cloudflare
+    --api cf
+    --type dns
+    --data {{ acme_plugin_data | b64encode }}
+  when: "'cloudflare' not in acme_plugins.stdout | from_json | json_query('[].plugin')"
+  changed_when: true

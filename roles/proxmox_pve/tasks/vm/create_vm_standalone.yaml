@@ -1,0 +1,39 @@
+---
+- name: Create standalone VM-{{ vm.key }}
+  vars:
+    cd_drives: "{% for drive in vm.value.cd_drives | default({}, true) | dict2items %}\
+      --{{ drive.key }} {{ drive.value.storage | default(vm.value.storage, true) }}:iso/{{ drive.value.iso }},media=cdrom \
+      {% endfor %}"
+    disks: "{% for disk in vm.value.disks | default({}, true) | dict2items %}\
+      --{{ disk.key }} {{ disk.value.storage | default(vm.value.storage, true) }}:{{ disk.value.size }} \
+      {% endfor %}"
+    network_devices: "{% for netdev in vm.value.network_devices | dict2items %}
+      --net{{ netdev.key }} {{ netdev.value.type | default(pve_vm_defaults.netdev_type, true) }}\
+      {{ '=' + netdev.value.mac if netdev.value.mac is defined else '' }},\
+      bridge={{ netdev.value.bridge | default(pve_vm_defaults.netdev_bridge, true) }},\
+      firewall={{ netdev.value.firewall | default(pve_container_defaults.netdev_firewall) | ternary(1, 0, true) }},\
+      {{ ',tag=' + netdev.value.vlan_tag | string if netdev.value.vlan_tag is defined else '' }}
+      {% endfor %}"
+  ansible.builtin.command: >-
+    pvesh create /nodes/{{ ansible_facts.hostname }}/qemu
+    --vmid {{ vm.key }}
+    --name {{ vm.value.name }}
+    --bios {{ vm.value.bios | default(pve_vm_defaults.bios, true) }}
+    --cores {{ vm.value.cores | default(pve_vm_defaults.cores, true) }}
+    --cpu {{ vm.value.cpu | default(pve_vm_defaults.cpu, true) }}
+    --machine {{ vm.value.machine | default(pve_vm_defaults.machine, true) }}
+    --memory {{ vm.value.memory | default(pve_vm_defaults.memory, true) }}
+    --onboot {{ vm.value.onboot | default(pve_vm_defaults.onboot) | ternary(1, 0, true) }}
+    --ostype {{ vm.value.ostype | default(pve_vm_defaults.ostype, true) }}
+    --scsihw {{ vm.value.scsihw | default(pve_vm_defaults.scsihw, true) }}
+    --sockets {{ vm.value.sockets | default(pve_vm_defaults.sockets, true) }}
+    --vga {{ vm.value.vga | default(pve_vm_defaults.vga, true) }}
+    --tags {{ managed_by_ansible_tag }},{{ vm.value.tags | default([]) | join(',', true) }}
+    {{ cd_drives }}
+    {{ disks }}
+    {{ network_devices }}
+    {% if 'ovmf' in vm.value.bios | default(pve_vm_defaults.bios, true) %}
+    --efidisk0 {{ vm.value.storage }}:1,efitype=4m,pre-enrolled-keys=1
+    --tpmstate0 {{ vm.value.storage }}:1,version=v2.0
+    {% endif %}
+  changed_when: true

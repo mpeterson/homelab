@@ -1,0 +1,12 @@
+---
+
+proxmox_acme:
+  enable: true
+  account_mail: __REDACTED_EMAIL__
+  staging: false
+  plugin: acmedns
+  plugin_settings:
+    acmedns_base_url:  https://auth.acme-dns.io
+    acmedns_password: __REDACTED__
+    acmedns_subdomain: __REDACTED__
+    acmedns_username: __REDACTED__

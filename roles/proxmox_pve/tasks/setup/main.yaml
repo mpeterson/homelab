@@ -1,0 +1,26 @@
+---
+- name: Switch to community APT repo
+  ansible.builtin.import_tasks: switch_to_community_updates_repo.yaml
+  when: pve_switch_to_community_updates_repo
+
+- name: Disable Proxmox Subscription prompt
+  ansible.builtin.import_tasks: disable_subscription_prompt.yaml
+  when: pve_disable_no_subscription_prompt
+
+- name: Install basic packages
+  ansible.builtin.import_tasks: install_basic_packages.yaml
+
+- name: Update Proxmox
+  ansible.builtin.import_tasks: update.yaml
+
+- name: Enable ACME certificate management
+  ansible.builtin.import_tasks: acme/enable_acme.yaml
+  when: proxmox_acme.enable
+
+- name: Install NGINX
+  ansible.builtin.import_tasks: install_nginx.yaml
+  when: proxmox_webui_https_port.enable
+
+- name: Setup GPU passthrough
+  ansible.builtin.import_tasks: pcie_passthrough.yaml
+  when: pve_pcie_passthrough.enable

@@ -1,0 +1,11 @@
+[Unit]
+Description=Backup System Daily
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+OnCalendar={{ pve_backup.host.schedule }}
+Unit=autobackup.service
+
+[Install]
+WantedBy=timers.target

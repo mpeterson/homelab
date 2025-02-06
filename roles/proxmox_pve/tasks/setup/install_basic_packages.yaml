@@ -1,0 +1,8 @@
+---
+- name: Install basic packages
+  ansible.builtin.apt:
+    name:
+      - neovim
+      - htop
+      - jq
+      - yq

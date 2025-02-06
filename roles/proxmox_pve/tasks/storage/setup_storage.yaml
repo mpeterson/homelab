@@ -1,0 +1,17 @@
+---
+- name: Get storage backends {{ storage_config.key }}
+  ansible.builtin.command:
+    pvesh get /storage --output-format json
+  changed_when: false
+  register: existing_storage
+
+- name: Add storage backend {{ storage_config.key }}
+  vars:
+    create_params: >-
+      {% for key, value in storage_config.value.items() %}
+        --{{ key }} '{{ value }}' 
+      {% endfor %}
+  ansible.builtin.command:
+    pvesh create /storage --storage {{ storage_config.key }} {{ create_params }}
+  when: "storage_config.key not in existing_storage.stdout | from_json | json_query('[].storage')"
+  changed_when: true

@@ -1,0 +1,6 @@
+---
+- name: Update storage contents
+  ansible.builtin.include_tasks: update_storage_contents.yaml
+  with_items: "{{ pve_storage_contents | default({}, true) | dict2items }}"
+  loop_control:
+    loop_var: storage_contents_config

@@ -1,0 +1,14 @@
+---
+- name: Setup webhook endpoints for notifications
+  when: inventory_hostname in groups.get('pve_main', [])
+  ansible.builtin.include_tasks: setup_webhooks.yaml
+  with_items: "{{ pve_notification.webhooks | default({}, true) | dict2items }}"
+  loop_control:
+    loop_var: webhook_config
+
+- name: Setup notification matchers
+  when: inventory_hostname in groups.get('pve_main', [])
+  ansible.builtin.include_tasks: setup_matchers.yaml
+  with_items: "{{ pve_notification.matchers | default({}, true) | dict2items }}"
+  loop_control:
+    loop_var: matcher_config

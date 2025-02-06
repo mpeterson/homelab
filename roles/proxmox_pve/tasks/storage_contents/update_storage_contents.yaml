@@ -1,0 +1,8 @@
+---
+- name: Manage ISOs
+  ansible.builtin.import_tasks: manage_isos.yaml
+  when: storage_contents_config.value.isos is defined
+
+- name: Manage Container Templates
+  ansible.builtin.import_tasks: manage_ct_templates.yaml
+  when: storage_contents_config.value.ct_templates is defined

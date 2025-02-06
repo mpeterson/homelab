@@ -1,0 +1,19 @@
+#!/bin/bash
+
+STORAGE_CFG="/etc/pve/storage.cfg"
+STORAGE_TARGET="{{ pve_backup.host.storage }}"
+VOLUMES="root.pxar:/ pve.pxar:/etc/pve"
+
+NS=$(sed -n "/^pbs: ${STORAGE_TARGET}\$/,/^\S/p" "${STORAGE_CFG}" | grep 'namespace' | awk '{print $2}')
+PBS_SERVER=$(sed -n "/^pbs: ${STORAGE_TARGET}\$/,/^\S/p" "${STORAGE_CFG}" | grep 'server' | awk '{print $2}')
+USERNAME=$(sed -n "/^pbs: ${STORAGE_TARGET}\$/,/^\S/p" "${STORAGE_CFG}" | grep 'username' | awk '{print $2}')
+DATASTORE=$(sed -n "/^pbs: ${STORAGE_TARGET}\$/,/^\S/p" "${STORAGE_CFG}" | grep 'datastore' | awk '{print $2}')
+
+KEYFILE="/etc/pve/priv/storage/{{ pve_backup.host.storage }}.enc"
+export PBS_REPOSITORY="${USERNAME}@${PBS_SERVER}:${DATASTORE}"
+export PBS_PASSWORD=$(cat /etc/pve/priv/storage/{{ pve_backup.host.storage }}.pw)
+ 
+/usr/bin/proxmox-backup-client backup $VOLUMES --keyfile $KEYFILE --ns $NS
+backup_exitcode=$?
+
+exit ${backup_exitcode}

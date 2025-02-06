@@ -1,0 +1,15 @@
+proxmox:
+  children:
+    pve:
+      children:
+        pve_main:
+          hosts:
+            pve-01.example.com:
+              ansible_user: root
+
+        pve_secondaries:
+          hosts: 
+            pve-02.example.com:
+              ansible_user: root
+            pve-03.example.com:
+              ansible_user: root

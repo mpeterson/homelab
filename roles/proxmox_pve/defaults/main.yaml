@@ -1,0 +1,75 @@
+---
+
+pve_switch_to_community_updates_repo: true
+pve_disable_no_subscription_prompt: true
+pve_update_packages: true
+
+proxmox_webui_https_port:
+  enable: true
+  upstream_port: 8006
+
+proxmox_acme:
+  enable: false
+  account_mail: ""
+  staging: false
+  plugin: acmedns
+  plugin_settings:
+    acmedns_base_url: ""
+    acmedns_password: ""
+    acmedns_subdomain: ""
+    acmedns_username: ""
+    azure_subscriptionid: ""
+    azure_tenantid: ""
+    azure_appid: ""
+    azure_clientsecret: ""
+    cloudflare_email: ""
+    cloudflare_token: ""
+
+pve_pcie_passthrough:
+  enable: false
+  devices: []
+  
+managed_by_ansible_tag: managed_by_ansible
+
+pve_remove_unrefenced:
+  vm_iso: true
+  ct_template: true
+  vm: true
+  container: true
+
+pve_vm_restart_timeout: 240
+
+pve_vm_defaults:
+  agent: true
+  bios: ovmf
+  cores: 1
+  cpu: host
+  memory: 512
+  onboot: false
+  machine: q35
+  ostype: l26
+  scsihw: virtio-scsi-pci
+  sockets: 1
+  vga: qxl
+  netdev_firewall: true
+  netdev_type: virtio
+  netdev_bridge: vmbr0
+
+pve_container_defaults:
+  cores: 1
+  memory: 512
+  swap: 512
+  nesting: true
+  onboot: false
+  unprivileged: true
+  timezone: host
+  start: false
+  netdev_firewall: true
+  nameserver: ""
+  searchdomain: ""
+
+pve_storage:
+
+pve_storage_contents:
+
+pve_backup:

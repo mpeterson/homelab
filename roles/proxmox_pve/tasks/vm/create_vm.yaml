@@ -1,0 +1,8 @@
+---
+- name: Clone from template VM-{{ vm.key }}
+  ansible.builtin.import_tasks: create_vm_clone.yaml
+  when: vm.value.template is defined
+
+- name: Create standalone VM-{{ vm.key }}
+  ansible.builtin.import_tasks: create_vm_standalone.yaml
+  when: vm.value.template is not defined

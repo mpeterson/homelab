@@ -1,0 +1,19 @@
+---
+
+- name: Reboot if not running workloads - Get running VMs (step 1/3)
+  ansible.builtin.command: pvesh get /nodes/{{ ansible_facts.hostname }}/qemu --output-format json
+  register: existing_vms_response
+  changed_when: false
+
+- name: Reboot if not running workloads - Get running LXCs (step 2/3)
+  ansible.builtin.command: pvesh get /nodes/{{ ansible_facts.hostname }}/lxc --output-format json
+  register: existing_lxcs_response
+  changed_when: false
+
+- name: Reboot if not running workloads - Trigger reboot (step 3/3)
+  ansible.builtin.reboot:
+  when: 
+    - existing_vms_response.stdout is defined
+    - existing_lxcs_response.stdout is defined
+    - (existing_vms_response.stdout | from_json | length) == 0
+    - (existing_lxcs_response.stdout | from_json | length) == 0

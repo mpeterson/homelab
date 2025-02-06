@@ -1,0 +1,23 @@
+---
+- name: Get existing VM configuration VM-{{ vm.key }}
+  ansible.builtin.command: >-
+    pvesh get /nodes/{{ ansible_facts.hostname }}/qemu/{{ vm.key }}/config --output-format json
+  register: vm_config_response
+  changed_when: false
+
+- name: Update VM configuration VM-{{ vm.key }}
+  vars:
+    vm_config: "{{ vm_config_response.stdout | from_json }}"
+  block:
+    - name: Update VM configuration
+      ansible.builtin.import_tasks: update_vm_config.yaml
+    - name: Update VM network devices
+      ansible.builtin.import_tasks: update_network_devices.yaml
+    - name: Update VM disks
+      ansible.builtin.import_tasks: update_disks.yaml
+    - name: Update VM cd drives
+      ansible.builtin.import_tasks: update_cd_drives.yaml
+    - name: Reboot VM if updated
+      ansible.builtin.import_tasks: reboot_updated_vm.yaml
+    - name: Update VM snapshots
+      ansible.builtin.import_tasks: update_snapshots.yaml

@@ -1,0 +1,7 @@
+---
+- name: Update all packages
+  ansible.builtin.apt:
+    upgrade: full
+    update_cache: true
+  when: pve_update_packages
+  notify: Reboot if not running workloads

@@ -1,0 +1,35 @@
+---
+- name: Setup Proxmox
+  ansible.builtin.import_tasks: setup/main.yaml
+  tags: pve_setup
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Setup storage backends
+  ansible.builtin.import_tasks: storage/main.yaml
+  tags: pve_storages
+
+- name: Setup backups
+  ansible.builtin.import_tasks: backups/main.yaml
+  tags: pve_backups
+
+- name: Setup notitications
+  ansible.builtin.import_tasks: notifications/main.yaml
+  tags: pve_notifications
+
+- name: Manage storage contents
+  ansible.builtin.import_tasks: storage_contents/main.yaml
+  tags: pve_storage_contents
+
+- name: Setup templates and isos
+  ansible.builtin.import_tasks: templates/main.yaml
+  tags: pve_templates
+
+- name: Setup VMs
+  ansible.builtin.import_tasks: vm/main.yaml
+  tags: pve_vms
+
+- name: Setup Containers
+  ansible.builtin.import_tasks: containers/main.yaml
+  tags: pve_containers

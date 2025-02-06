@@ -1,0 +1,17 @@
+---
+- name: Get backup schedules {{ backup_config.key }}
+  ansible.builtin.command:
+    pvesh get /cluster/backup --output-format json
+  changed_when: false
+  register: existing_backup
+
+- name: Add backup schedules {{ backup_config.key }}
+  vars:
+    create_params: >-
+      {% for key, value in backup_config.value.items() %}
+        --{{ key }} '{{ value }}' 
+      {% endfor %}
+  ansible.builtin.command:
+    pvesh create /cluster/backup --id {{ backup_config.key }} {{ create_params }}
+  when: "backup_config.key not in existing_backup.stdout | from_json | json_query('[].id')"
+  changed_when: true
