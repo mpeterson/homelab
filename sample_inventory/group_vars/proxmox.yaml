@@ -20,6 +20,7 @@ pve_storage_contents:
         checksum: sha256:33e29ed62517bc5d4aed6c80b9134369e201bb143e13fefdec5dbf3820f4b946
       - url: https://repo.almalinux.org/almalinux/9.5/isos/x86_64/AlmaLinux-9.5-x86_64-minimal.iso
         checksum: sha256:eef492206912252f2e24a74d3133b46cb4d240b54ffb3300a94000905b2590d3
+    # it's possible to search with: ansible-playbook playbooks/proxmox_pve/list_ct_images.yaml -e "search=ubuntu"
     ct_templates:
       - ubuntu-24.04-standard_24.04-2_amd64.tar.zst
 
