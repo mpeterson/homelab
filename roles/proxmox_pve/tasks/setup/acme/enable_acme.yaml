@@ -37,7 +37,7 @@
   vars:
     node_cfg: "{{ node_config.stdout | from_json }}"
     acme_account_config: account={{ acme_account_name }}
-    acme_domain_config: "{{ ansible_facts.fqdn }},plugin={{ proxmox_acme.plugin }}"
+    acme_domain_config: "{{ ansible_facts.fqdn }},plugin={{ proxmox_acme.plugin }}-{{ ansible_facts.hostname }}"
   ansible.builtin.command: >
     pvesh set /nodes/{{ ansible_facts.hostname }}/config
     --acme {{ acme_account_config }}

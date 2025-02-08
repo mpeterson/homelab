@@ -13,8 +13,8 @@
       AZUREDNS_CLIENTSECRET={{ proxmox_acme.plugin_settings.azure_clientsecret }}
   ansible.builtin.shell: >
     pvesh create /cluster/acme/plugins
-    --id {{ acme_plugin_name }}
+    --id {{ acme_plugin_name }}-{{ ansible_facts.hostname }}
     --api azure
     --type dns
     --data {{ acme_plugin_data | b64encode }}
-  when: "'azure' not in acme_plugins.stdout | from_json | json_query('[].plugin')"
+  when: "('azure' + ansible_facts.hostname) not in acme_plugins.stdout | from_json | json_query('[].plugin')"

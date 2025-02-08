@@ -13,9 +13,9 @@
       ACMEDNS_USERNAME={{ proxmox_acme.plugin_settings.acmedns_username }}
   ansible.builtin.command: >
     pvesh create /cluster/acme/plugins
-    --id acmedns
+    --id acmedns-{{ ansible_facts.hostname }}
     --api acmedns
     --type dns
     --data {{ acme_plugin_data | b64encode }}
-  when: "'acmedns' not in acme_plugins.stdout | from_json | json_query('[].plugin')"
+  when: "('acmedns-' + ansible_facts.hostname) not in acme_plugins.stdout | from_json | json_query('[].plugin')"
   changed_when: true

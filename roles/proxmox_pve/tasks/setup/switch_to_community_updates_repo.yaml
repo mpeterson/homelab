@@ -3,8 +3,22 @@
   ansible.builtin.apt_repository:
     repo: deb https://enterprise.proxmox.com/debian/pve {{ ansible_facts.distribution_release }} pve-enterprise
     state: absent
-    update_cache: true
+    update_cache: false
     filename: pve-enterprise
+
+- name: Remove ceph-quincye enterprise repository
+  ansible.builtin.apt_repository:
+    repo: deb https://enterprise.proxmox.com/debian/ceph-quincy {{ ansible_facts.distribution_release }} enterprise
+    state: absent
+    update_cache: false
+    filename: ceph
+
+- name: Add ceph-quincye non-enterprise repository
+  ansible.builtin.apt_repository:
+    repo: deb http://download.proxmox.com/debian/ceph-quincy {{ ansible_facts.distribution_release }} no-subscription
+    state: present
+    update_cache: false
+    filename: ceph
 
 - name: Add pve-no-subscription repository
   ansible.builtin.apt_repository:
