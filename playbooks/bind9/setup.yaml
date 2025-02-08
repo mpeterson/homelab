@@ -2,6 +2,9 @@
 - hosts: bind9
   name: bind9 setup
 
+  # to avoid having all DNS downs upon misconfiguration
+  serial: 1
+
   tags: bind9_setup
 
   roles:
