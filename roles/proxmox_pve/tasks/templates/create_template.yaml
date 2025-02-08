@@ -57,7 +57,9 @@
         --scsi0 {{ current_template_config.stdout | from_json | json_query('unused0') }}
         --ide0 {{ template.value.storage }}:cloudinit
         --boot order=scsi0
+        {% if template.value.vga is defined or pve_vm_defaults.vga is defined %}
         --vga {{ template.value.vga | default(pve_vm_defaults.vga, true) }}
+        {% endif %}
         {% if 'ovmf' in template.value.bios | default(pve_vm_defaults.bios, true) %}
         --efidisk0 {{ template.value.storage }}:1,efitype=4m,pre-enrolled-keys=1
         --tpmstate0 {{ template.value.storage }}:1,version=v2.0

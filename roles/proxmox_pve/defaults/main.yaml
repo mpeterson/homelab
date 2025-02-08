@@ -50,7 +50,6 @@ pve_vm_defaults:
   ostype: l26
   scsihw: virtio-scsi-pci
   sockets: 1
-  vga: qxl
   netdev_firewall: true
   netdev_type: virtio
   netdev_bridge: vmbr0

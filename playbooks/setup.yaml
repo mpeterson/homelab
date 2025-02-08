@@ -1,0 +1,2 @@
+- name: Run Proxmox PVE setup playbook
+  ansible.builtin.import_playbook: proxmox_pve/setup.yaml
