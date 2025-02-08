@@ -10,3 +10,9 @@ proxmox_acme:
     acmedns_password: __REDACTED__
     acmedns_subdomain: __REDACTED__
     acmedns_username: __REDACTED__
+
+pve_templates:
+  9000:                                                                                                                                                                         
+    name: almalinux-9
+    cloud_image_url: https://repo.almalinux.org/almalinux/9/cloud/aarch64/images/AlmaLinux-9-GenericCloud-latest.aarch64.qcow2
+    storage: local-zfs

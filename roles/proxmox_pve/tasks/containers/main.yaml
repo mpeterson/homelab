@@ -7,20 +7,20 @@
 - name: Create container if missing
   ansible.builtin.include_tasks: create_container.yaml
   when: ct.key | string not in existing_containers.stdout | from_json | json_query('[].vmid')
-  with_items: "{{ containers | default({}, true) | dict2items }}"
+  with_items: "{{ pve_containers | default({}, true) | dict2items }}"
   loop_control:
     loop_var: ct
 
 - name: Update container if already exists
   ansible.builtin.include_tasks: update_container.yaml
   when: ct.key | string in existing_containers.stdout | from_json | json_query('[].vmid')
-  with_items: "{{ containers | default({}, true) | dict2items }}"
+  with_items: "{{ pve_containers | default({}, true) | dict2items }}"
   loop_control:
     loop_var: ct
 
 - name: Remove unreferenced containers
   ansible.builtin.include_tasks: remove.yaml
-  when: pve_remove_unrefenced.container and container_id | int not in containers.keys()
+  when: pve_remove_unrefenced.container and (container_id | int) not in (pve_containers | default({}, true)).keys()
   with_items: "{{ existing_containers.stdout | from_json | json_query('[].vmid') }}"
   loop_control:
     loop_var: container_id
