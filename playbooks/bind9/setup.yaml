@@ -1,0 +1,54 @@
+---
+- hosts: bind9
+  name: bind9 setup
+
+  tags: bind9_setup
+
+  roles:
+    - bind9
+
+  tasks:
+    - name: Install fixed master zones
+      ansible.builtin.copy:
+        src: "{{ inventory_dir }}/files/bind9/fixed/{{ item }}.zone"
+        dest: "{{ bind9_conf_dir }}/masters/{{ item }}.zone"
+        owner: root
+        group: named
+        mode: '0644'
+      when:
+        - inventory_hostname in groups['bind9_main']
+        - (inventory_dir + '/files/bind9/fixed/' + item + '.zone') is file
+      loop: "{{ master_zones.keys() | list }}"
+      notify: reload DNS system
+
+    - name: Install dynamic master zones, if they don't exist
+      ansible.builtin.copy:
+        src: "{{ inventory_dir }}/files/bind9/dynamic/{{ item }}.zone"
+        dest: "{{ bind9_conf_dir }}/masters/{{ item }}.zone"
+        owner: root
+        group: named
+        mode: '0664'
+        force: '{{ force_dynamic_zone_update | default(false, true) }}'  # don't overwrite existing files, as dynamic zones are updated by bind9
+      when:
+        - inventory_hostname in groups['bind9_main']
+        - (inventory_dir + '/files/bind9/dynamic/' + item + '.zone') is file
+      loop: "{{ master_zones.keys() | list }}"
+      vars:
+        block: "{{ lookup('file', inventory_dir + '/files/bind9/dynamic/' + item + '.zone') }}"
+      notify: reload DNS system
+
+    - name: Post installation tasks
+      ansible.builtin.include_role:
+        name: bind9
+        tasks_from: postinst
+
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: "ATTENTION: Dynamic zones have not been updated"
+      ansible.builtin.debug:
+        msg: |
+          The dynamic zones have not been forcesfully updated, if you need to then set force_dynamic_zone_update: true in the inventory file.
+      when:
+        - inventory_hostname in groups['bind9_main']
+        - not (force_dynamic_zone_update | default(false, true))

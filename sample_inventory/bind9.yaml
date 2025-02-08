@@ -1,0 +1,13 @@
+bind9:
+  children:
+    bind9_main:
+      hosts:
+        dns-01.local.example.com:
+          ansible_user: user
+          ansible_become: yes
+
+    bind9_secondaries:
+      hosts: 
+        dns-02.local.example.com:
+          ansible_user: mpeterson
+          ansible_become: yes

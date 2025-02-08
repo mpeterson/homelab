@@ -1,0 +1,9 @@
+master_zones:
+  local.example.com:
+    transfer_groups:
+      - dns_02
+  ad.example.com:  
+    transfer_groups:
+      - dns_02
+    update_groups: # an example of how Windows Active Directory can be configured to use a BIND9 server
+      - winad

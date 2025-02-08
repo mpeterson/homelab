@@ -1,0 +1,7 @@
+slave_zones:
+  local.example.com:
+    master_groups:
+      - dns_01
+  ad.example.com:
+    master_groups:
+      - dns_01

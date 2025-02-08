@@ -4,12 +4,12 @@ proxmox:
       children:
         pve_main:
           hosts:
-            pve-01.example.com:
+            pve-01.local.example.com:
               ansible_user: root
 
         pve_secondaries:
           hosts: 
-            pve-02.example.com:
+            pve-02.local.example.com:
               ansible_user: root
-            pve-03.example.com:
+            pve-03.local.example.com:
               ansible_user: root

@@ -1,2 +1,5 @@
 - name: Run Proxmox PVE setup playbook
   ansible.builtin.import_playbook: proxmox_pve/setup.yaml
+
+- name: Run bind9 setup playbook
+  ansible.builtin.import_playbook: bind9/setup.yaml

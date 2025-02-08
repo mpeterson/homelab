@@ -1,0 +1,33 @@
+manage_firewall: no
+
+keys:
+  # you can create it using: /usr/sbin/tsig-keygen
+  dns_01_key:
+    algorithm: hmac-sha512
+    secret: "__REDACTED__"
+
+server_groups:
+  dns_01:
+    ips:
+      - 192.168.1.253
+    key: dns_01_key
+  dns_02:
+    ips:
+      - 192.168.1.254
+  internal:
+    ips:
+      - 192.168.0.0/16
+  tailscale:
+    ips:
+      - 100.0.0.0/8
+  winad:  # an example of how Windows Active Directory can be configured to use a BIND9 server
+    ips:
+      - 192.168.1.44
+
+recursion_allowed_groups:
+  - internal
+  - tailscale
+
+options:
+  listen-on-v6: "{ none; }"
+  response-policy: '{ zone "local.example.com."; }'

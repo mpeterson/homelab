@@ -1,0 +1,23 @@
+$TTL 5m
+
+; Start of Authority RR defining the key characteristics of the zone (domain)
+@       IN      SOA     ns1 dns (
+                                2023121901 ; Serial
+                                12h        ; refresh
+                                15m        ; update retry
+                                4d         ; expiry
+                                5m         ; minimum
+                                )
+
+; name server RR for the domain
+        IN      NS      ns1
+        IN      NS      ns2
+
+; records
+ns1                        IN      A       192.168.1.253
+ns2                        IN      A       192.168.1.253
+host-01                    IN      A       192.168.1.4
+
+
+; Response Policy Zone (RPZ)
+host-02.example.com    IN      CNAME   wibbler.local.example.com
