@@ -1,0 +1,27 @@
+---
+- name: Add APT sources list
+  ansible.builtin.apt_repository:
+    repo: "{{ item }}"
+    update_cache: true
+    filename: non-free
+  loop:
+    - "deb http://security.debian.org/ {{ ansible_facts.distribution_release }}-security non-free non-free-firmware"
+    - "deb-src http://security.debian.org/ {{ ansible_facts.distribution_release }}-security non-free non-free-firmware"
+    - "deb http://deb.debian.org/debian {{ ansible_facts.distribution_release }}-updates non-free non-free-firmware"
+    - "deb-src http://deb.debian.org/debian {{ ansible_facts.distribution_release }}-updates non-free non-free-firmware"
+    - "deb http://deb.debian.org/debian {{ ansible_facts.distribution_release }} non-free non-free-firmware"
+    - "deb-src http://deb.debian.org/debian {{ ansible_facts.distribution_release }} non-free non-free-firmware"
+
+- name: Install microcode packages
+  vars:
+    cpu_type: >-
+      {{
+      'amd' if 'AuthenticAMD' in ansible_facts.processor
+      else 'intel' if 'GenuineIntel' in ansible_facts.processor
+      else 'unknown'
+      }}
+  block:
+    - name: Install {{ cpu_type }} microcode packages
+      ansible.builtin.package:
+        name: "{{ cpu_type }}-microcode"
+        state: "{{ 'present' if pve_install_microcode_packages else 'absent' }}"

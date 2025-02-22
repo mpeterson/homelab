@@ -1,0 +1,27 @@
+- name: Install HA Fence Watchdog
+  when: pve_ha_fence_provider == 'idrac'
+  block:
+    - name: Setup ipmi_watchdog module in pve-ha-manager
+      ansible.builtin.lineinfile:
+        path: /etc/default/pve-ha-manager
+        regexp: '^[#]*WATCHDOG_MODULE='
+        line: 'WATCHDOG_MODULE=ipmi_watchdog'
+        create: yes
+
+    - name: Disable nmi_watchdog in GRUB
+      ansible.builtin.lineinfile:
+        path: /etc/default/grub
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="([^"]*?)(?:\s+(nmi_watchdog=.?))?(?:(\s+.*))?"'
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 nmi_watchdog=0\3"'
+        backrefs: yes
+        create: yes
+      notify: Update GRUB
+
+    - name: Configure ipmi_watchdog module
+      ansible.builtin.lineinfile:
+        path: /etc/modprobe.d/ipmi_watchdog.conf
+        line: "options ipmi_watchdog action=power_cycle panic_wdt_timeout=10"
+        create: yes
+        mode: "0644"
+        owner: root
+        group: root

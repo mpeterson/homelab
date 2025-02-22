@@ -2,12 +2,12 @@
 - name: Update GRUB
   ansible.builtin.command: update-grub
   changed_when: true
-  notify: Reboot
+  notify: Reboot if not running workloads
 
 - name: Update initramfs
   ansible.builtin.command: update-initramfs -u
   changed_when: true
-  notify: Reboot
+  notify: Reboot if not running workloads
 
 - name: Reboot
   ansible.builtin.reboot:

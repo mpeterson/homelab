@@ -31,6 +31,10 @@ pve_pcie_passthrough:
   
 managed_by_ansible_tag: managed_by_ansible
 
+pve_install_microcode_packages: false
+
+pve_ha_fence_provider:
+
 pve_remove_unrefenced:
   vm_iso: true
   ct_template: true

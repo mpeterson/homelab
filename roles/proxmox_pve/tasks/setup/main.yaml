@@ -10,6 +10,14 @@
 - name: Install basic packages
   ansible.builtin.import_tasks: install_basic_packages.yaml
 
+- name: Install microcode packages
+  ansible.builtin.import_tasks: install_microcode_packages.yaml
+  when: pve_install_microcode_packages
+
+- name: Setup HA fence provider
+  ansible.builtin.import_tasks: setup_fence_provider.yaml
+  when: pve_ha_fence_provider
+
 - name: Update Proxmox
   ansible.builtin.import_tasks: update.yaml
 

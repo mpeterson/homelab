@@ -1,4 +1,8 @@
 ---
+pve_ha_fence_provider: idrac
+
+pve_install_microcode_packages: true
+
 pve_storage:
   pbs-01:
     content: backup
