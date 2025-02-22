@@ -15,9 +15,9 @@ $TTL 5m
 
 ; records
 ns1                        IN      A       192.168.1.253
-ns2                        IN      A       192.168.1.253
+ns2                        IN      A       192.168.1.254
 host-01                    IN      A       192.168.1.4
 
 
 ; Response Policy Zone (RPZ)
-host-02.example.com    IN      CNAME   wibbler.local.example.com
+host-02.example.com    IN      CNAME   host-01.local.example.com
