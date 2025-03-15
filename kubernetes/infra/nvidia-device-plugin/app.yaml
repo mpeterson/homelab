@@ -21,9 +21,9 @@ spec:
           enabled: true
         nfd:
           enabled: false
-        config:
+        config: 
           map:
-            config:
+            config: |
               version: v1
               sharing:
                 timeSlicing:
