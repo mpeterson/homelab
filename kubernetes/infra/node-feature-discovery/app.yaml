@@ -9,13 +9,28 @@ metadata:
 
 spec:
   project: default
+  
   source:
     repoURL: https://kubernetes-sigs.github.io/node-feature-discovery/charts
     chart: node-feature-discovery
     targetRevision: 0.17.2
     helm:
-      valueFiles:
-        - values.yaml
+      valuesObject:
+        master:
+          config:
+            extraLabelNs:
+              - nvidia.com
+
+        worker:
+          config:
+            sources:
+              pci:
+                deviceClassWhitelist:
+                  - "02"
+                  - "03"
+                deviceLabelFields:
+                  - vendor
+  
   destination:
     server: https://kubernetes.default.svc
     namespace: infra
