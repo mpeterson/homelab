@@ -1,0 +1,14 @@
+master:
+  config:
+    extraLabelNs:
+      - nvidia.com
+
+worker:
+  config:
+    sources:
+      pci:
+        deviceClassWhitelist:
+          - "02"
+          - "03"
+        deviceLabelFields:
+          - vendor
