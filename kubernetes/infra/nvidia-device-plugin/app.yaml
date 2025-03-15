@@ -17,7 +17,6 @@ spec:
     helm:
       values: |
         runtimeClassName: nvidia
-        namespace: infra
         gfd:
           enabled: true
         nfd:
