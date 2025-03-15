@@ -1,2 +1,3 @@
 resources:
   - node-feature-discovery/app.yaml
+  - nvidia-device-plugin/
