@@ -23,23 +23,27 @@ spec:
       selfHeal: true
       prune: true
 
-  source:
-    repoURL: https://nvidia.github.io/k8s-device-plugin
-    chart: nvidia-device-plugin
-    targetRevision: 0.17.1
-    helm:
-      values: |
-        runtimeClassName: nvidia
-        gfd:
-          enabled: true
-        nfd:
-          enabled: false
-        config: 
-          map:
-            config: |
-              version: v1
-              sharing:
-                timeSlicing:
-                  resources:
-                    - name: nvidia.com/gpu
-                      replicas: 8
+  sources:
+    - repoURL: https://github.com/mpeterson/homelab
+      path: kubernetes/infra/nvidia-device-plugin/
+      targetRevision: main
+
+    - repoURL: https://nvidia.github.io/k8s-device-plugin
+      chart: nvidia-device-plugin
+      targetRevision: 0.17.1
+      helm:
+        values: |
+          runtimeClassName: nvidia
+          gfd:
+            enabled: true
+          nfd:
+            enabled: false
+          config: 
+            map:
+              config: |
+                version: v1
+                sharing:
+                  timeSlicing:
+                    resources:
+                      - name: nvidia.com/gpu
+                        replicas: 8
