@@ -1,3 +1,4 @@
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -10,7 +11,7 @@ spec:
   project: default
   source:
     repoURL: https://helm.cilium.io/
-    chart: cilium/cilium
+    chart: cilium
     targetRevision: 1.17.1
     helm:
       valueFiles:
