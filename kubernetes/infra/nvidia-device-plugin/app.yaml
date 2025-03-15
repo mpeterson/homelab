@@ -15,7 +15,7 @@ spec:
     chart: nvidia-device-plugin
     targetRevision: 0.17.1
     helm:
-      valuesObject:
+      values: |
         runtimeClassName: nvidia
         namespace: infra
         gfd:
