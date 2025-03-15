@@ -1,0 +1,45 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: node-feature-discovery
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infra
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+  
+  source:
+    repoURL: https://kubernetes-sigs.github.io/node-feature-discovery/charts
+    chart: node-feature-discovery
+    targetRevision: 0.17.2
+    helm:
+      values: |
+        master:
+          config:
+            extraLabelNs:
+              - nvidia.com
+
+        worker:
+          config:
+            sources:
+              pci:
+                deviceClassWhitelist:
+                  - "02"
+                  - "03"
+                deviceLabelFields:
+                  - vendor
