@@ -1,0 +1,5 @@
+namespace: infra
+
+resources:
+  - bgp-control-plane.yaml
+  - gateway.yaml

@@ -1,3 +1,4 @@
 resources:
+  - cilium/app.yaml
   - node-feature-discovery/app.yaml
-  - nvidia-device-plugin/
+  - nvidia-device-plugin/app.yaml

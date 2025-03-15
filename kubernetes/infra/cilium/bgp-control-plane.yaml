@@ -1,0 +1,62 @@
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPClusterConfig
+metadata:
+  name: cilium-bgp
+spec:
+  # Not needed currently
+  # nodeSelector:
+  #   matchLabels:
+  #     bgp: "65020"
+  bgpInstances:
+    - name: "65020"
+      localASN: 65020
+      peers:
+        - name: "bgp-65000"
+          peerASN: 65000
+          peerAddress: 10.3.0.1
+          peerConfigRef:
+            name: "cilium-peer"
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPPeerConfig
+metadata:
+  name: cilium-peer
+spec:
+  gracefulRestart:
+    enabled: true
+    restartTimeSeconds: 15
+  families:
+    - afi: ipv4
+      safi: unicast
+      advertisements:
+        matchLabels:
+          advertise: "bgp"
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPAdvertisement
+metadata:
+  name: bgp-advertisements
+  labels:
+    advertise: bgp
+spec:
+  advertisements:
+    - advertisementType: "Service"
+      service:
+        addresses:
+          - LoadBalancerIP
+      selector:
+        matchExpressions:
+          - {key: gateway.networking.k8s.io/gateway-name, operator: NotIn, values: ['never-used-value']}
+---
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: lb-ip-pool
+spec:
+  blocks:
+    - start: "10.3.1.2"
+      stop: "10.3.1.255"
+  serviceSelector:
+    matchExpressions:
+      - {key: gateway.networking.k8s.io/gateway-name, operator: NotIn, values: ['never-used-value']}
