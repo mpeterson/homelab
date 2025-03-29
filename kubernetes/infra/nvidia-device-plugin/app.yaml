@@ -23,7 +23,7 @@ spec:
       selfHeal: true
       prune: true
 
-  sources:
+  source:
     repoURL: https://nvidia.github.io/k8s-device-plugin
     chart: nvidia-device-plugin
     targetRevision: 0.17.1
