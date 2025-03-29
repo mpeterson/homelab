@@ -1,0 +1,4 @@
+creation_rules:
+  - unencrypted_regex: "^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$"
+    age: >-
+      age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664
