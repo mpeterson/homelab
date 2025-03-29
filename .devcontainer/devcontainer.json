@@ -7,21 +7,28 @@
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
-		"ghcr.io/devcontainers-extra/features/ansible:2": {}
+		"ghcr.io/devcontainers-extra/features/ansible:2": {},
+		"ghcr.io/devcontainers-extra/features/sops:1": {},
+		"ghcr.io/devcontainers-extra/features/age:1": {}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pipx inject ansible-core jmespath",
+	// "postCreateCommand": "pipx inject ansible-core jmespath",
+
+	"mounts": [
+		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/sops,target=/home/vscode/.config/sops,type=bind,consistency=cached"
+	],
 
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"bat67.markdown-extension-pack",
-				"redhat.ansible"
+				"redhat.ansible",
+				"signageos.signageos-vscode-sops"
 			]
 		}
 	}
