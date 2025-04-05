@@ -1,0 +1,37 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+    name: letsencrypt-prod-http01
+spec:
+    acme:
+        email: ENC[AES256_GCM,data:7bEfqBzFAhC+GACj9BCRn915G2JXKRhMaN5X,iv:d5l2SNLM+6H3ACJG4I2CzaR+kTjNClCPRKuDwUkzm8c=,tag:2WfoE11Wefc7XNfA0oRBAw==,type:str]
+        server: ENC[AES256_GCM,data:cFHLA799ie0413bpkDuL+SHqVqDUN5np87zKQsyUmQjdci9QL+7eIBZ8dMHrkg==,iv:Spfkz7/oPLlVL29Hq5sck/T1v7nAfsllr9UyNATQ5Rk=,tag:bOiHGAXTA5l8zQgPJ5Ux6w==,type:str]
+        privateKeySecretRef:
+            name: ENC[AES256_GCM,data:wqL3m9dxVHQM48mQr4l6C9gY3lIHbBE=,iv:3xSmw7y2+ec/LdHkOSFtMDn4tc/Sh6h5ntKZQQXnlCQ=,tag:IA5eJpfBexdyM0x41fZ2oA==,type:str]
+        solvers:
+            - http01:
+                gatewayHTTPRoute:
+                    parentRefs:
+                        - name: ENC[AES256_GCM,data:BqDPjtq/8ylHiLEhhr0=,iv:Uiq7B4XK00rSHG3W7bNwlmpXXT4GdvytoEADUY3q8yA=,tag:H8i8BsYm2d6NTHcRiNzpbg==,type:str]
+                          namespace: ENC[AES256_GCM,data:f9rkk34=,iv:7OYjZU/2SyaXEI9nIgq5mvSem+UOUZfFeZ+soUdDESk=,tag:amyxWbaY79Hs7Gx0j/x7kQ==,type:str]
+                          kind: Gateway
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBpWTRjNlQ5clUvRTVtVnRp
+            WHltRk9QcUZsQ3JEV3FQVVJwS2cvaVM4ZEZBCnNmdEI4K0NLQS80WlBWV08wRldi
+            MlNSc2F0bGFNaHZ1TC9tc3k1cDZ1T2sKLS0tIGRNc2gyOWlwUHllUGU3V0RRTklZ
+            Q3MrbU05dk9DQ05hdk1Rd0ZjT2J6dHcKH+tSy9Y9A7hs5VHbhdlPJywK1k+kphZs
+            lBNeTWh0wInE6p10UWb91gkurE90SpS5pvTwrI0GWLtpVJJ3Fw9kBQ==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2025-04-05T15:13:51Z"
+    mac: ENC[AES256_GCM,data:BEChvgvKhk5wC3wOsp1ib2aL8UYcQZPu4+g80QRaB40hJdORZWGjYcw5TU5sFt59EHSLB05jV0ir0njslCHdatT2QNkapoJGmQCUYm+jiSOSLf09TNp0M/ripfjZS8XB6TP9w9lbl4/GD1l7bmx/06wopXh9EqK9YeKSFOVikZM=,iv:2HvBzVTTiZn2yx8FnnhMOEUA7um47s6blqHAnfEj2YE=,tag:Cz5q0Zh2CawajNPy0JweYQ==,type:str]
+    pgp: []
+    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
+    version: 3.9.4

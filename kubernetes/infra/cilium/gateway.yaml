@@ -2,26 +2,47 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: internal-gateway
+  name: public-gateway
+  annotations:
+    cert-manager.io/issuer: letsencrypt-prod-http01
 spec:
+  addresses:
+  - type: IPAddress
+    value: 10.3.1.3
   gatewayClassName: cilium
   listeners:
     - name: http
       protocol: HTTP
+      hostname: '*.peterson.com.ar'
       port: 80
       allowedRoutes:
         namespaces:
           from: All
+    - name: https
+      protocol: HTTPS
+      hostname: '*.peterson.com.ar'
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: peterson-com-ar-tls
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: public-gateway
+  name: internal-gateway
 spec:
+  addresses:
+  - type: IPAddress
+    value: 10.3.1.4
   gatewayClassName: cilium
   listeners:
     - name: http
       protocol: HTTP
+      hostname: '*.lan.peterson.com.ar'
       port: 80
       allowedRoutes:
         namespaces:

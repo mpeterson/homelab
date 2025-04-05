@@ -31,4 +31,5 @@ spec:
       parameters:
       - name: crds.enabled
         value: "true"
-      
+      - name: "extraArgs"
+        value: "{--enable-gateway-api}"
