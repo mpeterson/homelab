@@ -4,7 +4,7 @@ kind: Gateway
 metadata:
   name: public-gateway
   annotations:
-    cert-manager.io/issuer: letsencrypt-prod-cloudflare
+    cert-manager.io/cluster-issuer: letsencrypt-prod-cloudflare
 spec:
   addresses:
   - type: IPAddress
@@ -35,7 +35,7 @@ kind: Gateway
 metadata:
   name: internal-gateway
   annotations:
-    cert-manager.io/issuer: letsencrypt-prod-cloudflare
+    cert-manager.io/cluster-issuer: letsencrypt-prod-cloudflare
 spec:
   addresses:
   - type: IPAddress
