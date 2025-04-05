@@ -20,8 +20,8 @@ sops:
             Q3MrbU05dk9DQ05hdk1Rd0ZjT2J6dHcKH+tSy9Y9A7hs5VHbhdlPJywK1k+kphZs
             lBNeTWh0wInE6p10UWb91gkurE90SpS5pvTwrI0GWLtpVJJ3Fw9kBQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-05T16:23:52Z"
-    mac: ENC[AES256_GCM,data:TYBuA4XGUQJ0pgKM9qeb9sZVHqvDCnEUBuIh0xIXeWv/8Qe0mC004SKfcjhPtu7r55Xylzat4lfq5DxnUR5IcZXmyFbt+2BSeo0kFhvHCxZJEoR12HCPfqGRqjOwsseapJ0d8mcZS+ZYEuFQqVIqSIcNj1vF+JOdGp2W+VB76Dc=,iv:rTxcYfluH1NqLSVBaoapHQSxX6L0QSL9gYQvPrvdcgA=,tag:qw+Vk9FMVmXCvddlVO3kBQ==,type:str]
+    lastmodified: "2025-04-05T16:31:43Z"
+    mac: ENC[AES256_GCM,data:+53OlpirQlNSwamy2GjO2RS6UEtaLSwdWvsmPORVV3wihaWNhfpAAdtSFn8E4lS6xDTQfupXnH8tPv7YYVpdY4uMv0CtRQdKDUNza51MhipGxK10aQEqvILy5jp40N/pEyFnEu2vjEbzKg8qIfQDy6ReaF/gefTmT/vHh0AQ46U=,iv:bJPb/xJlcPjUOI5yCixU8EcQ3NR1Ep3GUgaOzUJOxvs=,tag:g3nbu+DpxDnPDf1UhxSadw==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
     version: 3.9.4
@@ -39,9 +39,9 @@ spec:
         solvers:
             - dns01:
                 cloudflare:
-                    apiTokenSecretRef: null
-                    name: ENC[AES256_GCM,data:Nnog5Ca6JKz3H7pi5oWz2UBsH6o=,iv:iqQSrbpxXGEu5FpmHWCRb+NkROrCtE9xFr7kFwTuJDQ=,tag:yEV6QPoYTYaWuYPH/ash7A==,type:str]
-                    key: ENC[AES256_GCM,data:avRfZwry/MtC,iv:5TVbrBy7/l4fUlJ0jGLO7dhb09PzmzYEXmk/sRXqurY=,tag:zXfj9di2HgeqaQI7GWNWpw==,type:str]
+                    apiTokenSecretRef:
+                        name: ENC[AES256_GCM,data:ssovc2Rp0UatGbE8ht1ZeqtQndM=,iv:BZtxTuZsbubhOnUUK+Uj097b2SqEb7QKFssCpbHZMVM=,tag:GqWBsZoTaXLg+nDZ9vEXbw==,type:str]
+                        key: ENC[AES256_GCM,data:HkVpX5btkjYU,iv:nkwjvMUpKP1ASBPoZteo/G5v3/PVbWAz0LNIsE+zYjE=,tag:OPW4r5IyGCki7fpcmgX6NA==,type:str]
 sops:
     kms: []
     gcp_kms: []
@@ -57,8 +57,8 @@ sops:
             Q3MrbU05dk9DQ05hdk1Rd0ZjT2J6dHcKH+tSy9Y9A7hs5VHbhdlPJywK1k+kphZs
             lBNeTWh0wInE6p10UWb91gkurE90SpS5pvTwrI0GWLtpVJJ3Fw9kBQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-05T16:23:52Z"
-    mac: ENC[AES256_GCM,data:TYBuA4XGUQJ0pgKM9qeb9sZVHqvDCnEUBuIh0xIXeWv/8Qe0mC004SKfcjhPtu7r55Xylzat4lfq5DxnUR5IcZXmyFbt+2BSeo0kFhvHCxZJEoR12HCPfqGRqjOwsseapJ0d8mcZS+ZYEuFQqVIqSIcNj1vF+JOdGp2W+VB76Dc=,iv:rTxcYfluH1NqLSVBaoapHQSxX6L0QSL9gYQvPrvdcgA=,tag:qw+Vk9FMVmXCvddlVO3kBQ==,type:str]
+    lastmodified: "2025-04-05T16:31:43Z"
+    mac: ENC[AES256_GCM,data:+53OlpirQlNSwamy2GjO2RS6UEtaLSwdWvsmPORVV3wihaWNhfpAAdtSFn8E4lS6xDTQfupXnH8tPv7YYVpdY4uMv0CtRQdKDUNza51MhipGxK10aQEqvILy5jp40N/pEyFnEu2vjEbzKg8qIfQDy6ReaF/gefTmT/vHh0AQ46U=,iv:bJPb/xJlcPjUOI5yCixU8EcQ3NR1Ep3GUgaOzUJOxvs=,tag:g3nbu+DpxDnPDf1UhxSadw==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
     version: 3.9.4
@@ -95,8 +95,8 @@ sops:
             Q3MrbU05dk9DQ05hdk1Rd0ZjT2J6dHcKH+tSy9Y9A7hs5VHbhdlPJywK1k+kphZs
             lBNeTWh0wInE6p10UWb91gkurE90SpS5pvTwrI0GWLtpVJJ3Fw9kBQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-05T16:23:52Z"
-    mac: ENC[AES256_GCM,data:TYBuA4XGUQJ0pgKM9qeb9sZVHqvDCnEUBuIh0xIXeWv/8Qe0mC004SKfcjhPtu7r55Xylzat4lfq5DxnUR5IcZXmyFbt+2BSeo0kFhvHCxZJEoR12HCPfqGRqjOwsseapJ0d8mcZS+ZYEuFQqVIqSIcNj1vF+JOdGp2W+VB76Dc=,iv:rTxcYfluH1NqLSVBaoapHQSxX6L0QSL9gYQvPrvdcgA=,tag:qw+Vk9FMVmXCvddlVO3kBQ==,type:str]
+    lastmodified: "2025-04-05T16:31:43Z"
+    mac: ENC[AES256_GCM,data:+53OlpirQlNSwamy2GjO2RS6UEtaLSwdWvsmPORVV3wihaWNhfpAAdtSFn8E4lS6xDTQfupXnH8tPv7YYVpdY4uMv0CtRQdKDUNza51MhipGxK10aQEqvILy5jp40N/pEyFnEu2vjEbzKg8qIfQDy6ReaF/gefTmT/vHh0AQ46U=,iv:bJPb/xJlcPjUOI5yCixU8EcQ3NR1Ep3GUgaOzUJOxvs=,tag:g3nbu+DpxDnPDf1UhxSadw==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
     version: 3.9.4
