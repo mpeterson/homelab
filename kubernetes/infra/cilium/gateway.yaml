@@ -59,4 +59,4 @@ spec:
       tls:
         certificateRefs:
           - kind: Secret
-            name: lan.peterson-com-ar-tls
+            name: lan-peterson-com-ar-tls
