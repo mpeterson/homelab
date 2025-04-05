@@ -28,8 +28,11 @@ spec:
     chart: cert-manager
     targetRevision: v1.17.1
     helm:
-      parameters:
-      - name: crds.enabled
-        value: "true"
-      - name: extraArgs
-        value: "{--enable-gateway-api,--dns01-recursive-nameservers-only,--dns01-recursive-nameservers=1.1.1.1:53}"
+      values: |
+        crds:
+          enabled: true
+          
+        extraArgs:
+        - --enable-gateway-api
+        - --dns01-recursive-nameservers-only
+        - --dns01-recursive-nameservers=1.1.1.1:53
