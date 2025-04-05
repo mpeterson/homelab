@@ -29,5 +29,6 @@ spec:
     targetRevision: v1.17.1
     helm:
       parameters:
-      - name: "crds.enabled"
-        value: true
+      - name: crds.enabled
+        value: "true"
+      
