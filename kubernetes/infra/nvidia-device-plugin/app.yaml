@@ -28,12 +28,15 @@ spec:
     chart: nvidia-device-plugin
     targetRevision: 0.17.1
     helm:
-      values: |
+      valuesObject:
         runtimeClassName: nvidia
+
         gfd:
           enabled: true
+
         nfd:
           enabled: false
+          
         config: 
           map:
             config: |

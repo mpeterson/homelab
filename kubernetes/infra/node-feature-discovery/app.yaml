@@ -28,7 +28,7 @@ spec:
     chart: node-feature-discovery
     targetRevision: 0.17.2
     helm:
-      values: |
+      valuesObject:
         master:
           config:
             extraLabelNs:
