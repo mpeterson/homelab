@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
     name: acl-configmap
+    namespace: smarthome
 data:
     acl: ENC[AES256_GCM,data:2TO/1mEXsMCuGQEhdMkRJuMQjaj9rgu+XFj92GSdajdszvEK4PTzSch8ujvr/hkoFcx4dpA2jaAs3DuQR8ZR+TYrWfULiGj4cPk8yqa/gRWiLZX2F9h9MIvASY3FZugjOQLMKVQmOZCwmg871A6lF8J6ChdOx+35WexJVtvf7cshCFsgEccjoVRxvOg/8jsNHfvbY5zA+BrkTAHUhL2zd5B1MTACqp9xhKaUw/PKl/jCtXxmrMcnQ3f4v/k6En+1HxNeX0a1LYGD55fQer0JWD5wS5SYTqdFKinDE1xbDbaRNtTzWAkCUiZdPtB5+DUZPPZ58DUoLg==,iv:zuye2px6XF0voWJGheKXgC0m9a4kICgZaVBiv7FWzII=,tag:rwwdet0im7tAnNUZxtMyEw==,type:str]
 sops:
@@ -19,8 +20,8 @@ sops:
             cU1PcUxpUTduZU9jM09JZmswdzNoR0kKlViiRbXzqq8OoH74MwKd3xBaRV0+l300
             7stdasNbsxpQKd00xINFwHCt2jAjjBZYf9WrdOClCIpjSwP5M6eWTw==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-26T12:13:59Z"
-    mac: ENC[AES256_GCM,data:a6EAkK4YOolcKUCNa5ytovlPxls6Z3MjtnMygBTVnc6Y9F+XXjMxWuWJ1DDSXQr1yDPtqaCY38aSrywASL4AhZ2lYp3N/lSNlSOIYqiPi9AUfxxNvT2G6HkA8xPitqJl9ezBjdN+Q9qEkmSfQaLWkPNf6FYzYZ2m2bBSTGzNRz8=,iv:MJALa/iIunHAogf9hmN/cTXoMO0s8jTprd7SAzMDTsw=,tag:y36rpyMCZ6VaDs909QtlFw==,type:str]
+    lastmodified: "2025-04-26T13:28:36Z"
+    mac: ENC[AES256_GCM,data:kDNxnRTd1RRISaFKLWudqJNBsSSur4w4u+3ZZkxR80IvKS9E/NoUZ+z1+VMkcBPMP2iVfnh3gwJhc9EQAzPEduAhRs3te4FuYLi5d2+LftiZncAF7fHHzelXHyaaZluuhgMcX2+r5foHaA/4dtbD/apvfovYTYttne2FiA/o03E=,iv:7nR4MWiMxW3Kfpj6AQN5H120uk+w5ivy4NwnzOvkO30=,tag:q6GuOrENKANsuPkxBNdSXw==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
     version: 3.9.4
