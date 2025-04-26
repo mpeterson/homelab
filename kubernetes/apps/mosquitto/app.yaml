@@ -157,7 +157,7 @@ spec:
           data:
             storageClass: zfs-generic-iscsi-csi-xfs
             accessMode: ReadWriteOnce
-            size: 200Mi
+            size: 500Mi
             advancedMounts:
               main:
                 app:
