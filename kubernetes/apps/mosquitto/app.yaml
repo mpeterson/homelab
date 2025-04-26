@@ -1,0 +1,196 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mosquitto-configs
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: smarthome
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/apps/mosquitto/
+    targetRevision: main
+
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/app-template-3.2.0/charts/other/app-template/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app mosquitto
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: smarthome
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://nvidia.github.io/k8s-device-plugin
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+        
+        controllers:
+          main:
+            initContainers:
+              init-config:
+                image:
+                  repository: &image docker.io/library/eclipse-mosquitto
+                  tag: &tag 2.0.21@sha256:94f5a3d7deafa59fa3440d227ddad558f59d293c612138de841eec61bfa4d353
+                command: ["/bin/sh", "-c"]
+                args:
+                  - |
+                    cp /tmp/passwd /mosquitto/external_config/passwd;
+                    chmod 0700 /mosquitto/external_config/passwd;
+                    mosquitto_passwd -U /mosquitto/external_config/passwd
+            containers:
+              app:
+                image:
+                  repository: *image
+                  tag: *tag
+                probes:
+                  liveness:
+                    enabled: true
+                  readiness:
+                    enabled: true
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities: { drop: ["ALL"] }
+                resources:
+                  requests:
+                    cpu: 10m
+                    memory: 20Mi
+
+        defaultPodOptions:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile: { type: RuntimeDefault }
+
+        service:
+          app:
+            controller: *app
+            ports:
+              mqtt:
+                port: &mqtt-port 1883
+              websocket:
+                port: &websocket-port 9001
+
+        route:
+          tcp:
+            enabled: true
+            kind: TCPRoute
+            parentRefs:
+              - kind: Gateway
+                name: internal-gateway
+                namespace: network
+                sectionName: mqtt
+            rules:
+              - backendRefs:
+                  - name: *app
+                    port: *mqtt-port
+                matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+
+          tls:
+            enabled: true
+            kind: TCPRoute
+            parentRefs:
+              - kind: Gateway
+                name: external-gateway
+                namespace: network
+                sectionName: mqtts
+            rules:
+              - backendRefs:
+                  - name: *app
+                    port: *mqtt-port
+                matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+
+        persistence:
+          data:
+            storageClass: ceph-blockzfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 200Mi
+            advancedMounts:
+              main:
+                app:
+                  - path: /mosquitto/data
+          config:
+            type: configMap
+            name: mosquitto-configmap
+            advancedMounts:
+              main:
+                app:
+                  - path: /mosquitto/config/mosquitto.conf
+                    subPath: mosquitto.conf
+                    readOnly: true
+          acl:
+            type: configMap
+            name: acl-configmap
+            advancedMounts:
+              main:
+                app:
+                  - path: /mosquitto/external_config/acl
+                    subPath: acl
+                    readOnly: true
+          logs:
+            type: emptyDir
+            advancedMounts:
+              main:
+                app:
+                  - path: /mosquitto/log
+          passwd:
+            type: secret
+            name: mosquitto-secret
+            advancedMounts:
+              main:
+                init-config:
+                  - path: /tmp/passwd
+                    subPath: passwd
+                    readOnly: true
+          external-config:
+            type: emptyDir
+            globalMounts:
+              - path: /mosquitto/external_config
