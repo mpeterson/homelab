@@ -106,7 +106,7 @@ spec:
 
         service:
           app:
-            controller: *app
+            controller: main
             ports:
               mqtt:
                 port: &mqtt-port 1883
