@@ -107,46 +107,51 @@ spec:
         service:
           app:
             controller: main
+            # TODO(michelp): Temporary until Cilium supports TCPRoute for Gateway API
+            type: LoadBalancer
+            annotations:
+              io.cilium/lb-ipam-ips: 10.3.1.7
+            ##
             ports:
               mqtt:
                 port: &mqtt-port 1883
               websocket:
                 port: &websocket-port 9001
 
-        route:
-          tcp:
-            enabled: true
-            kind: TCPRoute
-            parentRefs:
-              - kind: Gateway
-                name: internal-gateway
-                namespace: network
-                sectionName: mqtt
-            rules:
-              - backendRefs:
-                  - name: *app
-                    port: *mqtt-port
-                matches:
-                  - path:
-                      type: PathPrefix
-                      value: /
+        # route:
+        #   tcp:
+        #     enabled: true
+        #     kind: TCPRoute
+        #     parentRefs:
+        #       - kind: Gateway
+        #         name: internal-gateway
+        #         namespace: network
+        #         sectionName: mqtt
+        #     rules:
+        #       - backendRefs:
+        #           - name: *app
+        #             port: *mqtt-port
+        #         matches:
+        #           - path:
+        #               type: PathPrefix
+        #               value: /
 
-          tls:
-            enabled: true
-            kind: TCPRoute
-            parentRefs:
-              - kind: Gateway
-                name: external-gateway
-                namespace: network
-                sectionName: mqtts
-            rules:
-              - backendRefs:
-                  - name: *app
-                    port: *mqtt-port
-                matches:
-                  - path:
-                      type: PathPrefix
-                      value: /
+        #   tls:
+        #     enabled: true
+        #     kind: TCPRoute
+        #     parentRefs:
+        #       - kind: Gateway
+        #         name: external-gateway
+        #         namespace: network
+        #         sectionName: mqtts
+        #     rules:
+        #       - backendRefs:
+        #           - name: *app
+        #             port: *mqtt-port
+        #         matches:
+        #           - path:
+        #               type: PathPrefix
+        #               value: /
 
         persistence:
           data:
