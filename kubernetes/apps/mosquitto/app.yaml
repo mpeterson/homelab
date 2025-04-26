@@ -155,7 +155,7 @@ spec:
 
         persistence:
           data:
-            storageClass: ceph-blockzfs-generic-iscsi-csi-xfs
+            storageClass: zfs-generic-iscsi-csi-xfs
             accessMode: ReadWriteOnce
             size: 200Mi
             advancedMounts:
