@@ -173,7 +173,7 @@ spec:
                     readOnly: true
           acl:
             type: configMap
-            name: acl-configmap
+            name: mosquitto-acl
             advancedMounts:
               mosquitto:
                 app:
