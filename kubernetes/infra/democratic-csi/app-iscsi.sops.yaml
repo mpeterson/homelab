@@ -22,7 +22,7 @@ spec:
     source:
         repoURL: https://democratic-csi.github.io/charts/
         chart: democratic-csi
-        targetRevision: 0.14.7
+        targetRevision: 0.15.0
         helm:
             valuesObject:
                 controller:
