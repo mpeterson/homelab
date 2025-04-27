@@ -64,7 +64,7 @@ spec:
         strategy: RollingUpdate
         
         controllers:
-          main:
+          mosquitto:
             initContainers:
               init-config:
                 image:
@@ -106,7 +106,7 @@ spec:
 
         service:
           app:
-            controller: main
+            controller: *app
             # TODO(michelp): Temporary until Cilium supports TCPRoute for Gateway API
             type: LoadBalancer
             annotations:
@@ -159,14 +159,14 @@ spec:
             accessMode: ReadWriteOnce
             size: 500Mi
             advancedMounts:
-              main:
+              mosquitto:
                 app:
                   - path: /mosquitto/data
           config:
             type: configMap
             name: mosquitto-configmap
             advancedMounts:
-              main:
+              mosquitto:
                 app:
                   - path: /mosquitto/config/mosquitto.conf
                     subPath: mosquitto.conf
@@ -175,7 +175,7 @@ spec:
             type: configMap
             name: acl-configmap
             advancedMounts:
-              main:
+              mosquitto:
                 app:
                   - path: /mosquitto/external_config/acl
                     subPath: acl
@@ -183,14 +183,14 @@ spec:
           logs:
             type: emptyDir
             advancedMounts:
-              main:
+              mosquitto:
                 app:
                   - path: /mosquitto/log
           passwd:
             type: secret
             name: mosquitto-secret
             advancedMounts:
-              main:
+              mosquitto:
                 init-config:
                   - path: /tmp/passwd
                     subPath: passwd
