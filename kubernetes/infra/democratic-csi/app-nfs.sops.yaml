@@ -22,7 +22,7 @@ spec:
     source:
         repoURL: https://democratic-csi.github.io/charts/
         chart: democratic-csi
-        targetRevision: 0.14.7
+        targetRevision: 0.15.0
         helm:
             valuesObject:
                 csiDriver:
@@ -41,7 +41,7 @@ spec:
                         #ENC[AES256_GCM,data:ceCjS2JQL4kGbp2DzCjc86buE27cpw==,iv:+UyUt8YtbHQWmRBZG01aT5VFDbMdI0mU2OM/2ODtfUc=,tag:tMzCUFw3d9aT/NU6K4Pe1A==,type:comment]
                         fsType: ENC[AES256_GCM,data:gy0x,iv:u19ThBxqPhv17c9zIKSwFIgbkU5LvjJW+LSgLp3foTA=,tag:VZACJ/MB8frLWBRoSAdQDw==,type:str]
                         #ENC[AES256_GCM,data:edmHV766cOqaDrUwVuFytFhhmoM7ObSlqLZlHqN5a5D2bTr75TBHQ7O8+jyA3JMBcVyC1Vrh,iv:TG3oqfD4g3tyJ4xfie4kK3W8dZ3TJPO0JJtmFGoQnMQ=,tag:DD0Y8T/PdoZtolHTJnaHWw==,type:comment]
-                        #ENC[AES256_GCM,data:XZY6HZGtDX7TZYaTzvrwNZVC3X5PIWm4uat7q19Ij6tXUe3KhIGtQA==,iv:zU/F3KGZjcSMm+SVr6fCBLrwDhTo/GQ8HBlMI1p8x5Q=,tag:LqxFwl4rhpmq52YwgBJ/eg==,type:comment]
+                        #ENC[AES256_GCM,data:whnuubHVPw20tWjAAwQAwYM5FBz1ss9wmGkr0MXMmMN8+WFIgi0aqw==,iv:ptjahbBnIVpPf2QmKJYqM464LNTVTPn2xZapN2dKA2Y=,tag:oLzQyD9VPF4hMcE9gh1vJA==,type:comment]
                         #ENC[AES256_GCM,data:98hNSB0V0ug3C7EOiJr2+7zUMwLwJDUPi5lsqvRnagA9oQ5QZP0=,iv:Ph+EqOYwUYHe1kB190XCh/IPqUJ2dkosCsr6vSRrTXo=,tag:ghwOJv9slZEC/eWw3ufxQQ==,type:comment]
                         #ENC[AES256_GCM,data:3A4yhNpl1Tj6Ww5bpk9B+eAluHfDVO04lCe3fUoOqsCZKZ1tsOa4fGSOIakdlUwOKOxKiA==,iv:Nrd91M+b7cw3ZzjGq+5bV2QIjIEo0+sdwPpRaNqgcew=,tag:fV4WqEyrvFwLoz/Ne73H+g==,type:comment]
                         #ENC[AES256_GCM,data:whnuubHVPw20tWjAAwQAwYM5FBz1ss9wmGkr0MXMmMN8+WFIgi0aqw==,iv:ptjahbBnIVpPf2QmKJYqM464LNTVTPn2xZapN2dKA2Y=,tag:oLzQyD9VPF4hMcE9gh1vJA==,type:comment]
@@ -122,8 +122,8 @@ sops:
             d3ZEaDUyaWpNMkQybU5KbzJWSDhKVlEKeUbpsF5W5+Bn8+NzcKZFJKGUFtH7+8HA
             N9YkT/gvOBmzw+L8wPDRRy9x+bSoI2Z0eOc7fBuDcSnOsLLuhuIWqQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-06T09:47:28Z"
-    mac: ENC[AES256_GCM,data:aGzdhZAcbCJU4DfLVOmq7pzLLRnqacAP/EF88mg7xLz5uD6yet8fQWH18elZC6eGT0K/oceEEyUu+leW19qL+YvExX81Wuz0rXLVuYO4cexZlo8/W2co5vRbuxcIOdhSt5iPIMbQtXNzLP5HUg4qE7EZ6FRUKZLusGNH31Qjm6U=,iv:rhUkrRf9NUN/AFZqOvQVED1nALkUTI5soB+iw5gtSEo=,tag:4Mz5sJxCX0SjUxWVX59gFw==,type:str]
+    lastmodified: "2025-04-27T07:03:22Z"
+    mac: ENC[AES256_GCM,data:i+yqiRQN7xeJdWJSlhK6PWokSMQf5R/0UbuZ4ovmpodbgfXY7eDpsjZedhbamG4Z/lt2u/atFaUFXf7NQ8HmnEgih8DESoP8K7qJf56fLsPLZlgOb0/JQwywTActkaZr1hlqkZuZ6IC6BkcV0rcCpisOTVF8Yqt4Lg9+RvzeQEo=,iv:YHg9k28/TxZLziHn8vJyg4NjU6tHIA8aa6EX6QFSI8c=,tag:sGty20CQIBlAwb5EjI7R5A==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
     version: 3.9.4
