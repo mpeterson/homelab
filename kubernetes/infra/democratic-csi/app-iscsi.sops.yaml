@@ -5,6 +5,8 @@ metadata:
     namespace: argocd
     finalizers:
         - resources-finalizer.argocd.argoproj.io
+    annotations:
+        argocd.argoproj.io/sync-wave: "-5"
 spec:
     project: default
     destination:
@@ -173,8 +175,8 @@ sops:
             UDZiUVQxbGkvM0g3eEp1TE1rNVpLWnMK2evXAjmhnHawDVVBv8WuLaFsE1SKVxxX
             iHwO1m/MS/VwC79MZfFPX1Px9S+b5uxc9FQdzgNhjOGD7dW4Lj6bjQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-28T09:26:04Z"
-    mac: ENC[AES256_GCM,data:SjsLRg3Am+zcxWO4W4XCdCeeyodfvWaiG24t94fAg5pe4a+GCLT7mdep86Zt9dZwOYoB8Dtwm3ghwqUYo5fWT0GPvwMNErK6yqTHYB+3xrN5RDdiMdzBqkWps4vgXAhBR6PycWmh5btdMDq7ZG9FppG/+p4CAVd46hGy5p+fnME=,iv:i3HEqp6VLoiybOBU+PJdjqMN0n/eXpbFU/5Jo8znx04=,tag:Q3FDiArKpqfzS4gtXGp3eg==,type:str]
+    lastmodified: "2025-04-28T11:34:49Z"
+    mac: ENC[AES256_GCM,data:kLftJ62OwEFVUuzfezGvb2Mtu/ZyX+utGsI5hTx9MKGt7eQFgv3aOv2pfbK9YcKr74glI5zhsKuYOj1KxEqefbD7fRElVqcRYTfjf/80rKw2rWCER9YL3EMlu8EFXixRhh+EiI06LS4notM8GoIIO2ga6mp7SAaxAPUM+k3hEPA=,iv:lpwF94RVWBOKrzLRdnvmvNOAwxtyb9zo8i4TJ0Px6tI=,tag:4oAepk5LOTMLR7ijnKlxFg==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
     version: 3.9.4

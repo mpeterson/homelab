@@ -4,6 +4,8 @@ kind: Application
 metadata:
   name: cilium
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-6"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 
