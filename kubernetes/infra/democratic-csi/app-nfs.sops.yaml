@@ -58,13 +58,13 @@ spec:
                         node-publish-secret: null
                         controller-expand-secret: null
                 #ENC[AES256_GCM,data:updaGGUTgVXHTxkFwlrGg/yfT1nMqspCP+pKgYk8bDddA6UAz9PbzO4Oc8Jz4Un9i6F3pnJsBYg=,iv:fYc5o3tEuVRkUYBMJttpLdFfpB+2ZRDHRIqDYoHiBWc=,tag:H4cLPjudwHcAybM/VTfIHA==,type:comment]
-                volumeSnapshotClasses: []
-                #ENC[AES256_GCM,data:R5ZhNPIC9lO3TBc6Wvae2hiL9bluiF+Qmq40,iv:jwalTF88j8OeR5Vda54Kd3dic7Ij1arQ9uFE3rCzsJ0=,tag:mgzaQYpgXXojiUfppTE34g==,type:comment]
-                #ENC[AES256_GCM,data:W0qV/nB5AqeWnecAlQ==,iv:ozaCLtkaV1PugEMuJILBCZVk/nE71jD1QZLMKYxagH4=,tag:c2dssGDMhmlS/9Ya1VnMeA==,type:comment]
-                #ENC[AES256_GCM,data:BqweORZamSSvqMZutoLC2rGRp+iwU3NNX0eVrJICWwIxFhWS2/Z2xfyjqJzMRfaFezhFuM8q24tYMCCn,iv:030LtH/e2M7anycheNTGP4Bzqwa9e4s0DSSJqQ2tNxU=,tag:c8ximKp2oPjAuyUIjrsgjA==,type:comment]
-                #ENC[AES256_GCM,data:tdPRUYzz2qjcetV0uMWUtmVcexQLuOmb3Y2oehJu,iv:MD6uzfDS1CKplZNacMWt4gvVnXZB+1PamC5JThGOG0A=,tag:eajF4svkwW1u1UW089XrFQ==,type:comment]
-                #ENC[AES256_GCM,data:RDHSGsvs2tYtPw==,iv:8EVCNGHaUKwfQPfc0QBZH/ku4AlvzKCg2aKxkvPemRI=,tag:OWQe+l01LtBLYvPpxb9UvA==,type:comment]
-                #ENC[AES256_GCM,data:+TDm/wVhnH4lsI8rw+S58DwRteXjGTU=,iv:AYB1aTEApCgNHB/FgzSIc0nLF+E/UmCzIX0U9pEE53s=,tag:vwdTWaXZHUQ6noS0W+cUJA==,type:comment]
+                volumeSnapshotClasses:
+                    - name: ENC[AES256_GCM,data:h6RDmQ9aukb4g6wPHccm4EMjoA==,iv:zKYZzZSjVbMIXwxez66kEA6AYb/jzDhZetnWTISDhBM=,tag:xyTyt2gs7JMfn10PS/KQIQ==,type:str]
+                      parameters: null
+                      #ENC[AES256_GCM,data:TXF2okAxanbI9ri4MpeehhUqMIYx6lBeu4b/hxA3G4z+I3sSBBofSiD2qmdn1aaL6S39wxOc0mxY,iv:I6wDjdIBx//KLCcfyOARWfvPSW1xKEf+OoONlg4nR3c=,tag:qp3C/QKpZBzWlSjz7IsSxQ==,type:comment]
+                      #ENC[AES256_GCM,data:JFBcwGTFc0V9gPflbvJ8EAFnqqRquSYgoToJ,iv:RlHaWlZHSjNBLqkv2hSz+c15Uw0ch32BZwIluF29Rpg=,tag:Q6XdzEbVD7+aNSq+KUBaGw==,type:comment]
+                      secrets:
+                        snapshotter-secret: null
                 driver:
                     config:
                         #ENC[AES256_GCM,data:RIYhofMQQlrnCZFcGPap1XwO6gNCHv+HryZOO7A7CPNnHJbO2HbTk2FykLzxYH6i2ReIRVBnWpygC1FR+X+1qFA2oPZwEgNyzw==,iv:EctMjOZB3a5ICVCc9yCppjTuLpkGQ1OA/fs4wSmHLdo=,tag:r1RqAbOYHsuqBFORVVcV4Q==,type:comment]
@@ -122,8 +122,8 @@ sops:
             d3ZEaDUyaWpNMkQybU5KbzJWSDhKVlEKeUbpsF5W5+Bn8+NzcKZFJKGUFtH7+8HA
             N9YkT/gvOBmzw+L8wPDRRy9x+bSoI2Z0eOc7fBuDcSnOsLLuhuIWqQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-27T07:03:22Z"
-    mac: ENC[AES256_GCM,data:i+yqiRQN7xeJdWJSlhK6PWokSMQf5R/0UbuZ4ovmpodbgfXY7eDpsjZedhbamG4Z/lt2u/atFaUFXf7NQ8HmnEgih8DESoP8K7qJf56fLsPLZlgOb0/JQwywTActkaZr1hlqkZuZ6IC6BkcV0rcCpisOTVF8Yqt4Lg9+RvzeQEo=,iv:YHg9k28/TxZLziHn8vJyg4NjU6tHIA8aa6EX6QFSI8c=,tag:sGty20CQIBlAwb5EjI7R5A==,type:str]
+    lastmodified: "2025-04-28T09:23:09Z"
+    mac: ENC[AES256_GCM,data:SAlr3J9Tm3pJDU1JWeZs93QTviuru2D8bv5u4tMbVlbvKuB9Rxe/OGXT4o1deg6JihH5f3IJlRyWON24Xd31GcJAZQFQzPuD8HRTKd1y/XJ7VVLO/x3s8n1bk8yljuffMPJJcQGA28K+2zwLuTjfnf2kWNh24SUXArXYB8eelr4=,iv:kqO3o0GMIrD8o5V8tAN17nQaZtrYbNlV6q8jWzAKzqE=,tag:hpETGwkl1UQE2A6qtCYSjw==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
     version: 3.9.4
