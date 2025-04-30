@@ -29,3 +29,7 @@ spec:
     repoURL: https://democratic-csi.github.io/charts/
     chart: snapshot-controller
     targetRevision: 0.3.0
+    helm:
+      valuesObject:
+        validatingWebhook:
+          enabled: true

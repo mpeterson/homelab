@@ -64,7 +64,7 @@ spec:
                     - name: ENC[AES256_GCM,data:h6RDmQ9aukb4g6wPHccm4EMjoA==,iv:zKYZzZSjVbMIXwxez66kEA6AYb/jzDhZetnWTISDhBM=,tag:xyTyt2gs7JMfn10PS/KQIQ==,type:str]
                       parameters: null
                       #ENC[AES256_GCM,data:TXF2okAxanbI9ri4MpeehhUqMIYx6lBeu4b/hxA3G4z+I3sSBBofSiD2qmdn1aaL6S39wxOc0mxY,iv:I6wDjdIBx//KLCcfyOARWfvPSW1xKEf+OoONlg4nR3c=,tag:qp3C/QKpZBzWlSjz7IsSxQ==,type:comment]
-                      #ENC[AES256_GCM,data:JFBcwGTFc0V9gPflbvJ8EAFnqqRquSYgoToJ,iv:RlHaWlZHSjNBLqkv2hSz+c15Uw0ch32BZwIluF29Rpg=,tag:Q6XdzEbVD7+aNSq+KUBaGw==,type:comment]
+                      detachedSnapshots: ENC[AES256_GCM,data:hvjXuA==,iv:E6hzQ6Orn2LLSFgBnXmA+enoeV0jqMVHKvz0iK3dCK8=,tag:Az0kqmFz/QL3i/iDNm/jrg==,type:str]
                       secrets:
                         snapshotter-secret: null
                 driver:
@@ -124,8 +124,8 @@ sops:
             d3ZEaDUyaWpNMkQybU5KbzJWSDhKVlEKeUbpsF5W5+Bn8+NzcKZFJKGUFtH7+8HA
             N9YkT/gvOBmzw+L8wPDRRy9x+bSoI2Z0eOc7fBuDcSnOsLLuhuIWqQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-28T11:35:01Z"
-    mac: ENC[AES256_GCM,data:lr7GzssJQDaeVFYWb0t+KapnqfP1dE2dV3WYgm0v3v8RJ/KaRx1QW5uaKhc+6Wj8p/3/wOE/gMFPZAjm6btwnDAlWAWDXiYiziQHQm2EBUyApB6v2TPEiLUo3+lZVlbpKMfyetr0D0lKjdIPfixv2CswxFhEu6PzYWAUGuGnLHI=,iv:XuacZSVo0IcqMi+lwyLpdtztN2klwGmqcB0hQdwenDQ=,tag:DRYQFkX0Q0tVi/JOfr8WhA==,type:str]
+    lastmodified: "2025-04-28T13:27:21Z"
+    mac: ENC[AES256_GCM,data:aHvtq3OJ+NIxAWEEsp8aFAzhFaFa65HxZ1wvWvgP3/xgyCTL0ycX+9gfu1B0dubnAmg4BkMAe8zJMRSIFPiVnik+vzN9sOyY5yqBeo1OZkvNGR3jg8JOzGoWPZ7ctDIm0TV8C8BSdGH2eke04oEj9lzE5bTLcPuS4FKpPj1NfT8=,iv:KOAKRBy+M48WoV8D6o8GkFFSappXavXmN/j6FEsEkpE=,tag:trFHbEJyywWGIb2YqHPB3w==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
     version: 3.9.4
