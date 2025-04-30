@@ -115,15 +115,15 @@ spec:
                 #ENC[AES256_GCM,data:gqjwIt/8zcDwMzqqr2L65FsJ/4OeViGGitWypHzsAYmSeenKHU3uX9Mxh5KQk4eJSoGsxcsJqxQ=,iv:MBLNPVumGcc+rrzXRM5Fktqq8l5mRb8AQ3mnuYEPNcM=,tag:NznxUIrqPlWC/eRhdm0ExQ==,type:comment]
                 volumeSnapshotClasses:
                     - name: ENC[AES256_GCM,data:A829EwmnqC4+qVE3Jn6Ot4UgMuPfGpI3Kw==,iv:ShyjxmWILbJUY15NrYSOQnBwA4FhagWPcGvKHyjZ72U=,tag:fFF/ovkfaK05w4W8oQ99Sw==,type:str]
-                      parameters: null
-                      #ENC[AES256_GCM,data:TyvwaPA91yCbGp9ViQayt6LaR2yibC3qnrf9lNa6C90LPvyC6qYWIp07iYA4H9EX/nBtGPyiYNjW,iv:0I2IE6lNA27mdjzbKUH5hEKf2lJiVnWPO3yHy6enUxY=,tag:RyN8DlfeCM90Gxvu3EnDxg==,type:comment]
-                      detachedSnapshots: ENC[AES256_GCM,data:B5L8rA==,iv:jecr9sitbhF2uJTXZX/DEqBGl75xchJxugOmPLFcde4=,tag:su5B7O8YXkeZA3q0HQ4KGg==,type:str]
+                      parameters:
+                        #ENC[AES256_GCM,data:t7cVirsdd1q3SN8MXGVEVV86H5qesIi7zFxHLQLpq0yX3bppKnF/VE1VSwH7w8hSThPG6ONGEusP,iv:bNecagKvxUYlcZTQfOO+H2TRX3vanR2aROyzgRiq5gw=,tag:QCgVPjwddsjmzhB+B9ZB7g==,type:comment]
+                        detachedSnapshots: ENC[AES256_GCM,data:i8NYww==,iv:TVxvuuzBK0L+ofBit4u96TdtvQ95U27aTCOwhUwzmSY=,tag:OkpSV148XZBC9njn04Vebw==,type:str]
                       secrets:
                         snapshotter-secret: null
                     - name: ENC[AES256_GCM,data:g5ygX7w0zg2SK2CdDGr3l7oCwdCCNgD8WaE=,iv:ayANKhDHZlO7NoBtGM5ZapAngFBUJlEbQew4dG9p0q8=,tag:8lveKTkpW0yQsLuUvQHR6A==,type:str]
-                      parameters: null
-                      #ENC[AES256_GCM,data:TyvwaPA91yCbGp9ViQayt6LaR2yibC3qnrf9lNa6C90LPvyC6qYWIp07iYA4H9EX/nBtGPyiYNjW,iv:0I2IE6lNA27mdjzbKUH5hEKf2lJiVnWPO3yHy6enUxY=,tag:RyN8DlfeCM90Gxvu3EnDxg==,type:comment]
-                      detachedSnapshots: ENC[AES256_GCM,data:B5L8rA==,iv:jecr9sitbhF2uJTXZX/DEqBGl75xchJxugOmPLFcde4=,tag:su5B7O8YXkeZA3q0HQ4KGg==,type:str]
+                      parameters:
+                        #ENC[AES256_GCM,data:t7cVirsdd1q3SN8MXGVEVV86H5qesIi7zFxHLQLpq0yX3bppKnF/VE1VSwH7w8hSThPG6ONGEusP,iv:bNecagKvxUYlcZTQfOO+H2TRX3vanR2aROyzgRiq5gw=,tag:QCgVPjwddsjmzhB+B9ZB7g==,type:comment]
+                        detachedSnapshots: ENC[AES256_GCM,data:i8NYww==,iv:TVxvuuzBK0L+ofBit4u96TdtvQ95U27aTCOwhUwzmSY=,tag:OkpSV148XZBC9njn04Vebw==,type:str]
                       secrets:
                         snapshotter-secret: null
                 driver:
@@ -175,8 +175,8 @@ sops:
             UDZiUVQxbGkvM0g3eEp1TE1rNVpLWnMK2evXAjmhnHawDVVBv8WuLaFsE1SKVxxX
             iHwO1m/MS/VwC79MZfFPX1Px9S+b5uxc9FQdzgNhjOGD7dW4Lj6bjQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-28T13:27:02Z"
-    mac: ENC[AES256_GCM,data:H399WXfPKoygxDmOk+c93XaGJYsJoay42FwrxuK4yxfcx+AjHFXG8U0lbBzDszUL4zwSOqcnvPf+arMI2tKFfA+I9wZez/icRlcyfzKs+V2t6SfDmdSZGU08s+lhP9v+WEYvtsjej3FwDG0OL/ZOSgGsOgsb5xwpftq5aEr0pSo=,iv:7lkBsCNjmJupH8oFwufJQrPFtYk6YD/ZNZ9Y2EZwM3A=,tag:dol3NQ/qkjKho5WNN1ps5A==,type:str]
+    lastmodified: "2025-04-30T15:10:43Z"
+    mac: ENC[AES256_GCM,data:AlXh1QDaTyuRMQ7drWlrpDeiwvL/EsMlpLIEX8SjVhMvOKkzfPtfMw2gJpmD65nouYDxhzF1iS19zZnyRaD2Ln8dCJufkejm3JxMoYiUx0TGk5VCdmFPKd/k5ZsfwGgZQRVmmhrLJC/SDmGe30fWzfff8tYs9FO/UXr9PBM4djs=,iv:oM8irmE92/vctuQUCaJ/RUG5AZi8OHrQwbtCYCy7gwk=,tag:GsEdHcjDVlZdH6PAyNPhVw==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
     version: 3.9.4

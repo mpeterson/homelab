@@ -62,9 +62,9 @@ spec:
                 #ENC[AES256_GCM,data:updaGGUTgVXHTxkFwlrGg/yfT1nMqspCP+pKgYk8bDddA6UAz9PbzO4Oc8Jz4Un9i6F3pnJsBYg=,iv:fYc5o3tEuVRkUYBMJttpLdFfpB+2ZRDHRIqDYoHiBWc=,tag:H4cLPjudwHcAybM/VTfIHA==,type:comment]
                 volumeSnapshotClasses:
                     - name: ENC[AES256_GCM,data:h6RDmQ9aukb4g6wPHccm4EMjoA==,iv:zKYZzZSjVbMIXwxez66kEA6AYb/jzDhZetnWTISDhBM=,tag:xyTyt2gs7JMfn10PS/KQIQ==,type:str]
-                      parameters: null
-                      #ENC[AES256_GCM,data:TXF2okAxanbI9ri4MpeehhUqMIYx6lBeu4b/hxA3G4z+I3sSBBofSiD2qmdn1aaL6S39wxOc0mxY,iv:I6wDjdIBx//KLCcfyOARWfvPSW1xKEf+OoONlg4nR3c=,tag:qp3C/QKpZBzWlSjz7IsSxQ==,type:comment]
-                      detachedSnapshots: ENC[AES256_GCM,data:hvjXuA==,iv:E6hzQ6Orn2LLSFgBnXmA+enoeV0jqMVHKvz0iK3dCK8=,tag:Az0kqmFz/QL3i/iDNm/jrg==,type:str]
+                      parameters:
+                        #ENC[AES256_GCM,data:dFtNjuribY1u63s7yBLm3YLqrHPMTBlXFosXF7vYiThzJA+TYGyFrOqi+uZHRhndKvRCYdLMe1Xt,iv:1AZLNkuQWA/eIIhp7/LOelwzbGhfGN3VpkyVILCcfKQ=,tag:YPafadRHDJxEH5g7rJFppw==,type:comment]
+                        detachedSnapshots: ENC[AES256_GCM,data:dPOF8A==,iv:80ms2CVC5IfLOXwYDMr6aoN9WAEM9+dfJ7uOJg1RoQ4=,tag:1H2Shra4tImdx4QdMfOxsQ==,type:str]
                       secrets:
                         snapshotter-secret: null
                 driver:
@@ -124,8 +124,8 @@ sops:
             d3ZEaDUyaWpNMkQybU5KbzJWSDhKVlEKeUbpsF5W5+Bn8+NzcKZFJKGUFtH7+8HA
             N9YkT/gvOBmzw+L8wPDRRy9x+bSoI2Z0eOc7fBuDcSnOsLLuhuIWqQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-28T13:27:21Z"
-    mac: ENC[AES256_GCM,data:aHvtq3OJ+NIxAWEEsp8aFAzhFaFa65HxZ1wvWvgP3/xgyCTL0ycX+9gfu1B0dubnAmg4BkMAe8zJMRSIFPiVnik+vzN9sOyY5yqBeo1OZkvNGR3jg8JOzGoWPZ7ctDIm0TV8C8BSdGH2eke04oEj9lzE5bTLcPuS4FKpPj1NfT8=,iv:KOAKRBy+M48WoV8D6o8GkFFSappXavXmN/j6FEsEkpE=,tag:trFHbEJyywWGIb2YqHPB3w==,type:str]
+    lastmodified: "2025-04-30T15:10:56Z"
+    mac: ENC[AES256_GCM,data:bwX5BMAI/zP8lBNcorkfmBVjGR/bGjLXDA42Wqomig+ndffARQr0fqJLF9JyB+dHpRsbJJrNVLoTGsUUz4vrc23z4y0GHJFXDxChyiY6nF5iPX62UX/tQla4g3if5XvRLEHC9fH6iF/gpUEDtfm569kE1QeGg5rzLr54VuI9LDc=,iv:n2yCsZifpezTx5h6ee4vtsy6TwVlbiEg5+QMigu0ZJA=,tag:YgYjjpZDOaSUpH50RRWvgQ==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
     version: 3.9.4
