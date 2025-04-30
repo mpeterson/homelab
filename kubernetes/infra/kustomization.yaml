@@ -14,3 +14,4 @@ resources:
   - node-feature-discovery/app.yaml
   - nvidia-device-plugin/app.yaml
   - nvidia-device-plugin/configs.yaml
+  - velero/app.yaml
