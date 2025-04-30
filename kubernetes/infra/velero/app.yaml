@@ -14,7 +14,7 @@ spec:
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: smarthome
+    namespace: velero
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -46,7 +46,7 @@ spec:
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: infra
+    namespace: velero
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -84,6 +84,7 @@ spec:
               config:
                 region: us-west-001
                 s3Url: "https://s3.us-west-001.backblazeb2.com"
+                checksumAlgorithm: "" # required for Backblaze B2
 
           volumeSnapshotLocation:
             - name: democratic-csi
