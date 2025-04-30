@@ -96,7 +96,7 @@ spec:
 
         schedules:
           daily-backups:
-            disabled: false
+            disabled: true
             schedule: "0 1 * * *" # once a day, at midnight
             useOwnerReferencesInBackup: false
             template:
