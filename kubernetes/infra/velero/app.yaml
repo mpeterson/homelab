@@ -93,13 +93,13 @@ spec:
           features: EnableCSI
           defaultVolumeSnapshotLocations: csi:democratic-csi
 
-          schedules:
-            daily-backups:
-              disabled: false
-              schedule: "0 1 * * *" # once a day, at midnight
-              useOwnerReferencesInBackup: false
-              template:
-                ttl: "240h"
-                storageLocation: cloud
-                includedNamespaces:
-                - '*'
+        schedules:
+          daily-backups:
+            disabled: false
+            schedule: "0 1 * * *" # once a day, at midnight
+            useOwnerReferencesInBackup: false
+            template:
+              ttl: "240h"
+              storageLocation: cloud
+              includedNamespaces:
+              - '*'
