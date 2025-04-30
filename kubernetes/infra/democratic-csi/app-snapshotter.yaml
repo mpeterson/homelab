@@ -26,10 +26,45 @@ spec:
       prune: true
   
   source:
-    repoURL: https://democratic-csi.github.io/charts/
+    repoURL: https://piraeus.io/helm-charts/
     chart: snapshot-controller
-    targetRevision: 0.3.0
+    targetRevision: 4.0.2
     helm:
       valuesObject:
         validatingWebhook:
           enabled: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: snapshot-validation-webhook
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+
+spec:
+  project: default
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infra
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+  
+  source:
+    repoURL: https://piraeus.io/helm-charts/
+    chart: snapshot-validation-webhook
+    targetRevision: 1.9.0
+    helm:
+      valuesObject:
+        validatingWebhook:
+          enabled: true          
