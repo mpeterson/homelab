@@ -114,13 +114,7 @@ spec:
                         controller-expand-secret: null
                 #ENC[AES256_GCM,data:gqjwIt/8zcDwMzqqr2L65FsJ/4OeViGGitWypHzsAYmSeenKHU3uX9Mxh5KQk4eJSoGsxcsJqxQ=,iv:MBLNPVumGcc+rrzXRM5Fktqq8l5mRb8AQ3mnuYEPNcM=,tag:NznxUIrqPlWC/eRhdm0ExQ==,type:comment]
                 volumeSnapshotClasses:
-                    - name: ENC[AES256_GCM,data:A829EwmnqC4+qVE3Jn6Ot4UgMuPfGpI3Kw==,iv:ShyjxmWILbJUY15NrYSOQnBwA4FhagWPcGvKHyjZ72U=,tag:fFF/ovkfaK05w4W8oQ99Sw==,type:str]
-                      parameters:
-                        #ENC[AES256_GCM,data:t7cVirsdd1q3SN8MXGVEVV86H5qesIi7zFxHLQLpq0yX3bppKnF/VE1VSwH7w8hSThPG6ONGEusP,iv:bNecagKvxUYlcZTQfOO+H2TRX3vanR2aROyzgRiq5gw=,tag:QCgVPjwddsjmzhB+B9ZB7g==,type:comment]
-                        detachedSnapshots: ENC[AES256_GCM,data:i8NYww==,iv:TVxvuuzBK0L+ofBit4u96TdtvQ95U27aTCOwhUwzmSY=,tag:OkpSV148XZBC9njn04Vebw==,type:str]
-                      secrets:
-                        snapshotter-secret: null
-                    - name: ENC[AES256_GCM,data:g5ygX7w0zg2SK2CdDGr3l7oCwdCCNgD8WaE=,iv:ayANKhDHZlO7NoBtGM5ZapAngFBUJlEbQew4dG9p0q8=,tag:8lveKTkpW0yQsLuUvQHR6A==,type:str]
+                    - name: ENC[AES256_GCM,data:QWQb4tiSibaDyP0lfmX0AUXdFL9X,iv:G5O6mQnapvHQheon090UhTcr7D8EsHbcPX+WXVSkoKQ=,tag:HTiAcCgvbHraUuDhtvyZvw==,type:str]
                       parameters:
                         #ENC[AES256_GCM,data:t7cVirsdd1q3SN8MXGVEVV86H5qesIi7zFxHLQLpq0yX3bppKnF/VE1VSwH7w8hSThPG6ONGEusP,iv:bNecagKvxUYlcZTQfOO+H2TRX3vanR2aROyzgRiq5gw=,tag:QCgVPjwddsjmzhB+B9ZB7g==,type:comment]
                         detachedSnapshots: ENC[AES256_GCM,data:i8NYww==,iv:TVxvuuzBK0L+ofBit4u96TdtvQ95U27aTCOwhUwzmSY=,tag:OkpSV148XZBC9njn04Vebw==,type:str]
@@ -175,8 +169,8 @@ sops:
             UDZiUVQxbGkvM0g3eEp1TE1rNVpLWnMK2evXAjmhnHawDVVBv8WuLaFsE1SKVxxX
             iHwO1m/MS/VwC79MZfFPX1Px9S+b5uxc9FQdzgNhjOGD7dW4Lj6bjQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-30T15:10:43Z"
-    mac: ENC[AES256_GCM,data:AlXh1QDaTyuRMQ7drWlrpDeiwvL/EsMlpLIEX8SjVhMvOKkzfPtfMw2gJpmD65nouYDxhzF1iS19zZnyRaD2Ln8dCJufkejm3JxMoYiUx0TGk5VCdmFPKd/k5ZsfwGgZQRVmmhrLJC/SDmGe30fWzfff8tYs9FO/UXr9PBM4djs=,iv:oM8irmE92/vctuQUCaJ/RUG5AZi8OHrQwbtCYCy7gwk=,tag:GsEdHcjDVlZdH6PAyNPhVw==,type:str]
+    lastmodified: "2025-04-30T15:49:51Z"
+    mac: ENC[AES256_GCM,data:lfItOm0jf0JRe1w6j6mrEtEtHw2mj0lmDjpLxhJ3+eTt0EUDtRL7vRhTiRqlxUpNMik0/rBjln0KF+/Nr74OvjGjNmG5wQLZDkENrVY7QBRA0gkpaczwVVHcwJ0KRq884PaUxsPKzOlQB44bJT43PqdzRx0/mGusp/IE2ZarDf0=,iv:14GdcxYpj3qQWNdkli/W70qSx2s2yI2KQz4vuo0JUCI=,tag:zD5MGi/wMDaqWseq3SmFaw==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
     version: 3.9.4
