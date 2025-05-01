@@ -80,36 +80,36 @@ spec:
                 env:
                   PLEX_ADVERTISE_URL: "https://plex.peterson.com.ar:443"
                   PLEX_NO_AUTH_NETWORKS: 10.2.1.0/24
-              probes:
-                liveness: &probes
-                  enabled: true
-                  custom: true
-                  spec:
-                    httpGet:
-                      path: /identity
-                      port: 32400
-                    initialDelaySeconds: 0
-                    periodSeconds: 10
-                    timeoutSeconds: 1
-                    failureThreshold: 3
-                readiness: *probes
-                startup:
-                  enabled: true
-                  spec:
-                    failureThreshold: 30
-                    periodSeconds: 10
-              securityContext:
-                allowPrivilegeEscalation: false
-                readOnlyRootFilesystem: true
-                capabilities:
-                  drop:
-                    - ALL
-              resources:
-                requests:
-                  cpu: 100m
-                limits:
-                  nvidia.com/gpu: 1
-                  memory: 9248M
+                probes:
+                  liveness: &probes
+                    enabled: true
+                    custom: true
+                    spec:
+                      httpGet:
+                        path: /identity
+                        port: 32400
+                      initialDelaySeconds: 0
+                      periodSeconds: 10
+                      timeoutSeconds: 1
+                      failureThreshold: 3
+                  readiness: *probes
+                  startup:
+                    enabled: true
+                    spec:
+                      failureThreshold: 30
+                      periodSeconds: 10
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
+                resources:
+                  requests:
+                    cpu: 100m
+                  limits:
+                    nvidia.com/gpu: 1
+                    memory: 9248M
 
         service:
           app:
