@@ -47,9 +47,6 @@ spec:
                 image:
                   repository: &image ghcr.io/home-operations/tautulli
                   tag: &tag 2.15.2@sha256:882f5b2a89e3da25716af3f3a293bf93a0111056548e37a55c918cf7789bbb78
-                env:
-                  PLEX_ADVERTISE_URL: "https://plex.peterson.com.ar:443,http://10.3.1.5:32400,"
-                  PLEX_NO_AUTH_NETWORKS: 10.2.1.0/24
                 probes:
                   liveness: &probes
                     enabled: true
