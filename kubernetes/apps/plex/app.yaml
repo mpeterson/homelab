@@ -1,0 +1,167 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app plex
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+        
+        controllers:
+          plex:
+            pod:
+              runtimeClassName: nvidia
+              securityContext:
+                runAsUser: 65534
+                runAsGroup: 100
+                fsGroup: 100
+                fsGroupChangePolicy: "OnRootMismatch"
+                supplementalGroups:
+                  - 44
+            initContainers:
+              init-config:
+                image:
+                  repository: docker.io/library/alpine
+                  tag: 3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
+                command: ["/bin/sh", "-c"]
+                args:
+                  - |
+                    #!/bin/sh
+                    echo "waiting for pre-existing pms database to uploaded..."
+
+                    if [ -d "/config/Library" ]; then
+                      echo "PMS library already exists, exiting."
+                      exit 0
+                    fi
+
+                    # wait for the database archive to be manually copied to the server
+                    while [ ! -f /pms.tgz ]; do sleep 2; done;
+
+                    tar -xvzf /pms.tgz -C /config
+                    
+                    chown -R 65534:100 /config/Library
+                    find /config/Library -type d -exec chmod 755 {} +
+                    find /config/Library -type f -exec chmod 644 {} +
+
+                    rm /pms.tgz
+
+                    echo "Done."
+            containers:
+              app:
+                image:
+                  repository: &image ghcr.io/home-operations/plex
+                  tag: &tag 1.41.6.9685@sha256:37d36646471fb905a0080daaaa1f09ad3370b06149ed5f94dad73ead591cad0e
+                env:
+                  PLEX_ADVERTISE_URL: "https://plex.peterson.com.ar:443"
+                  PLEX_NO_AUTH_NETWORKS: 10.2.1.0/24
+              probes:
+                liveness: &probes
+                  enabled: true
+                  custom: true
+                  spec:
+                    httpGet:
+                      path: /identity
+                      port: 32400
+                    initialDelaySeconds: 0
+                    periodSeconds: 10
+                    timeoutSeconds: 1
+                    failureThreshold: 3
+                readiness: *probes
+                startup:
+                  enabled: true
+                  spec:
+                    failureThreshold: 30
+                    periodSeconds: 10
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+              resources:
+                requests:
+                  cpu: 100m
+                limits:
+                  nvidia.com/gpu: 1
+                  memory: 9248M
+
+        service:
+          app:
+            controller: *app
+            ports:
+              http:
+                port: &port 32400
+
+        route:
+          app:
+            enabled: true
+            kind: TCPRoute
+            hostnames:
+              - plex.peterson.com.ar
+            parentRefs:
+              - kind: Gateway
+                name: public-gateway
+                namespace: network
+                sectionName: https
+            rules:
+              - backendRefs:
+                  - name: *app
+                    port: *port
+                matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+
+        persistence:
+          config:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 50Gi
+            globalMounts:
+              - path: /config
+          plex-cache:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 10Gi
+            globalMounts:
+              - path: /config/Library/Application Support/Plex Media Server/Cache
+          logs:
+            type: emptyDir
+            globalMounts:
+              - path: /config/Library/Application Support/Plex Media Server/Logs
+          nfs-nas-media:
+            type: nfs
+            server: nas.lan.peterson.com.ar
+            path: /nibbler/media/streaming/
+            globalMounts:
+              - path: /data
+          transcode:
+            type: emptyDir
+            globalMounts:
+              - path: /transcode

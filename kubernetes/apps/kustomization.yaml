@@ -5,3 +5,4 @@ kind: Kustomization
   
 resources:
   - mosquitto/app.yaml
+  - plex/app.yaml
