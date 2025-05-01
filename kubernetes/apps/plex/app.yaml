@@ -44,41 +44,43 @@ spec:
                 fsGroupChangePolicy: "OnRootMismatch"
                 supplementalGroups:
                   - 44
-            initContainers:
-              init-config:
-                image:
-                  repository: docker.io/library/alpine
-                  tag: 3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
-                command: ["/bin/sh", "-c"]
-                args:
-                  - |
-                    #!/bin/sh
-                    echo "waiting for pre-existing pms database to uploaded..."
 
-                    if [ -f "/config/Library/Application Support/Plex Media Server/Preferences.xml" ]; then
-                      echo "PMS library already exists, exiting."
-                      exit 0
-                    fi
+            # initContainers:
+            #   init-config:
+            #     image:
+            #       repository: docker.io/library/alpine
+            #       tag: 3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
+            #     command: ["/bin/sh", "-c"]
+            #     args:
+            #       - |
+            #         #!/bin/sh
+            #         echo "waiting for pre-existing pms database to uploaded..."
 
-                    # wait for the database archive to be manually copied to the server
-                    while [ ! -f /tmp/pms.tgz ]; do sleep 2; done;
+            #         if [ -f "/config/Library/Application Support/Plex Media Server/Preferences.xml" ]; then
+            #           echo "PMS library already exists, exiting."
+            #           exit 0
+            #         fi
 
-                    tar -xvzf /tmp/pms.tgz -C /config
+            #         # wait for the database archive to be manually copied to the server
+            #         while [ ! -f /tmp/pms.tgz ]; do sleep 2; done;
+
+            #         tar -xvzf /tmp/pms.tgz -C /config
                     
-                    chown -R 65534:100 /config/Library || true
-                    find /config/Library -type d -exec chmod 755 {} +
-                    find /config/Library -type f -exec chmod 644 {} +
+            #         chown -R 65534:100 /config/Library || true
+            #         find /config/Library -type d -exec chmod 755 {} +
+            #         find /config/Library -type f -exec chmod 644 {} +
 
-                    rm /tmp/pms.tgz
+            #         rm /tmp/pms.tgz
 
-                    echo "Done."
-                securityContext:
-                  runAsUser: 0
-                  runAsGroup: 0
-                  fsGroup: 100
-                  fsGroupChangePolicy: "OnRootMismatch"
-                  supplementalGroups:
-                    - 44
+            #         echo "Done."
+            #     securityContext:
+            #       runAsUser: 0
+            #       runAsGroup: 0
+            #       fsGroup: 100
+            #       fsGroupChangePolicy: "OnRootMismatch"
+            #       supplementalGroups:
+            #         - 44
+
             containers:
               app:
                 image:
