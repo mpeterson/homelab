@@ -82,7 +82,7 @@ spec:
             enabled: true
             kind: HTTPRoute
             hostnames:
-              - plex-stats.peterson.com.ar
+              - stats-plex.peterson.com.ar
             parentRefs:
               - kind: Gateway
                 name: public-gateway
