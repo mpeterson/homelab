@@ -30,13 +30,13 @@ spec:
                 controller:
                     driver:
                         image:
-                            registry: ghcr.io/mpeterson/democratic-csi.git
+                            registry: ghcr.io/mpeterson/democratic-csi
                             tag: add_pcs_iscsi_support-0d92877
                 node:
                     hostPID: ENC[AES256_GCM,data:Igqd3A==,iv:D8Vtmk//eMHaw0gMxm3bDoeGS9mcX0CUyaRtwmOJpOk=,tag:6sGQYfw7ASVPez6BRBXdeA==,type:bool]
                     driver:
                         image:
-                            registry: ghcr.io/mpeterson/democratic-csi.git
+                            registry: ghcr.io/mpeterson/democratic-csi
                             tag: add_pcs_iscsi_support-0d92877
                         extraEnv:
                             - name: ENC[AES256_GCM,data:UgJowS080o2h1bvtJL8t8W0bwONZ4g==,iv:iH+jpXxhy5px7fNjduyn8IajyXJnR+Mg69KhHEj+K0U=,tag:z53QfD7W7QXZoJ7vCnzmUw==,type:str]
@@ -169,8 +169,8 @@ sops:
             UDZiUVQxbGkvM0g3eEp1TE1rNVpLWnMK2evXAjmhnHawDVVBv8WuLaFsE1SKVxxX
             iHwO1m/MS/VwC79MZfFPX1Px9S+b5uxc9FQdzgNhjOGD7dW4Lj6bjQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-05-01T12:12:58Z"
-    mac: ENC[AES256_GCM,data:6PczkhBkAegH5WvHGrvAxrz9aHMoO17MHWHJINF6tRZqEToCFcHd5X0uBSkx7OiuJPe6D9NH+u5wbjaYomSQZ2mU1b1F+RGVnb6vwVhGtNJLsbe6uzF0GHE4YdAgEJl/goidVml4gdb7JbfCmYs9R+d1fAju0ZpyCVfc4b64UNs=,iv:ktdqxTKN0MMxBNL6yEo4aHJl38qYpJbubQcTGCt3hHg=,tag:C/iK9zjNj6L9LVSCZQhn+A==,type:str]
+    lastmodified: "2025-05-01T12:29:29Z"
+    mac: ENC[AES256_GCM,data:rUhe8lhnTBAlNVjLDm9qR+YEGcp6+U2v7BZoE1jwDtG0kEv5vhGphdNosAZiG7R2w6ABgpOu4S6g/fbZOPISnLIGJp8MzgkT4ffDAlXjla+IG900LEADZ9ducIO0Wn+dHILUy/8mNIlNQ0uk6xt8HFNSeTwV5KFZy7TQdWxCRiM=,iv:fcTcxqoTlIZNC8kQUmO/RvjnLE6fHZB5uz2g7xPCMLI=,tag:JpSV9t64gCa6VsTHKRZLQg==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
     version: 3.9.4
