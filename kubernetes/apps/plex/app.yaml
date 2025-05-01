@@ -61,15 +61,15 @@ spec:
                     fi
 
                     # wait for the database archive to be manually copied to the server
-                    while [ ! -f /pms.tgz ]; do sleep 2; done;
+                    while [ ! -f /tmp/pms.tgz ]; do sleep 2; done;
 
-                    tar -xvzf /pms.tgz -C /config
+                    tar -xvzf /tmp/pms.tgz -C /config
                     
-                    chown -R 65534:100 /config/Library
+                    chown -R 65534:100 /config/Library || true
                     find /config/Library -type d -exec chmod 755 {} +
                     find /config/Library -type f -exec chmod 644 {} +
 
-                    rm /pms.tgz
+                    rm /tmp/pms.tgz
 
                     echo "Done."
             containers:
