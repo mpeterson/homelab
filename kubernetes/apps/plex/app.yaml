@@ -121,7 +121,7 @@ spec:
         route:
           app:
             enabled: true
-            kind: TCPRoute
+            kind: HTTPRoute
             hostnames:
               - plex.peterson.com.ar
             parentRefs:
