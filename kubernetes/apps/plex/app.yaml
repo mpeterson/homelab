@@ -55,7 +55,7 @@ spec:
                     #!/bin/sh
                     echo "waiting for pre-existing pms database to uploaded..."
 
-                    if [ -d "/config/Library" ]; then
+                    if [ -f "/config/Library/Application Support/Plex Media Server/Preferences.xml" ]; then
                       echo "PMS library already exists, exiting."
                       exit 0
                     fi
