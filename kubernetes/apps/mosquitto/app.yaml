@@ -29,7 +29,7 @@ spec:
     targetRevision: main
 
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/app-template-3.2.0/charts/other/app-template/values.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -56,7 +56,7 @@ spec:
       prune: true
 
   source:
-    repoURL: https://bjw-s.github.io/helm-charts
+    repoURL: https://bjw-s-labs.github.io/helm-charts
     chart: app-template
     targetRevision: 3.7.3
     helm:
