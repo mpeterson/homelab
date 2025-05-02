@@ -10,6 +10,7 @@ resources:
   - qbittorrent/app.yaml
   - qbittorrent/tools.yaml
   - radarr/app.yaml
+  - recyclarr/app.yaml
   - sabnzbd/app.yaml
   - sonarr/app.yaml
   - tautulli/app.yaml

@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generators:
+  - secret-generator.yaml
+
+configMapGenerator:
+  - name: mosquitto-configmap
+    files:
+      - recyclarr.yml=./config/recyclarr.yml
+
+generatorOptions:
+  disableNameSuffixHash: true
