@@ -164,6 +164,8 @@ spec:
                   - --exclude-pattern
                   - "*/manual/*"
                   - --exclude-pattern
+                  - "*/torrents-files/*"
+                  - --exclude-pattern
                   - "*/cross-seed/*"
                   - --server
                   - *qbittorrent_host
