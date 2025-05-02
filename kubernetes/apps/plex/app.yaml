@@ -196,7 +196,7 @@ spec:
             advancedMounts:
               plex:
                 app:
-                  - path: /data
+                  - path: /data/streaming
                     subPath: streaming
           transcode:
             type: emptyDir
