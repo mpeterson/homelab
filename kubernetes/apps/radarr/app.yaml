@@ -1,0 +1,122 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app radarr
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+        
+        controllers:
+          radarr:
+            pod:
+              securityContext:
+                runAsUser: 65534
+                runAsGroup: 100
+                fsGroup: 65534
+                fsGroupChangePolicy: "OnRootMismatch"
+
+            containers:
+              app:
+                image:
+                  repository: &image ghcr.io/home-operations/radarr
+                  tag: &tag 5.23.0.9907@sha256:fe8820f9be8a2afde3a3c081295b50eda67ecd5bd3b4438bfd6473c02590bebc
+                probes:
+                  liveness: &probes
+                    enabled: true
+                    custom: true
+                    spec:
+                      httpGet:
+                        path: /ping
+                        port: &port 7878
+                      initialDelaySeconds: 0
+                      periodSeconds: 10
+                      timeoutSeconds: 1
+                      failureThreshold: 3
+                  readiness: *probes
+                resources:
+                  requests:
+                    cpu: 20m
+                    memory: 384Mi
+                  limits:
+                    memory: 2Gi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
+
+        service:
+          app:
+            controller: *app
+            ports:
+              http:
+                port: *port
+
+        route:
+          app:
+            enabled: true
+            kind: HTTPRoute
+            hostnames:
+              - radarr.lan.peterson.com.ar
+            parentRefs:
+              - kind: Gateway
+                name: internal-gateway
+                namespace: network
+                sectionName: https
+            rules:
+              - backendRefs:
+                  - name: *app
+                    port: *port
+                matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+
+        persistence:
+          config:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 3Gi
+            globalMounts:
+              - path: /config
+          temp:
+            type: emptyDir
+            globalMounts:
+              - path: /tmp
+          nfs-nas-media:
+            type: nfs
+            server: nas.lan.peterson.com.ar
+            path: /nibbler/media/
+            globalMounts:
+              - path: /data/streaming
+                subPath: streaming
+              - path: /data/downloads
+                subPath: downloads

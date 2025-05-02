@@ -9,5 +9,7 @@ resources:
   - prowlarr/app.yaml
   - qbittorrent/app.yaml
   - qbittorrent/tools.yaml
+  - radarr/app.yaml
   - sabnzbd/app.yaml
+  - sonarr/app.yaml
   - tautulli/app.yaml
