@@ -7,5 +7,6 @@ resources:
   - mosquitto/app.yaml
   - plex/app.yaml
   - qbittorrent/app.yaml
+  - qbittorrent/tools.yaml
   - sabnzbd/app.yaml
   - tautulli/app.yaml

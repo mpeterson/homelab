@@ -1,0 +1,199 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbittorrent-configs
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/apps/qbittorrent/
+    targetRevision: main
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app qbtools
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      valuesObject:
+        defaultPodOptions:
+          securityContext:
+            runAsUser: 65534
+            runAsGroup: 100
+            fsGroup: 65534
+            fsGroupChangePolicy: "OnRootMismatch"
+
+        controllers:
+          prune:
+            type: cronjob
+
+            cronjob: &cronJobSpec
+              schedule: "@hourly"
+              backoffLimit: 0
+              concurrencyPolicy: Forbid
+              failedJobsHistory: 1
+              successfulJobsHistory: 0
+
+            pod:
+              restartPolicy: Never
+
+            initContainers:
+              tagging: &container
+                image:
+                  repository: ghcr.io/buroa/qbtools
+                  tag: v0.20.0@sha256:e205a85d24ece267f8066e9f58cbd7485a5fac3a0c24520bcc55c525f11b8d6f
+                args:
+                  - tagging
+                  - --added-on
+                  - --expired
+                  - --last-activity
+                  - --sites
+                  - --unregistered
+                  - --server
+                  - &qbittorrent_host qbittorrent.media.svc.cluster.local
+                  - --port
+                  - &qbittorrent_port "80"
+                  - --config
+                  - /config/config.yaml
+                resources:
+                  requests:
+                    memory: 128Mi
+                    cpu: 25m
+                  limits:
+                    memory: 256Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
+
+            containers:
+              expired:
+                <<: *container
+                args:
+                  - prune
+                  - --exclude-category
+                  - manual
+                  - --exclude-category
+                  - cross-seed
+                  - --exclude-tag
+                  - added:24h
+                  - --include-tag
+                  - expired
+                  - --server
+                  - *qbittorrent_host
+                  - --port
+                  - *qbittorrent_port
+
+              unregistered:
+                <<: *container
+                args:
+                  - prune
+                  - --exclude-category
+                  - manual
+                  - --exclude-category
+                  - cross-seed
+                  - --exclude-tag
+                  - added:24h
+                  - --include-tag
+                  - unregistered
+                  - --server
+                  - *qbittorrent_host
+                  - --port
+                  - *qbittorrent_port
+
+          orphaned:
+            type: cronjob
+            cronjob:
+              <<: *cronJobSpec
+              schedule: "@daily"
+            pod:
+              restartPolicy: Never
+            containers:
+              app:
+                <<: *container
+                args:
+                  - orphaned
+                  - --exclude-pattern
+                  - "*/manual/*"
+                  - --exclude-pattern
+                  - "*/cross-seed/*"
+                  - --server
+                  - *qbittorrent_host
+                  - --port
+                  - *qbittorrent_port
+
+          reannounce:
+            containers:
+              app:
+                <<: *container
+                args:
+                  - reannounce
+                  - --process-seeding
+                  - --server
+                  - *qbittorrent_host
+                  - --port
+                  - *qbittorrent_port
+
+        persistence:
+          config-file:
+            type: secret
+            name: qbtools-secret
+            globalMounts:
+              - path: /config/config.yaml
+                subPath: config.yaml
+                readOnly: true
+          downloads:
+            type: nfs
+            server: nas.lan.peterson.com.ar
+            path: /nibbler/media/
+            globalMounts:
+              - path: /data/downloads/torrents
+                subPath: downloads/torrents
