@@ -6,6 +6,7 @@ kind: Kustomization
 resources:
   - mosquitto/app.yaml
   - plex/app.yaml
+  - prowlarr/app.yaml
   - qbittorrent/app.yaml
   - qbittorrent/tools.yaml
   - sabnzbd/app.yaml
