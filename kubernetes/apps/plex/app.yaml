@@ -84,10 +84,9 @@ spec:
             containers:
               app:
                 image:
-                  repository: &image ghcr.io/home-operations/plex
                   tag: &tag 1.41.6.9685@sha256:37d36646471fb905a0080daaaa1f09ad3370b06149ed5f94dad73ead591cad0e
                 env:
-                  PLEX_ADVERTISE_URL: "https://plex.peterson.com.ar:443,http://10.3.1.5:32400,"
+                  PLEX_ADVERTISE_URL: "https://plex.peterson.com.ar:443,http://10.3.1.5:32400"
                   PLEX_NO_AUTH_NETWORKS: 10.2.1.0/24
                 probes:
                   liveness: &probes
@@ -192,11 +191,12 @@ spec:
           nfs-nas-media:
             type: nfs
             server: nas.lan.peterson.com.ar
-            path: /nibbler/media/streaming/
+            path: /nibbler/media/
             advancedMounts:
               plex:
                 app:
                   - path: /data
+                    subPath: streaming
           transcode:
             type: emptyDir
             advancedMounts:
