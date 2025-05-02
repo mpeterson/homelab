@@ -1,0 +1,132 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app qbittorrent
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+        
+        controllers:
+          qbittorrent:
+            pod:
+              securityContext:
+                runAsUser: 65534
+                runAsGroup: 100
+                fsGroup: 65534
+                fsGroupChangePolicy: "OnRootMismatch"
+
+            containers:
+              app:
+                image:
+                  repository: &image ghcr.io/home-operations/qbittorrent
+                  tag: &tag 5.1.0@sha256:d28de21b80e231578b600ce47335733df55ca2058e75361becfb1b252569f0c8
+                env:
+                  TZ: Asia/Jerusalem
+                  QBT_WEBUI_PORT: &port 80
+                  QBT_TORRENTING_PORT: &torrentPort 50413
+                probes:
+                  liveness:
+                    enabled: true
+                  readiness:
+                    enabled: true
+                  startup:
+                    enabled: true
+                    spec:
+                      failureThreshold: 30
+                      periodSeconds: 5
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities: { drop: ["ALL"] }
+                resources:
+                  requests:
+                    cpu: 10m
+                    memory: 250Mi
+                  limits:
+                    memory: 2Gi
+
+        service:
+          app:
+            controller: *app
+            type: LoadBalancer
+            annotations:
+              io.cilium/lb-ipam-ips: 10.3.1.6
+            ports:
+              http:
+                port: *port
+                primary: true
+              bittorrent:
+                port: *torrentPort
+                protocol: TCP
+
+        route:
+          app:
+            enabled: true
+            kind: HTTPRoute
+            hostnames:
+              - qbittorrent.lan.peterson.com.ar
+            parentRefs:
+              - kind: Gateway
+                name: internal-gateway
+                namespace: network
+                sectionName: https
+            rules:
+              - backendRefs:
+                  - name: *app
+                    port: *port
+                matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+
+        persistence:
+          config:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            advancedMounts:
+              qbittorrent:
+                app:
+                  - path: /config
+          downloads:
+            type: nfs
+            server: nas.lan.peterson.com.ar
+            path: /nibbler/media/
+            advancedMounts:
+              qbittorrent:
+                app:
+                  - path: /data/downloads/torrents
+                    subPath: downloads/torrents
+          temp:
+            type: emptyDir
+            advancedMounts:
+              qbittorrent:
+                app:
+                  - path: /tmp
