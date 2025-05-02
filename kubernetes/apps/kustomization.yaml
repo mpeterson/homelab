@@ -6,4 +6,5 @@ kind: Kustomization
 resources:
   - mosquitto/app.yaml
   - plex/app.yaml
+  - sabnzbd/app.yaml
   - tautulli/app.yaml
