@@ -29,7 +29,13 @@
 				"bat67.markdown-extension-pack",
 				"redhat.ansible",
 				"signageos.signageos-vscode-sops"
-			]
+			],
+			"settings": {
+				"yaml.customTags": [
+					"!secret scalar",
+					"!env_var scalar"
+				]
+			}
 		}
 	}
 
