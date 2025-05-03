@@ -7,7 +7,7 @@ generators:
   - secret-generator.yaml
 
 configMapGenerator:
-  - name: qbittorrent-scripts
+  - name: sabnzbd-scripts
     files:
       - scripts/xseed.sh
 

@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: qbittorrent-configs
+  name: cross-seed-configs
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -25,14 +25,14 @@ spec:
 
   source:
     repoURL: https://github.com/mpeterson/homelab
-    path: kubernetes/apps/qbittorrent/
+    path: kubernetes/apps/cross-seed/
     targetRevision: main
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: &app qbittorrent
+  name: &app cross-seed
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -63,7 +63,7 @@ spec:
         strategy: RollingUpdate
         
         controllers:
-          qbittorrent:
+          cross-seed:
             pod:
               securityContext:
                 runAsUser: 65534
@@ -74,19 +74,11 @@ spec:
             containers:
               app:
                 image:
-                  repository: &image ghcr.io/home-operations/qbittorrent
-                  tag: &tag 5.1.0@sha256:d28de21b80e231578b600ce47335733df55ca2058e75361becfb1b252569f0c8
-                env:
-                  TZ: Asia/Jerusalem
-                  QBT_WEBUI_PORT: &port 80
-                  QBT_TORRENTING_PORT: &torrentPort 50413
-                  XSEED_HOST: cross-seed.media.svc.cluster.local
-                  XSEED_PORT: 2468
-                  XSEED_APIKEY:
-                    valueFrom:
-                      secretKeyRef:
-                        name: qbittorrent-secret
-                        key: xseed_api_key
+                  repository: ghcr.io/cross-seed/cross-seed
+                  tag: 6.12.2
+                args:
+                  - daemon
+                  - -v
                 probes:
                   liveness:
                     enabled: true
@@ -97,80 +89,48 @@ spec:
                     spec:
                       failureThreshold: 30
                       periodSeconds: 5
-                securityContext:
-                  allowPrivilegeEscalation: false
-                  readOnlyRootFilesystem: true
-                  capabilities: { drop: ["ALL"] }
                 resources:
                   requests:
                     cpu: 10m
-                    memory: 250Mi
+                    memory: 128Mi
                   limits:
-                    memory: 2Gi
+                    memory: 256Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
 
         service:
           app:
             controller: *app
-            type: LoadBalancer
-            annotations:
-              io.cilium/lb-ipam-ips: 10.3.1.6
             ports:
               http:
-                port: *port
-                primary: true
-              bittorrent:
-                port: *torrentPort
-                protocol: TCP
-
-        route:
-          app:
-            enabled: true
-            kind: HTTPRoute
-            hostnames:
-              - qbittorrent.lan.peterson.com.ar
-            parentRefs:
-              - kind: Gateway
-                name: internal-gateway
-                namespace: network
-                sectionName: https
-            rules:
-              - backendRefs:
-                  - name: *app
-                    port: *port
-                matches:
-                  - path:
-                      type: PathPrefix
-                      value: /
+                port: &port 2468
 
         persistence:
           config:
             storageClass: zfs-generic-iscsi-csi-xfs
             accessMode: ReadWriteOnce
-            size: 1Gi
+            size: 500Mi
             advancedMounts:
-              qbittorrent:
+              cross-seed:
                 app:
                   - path: /config
-          downloads:
+          config-file:
+            type: secret
+            name: cross-seed-secret
+            globalMounts:
+              - path: /config/config.js
+                subPath: config.js
+                readOnly: true
+          media:
             type: nfs
             server: nas.lan.peterson.com.ar
             path: /nibbler/media/
-            advancedMounts:
-              qbittorrent:
-                app:
-                  - path: /data/downloads/torrents
-                    subPath: downloads/torrents
-          temp:
-            type: emptyDir
-            advancedMounts:
-              qbittorrent:
-                app:
-                  - path: /tmp
-          scripts:
-            type: configMap
-            name: qbittorrent-scripts
-            defaultMode: 0775
-            advancedMounts:
-              qbittorrent:
-                app:
-                  - path: /config/scripts
+            globalMounts:
+              - path: /data/streaming
+                subPath: streaming
+              - path: /data/downloads
+                subPath: downloads

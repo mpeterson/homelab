@@ -5,11 +5,3 @@ kind: Kustomization
 
 generators:
   - secret-generator.yaml
-
-configMapGenerator:
-  - name: qbittorrent-scripts
-    files:
-      - scripts/xseed.sh
-
-generatorOptions:
-  disableNameSuffixHash: true

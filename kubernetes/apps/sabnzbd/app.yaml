@@ -1,4 +1,33 @@
 ---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sabnzbd-configs
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/apps/sabnzbd/
+    targetRevision: main
+---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -56,6 +85,13 @@ spec:
                     sabnzbd.media.svc.cluster,
                     sabnzbd.media.svc.cluster.local,
                     sabnzbd.lan.peterson.com.ar
+                  XSEED_HOST: cross-seed.media.svc.cluster.local
+                  XSEED_PORT: 2468
+                  XSEED_APIKEY:
+                    valueFrom:
+                      secretKeyRef:
+                        name: sabnzbd-secret
+                        key: xseed_api_key
                 probes:
                   liveness: &probes
                     enabled: true
@@ -133,3 +169,11 @@ spec:
               sabnzbd:
                 app:
                   - path: /tmp
+          scripts:
+            type: configMap
+            name: sabnzbd-scripts
+            defaultMode: 0775
+            advancedMounts:
+              sabnzbd:
+                app:
+                  - path: /config/scripts

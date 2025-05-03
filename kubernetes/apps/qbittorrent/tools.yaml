@@ -1,33 +1,4 @@
 ---
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: qbittorrent-configs
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-
-spec:
-  project: default
-
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: media
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
-    managedNamespaceMetadata:
-      labels:
-        pod-security.kubernetes.io/enforce: privileged
-    automated:
-      selfHeal: true
-      prune: true
-
-  source:
-    repoURL: https://github.com/mpeterson/homelab
-    path: kubernetes/apps/qbittorrent/
-    targetRevision: main
----
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
 apiVersion: argoproj.io/v1alpha1
 kind: Application
