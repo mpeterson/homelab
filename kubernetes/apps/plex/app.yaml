@@ -124,8 +124,6 @@ spec:
           app:
             controller: *app
             type: LoadBalancer
-            externalTrafficPolicy: Local
-            internalTrafficPolicy: Local
             annotations:
               io.cilium/lb-ipam-ips: 10.3.1.5
             ports:
