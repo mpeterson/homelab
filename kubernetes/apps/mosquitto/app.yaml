@@ -109,6 +109,8 @@ spec:
             controller: *app
             # TODO(michelp): Temporary until Cilium supports TCPRoute for Gateway API
             type: LoadBalancer
+            externalTrafficPolicy: Local
+            internalTrafficPolicy: Local
             annotations:
               io.cilium/lb-ipam-ips: 10.3.1.7
             ##
