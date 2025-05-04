@@ -160,6 +160,8 @@ spec:
                 app:
                   - path: /data/downloads/torrents
                     subPath: downloads/torrents
+                  - path: /data/streaming
+                    subPath: streaming
           temp:
             type: emptyDir
             advancedMounts:
