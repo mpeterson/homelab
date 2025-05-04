@@ -132,7 +132,4 @@ spec:
             server: nas.lan.peterson.com.ar
             path: /nibbler/media/
             globalMounts:
-              - path: /data/streaming
-                subPath: streaming
-              - path: /data/downloads
-                subPath: downloads
+              - path: /data
