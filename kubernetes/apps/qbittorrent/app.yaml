@@ -154,7 +154,7 @@ spec:
           downloads:
             type: nfs
             server: nas.lan.peterson.com.ar
-            path: /nibbler/media/library/
+            path: /nibbler/media/
             advancedMounts:
               qbittorrent:
                 app:

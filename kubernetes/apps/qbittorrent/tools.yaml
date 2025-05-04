@@ -166,7 +166,7 @@ spec:
           downloads:
             type: nfs
             server: nas.lan.peterson.com.ar
-            path: /nibbler/media/library/
+            path: /nibbler/media/
             globalMounts:
               - path: /data/downloads/torrents
                 subPath: downloads/torrents

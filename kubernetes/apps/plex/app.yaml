@@ -192,7 +192,7 @@ spec:
           nfs-nas-media:
             type: nfs
             server: nas.lan.peterson.com.ar
-            path: /nibbler/media/library/
+            path: /nibbler/media/
             advancedMounts:
               plex:
                 app:
