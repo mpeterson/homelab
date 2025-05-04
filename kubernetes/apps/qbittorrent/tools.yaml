@@ -142,7 +142,6 @@ spec:
                   - *qbittorrent_host
                   - --port
                   - *qbittorrent_port
-                  - --dry-run
 
           reannounce:
             containers:
