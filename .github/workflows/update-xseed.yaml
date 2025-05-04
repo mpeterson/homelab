@@ -1,0 +1,113 @@
+name: Sync xseed.sh from Gist
+
+on:
+  schedule:
+    - cron: "0 5 * * *"  # Daily at 05:00 UTC
+  workflow_dispatch:
+
+env:
+  BRANCH_NAME: gh-action/update-xseed
+  BASE_BRANCH: main
+  GIST_URL: https://gist.github.com/ddc337a37b038cb84e6248fe8adebb46.git
+  GIST_FILE: xseed.sh
+  FILE_PATH: kubernetes/apps/custom-arrscripts/scripts/xseed.sh
+  FILE_PERMISSION: 755
+
+jobs:
+  sync-xseed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clone the Gist
+        run: |
+          git clone ${{ env.GIST_URL }} gist
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+
+      - name: Create or update branch
+        run: |
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          
+          # Stash any uncommitted changes first
+          git stash -u
+          
+          # Check if branch exists remotely
+          if git ls-remote --heads origin ${{ env.BRANCH_NAME }} | grep -q ${{ env.BRANCH_NAME }}; then
+            echo "Branch ${{ env.BRANCH_NAME }} exists remotely, updating..."
+            git fetch origin ${{ env.BRANCH_NAME }}
+            git checkout -B ${{ env.BRANCH_NAME }} origin/${{ env.BRANCH_NAME }}
+          else
+            echo "Creating new branch ${{ env.BRANCH_NAME }}..."
+            git checkout -b ${{ env.BRANCH_NAME }}
+          fi
+          
+          # Apply stashed files if any were stashed
+          git stash list | grep -q "stash@{0}" && git stash pop || echo "No stashed changes"
+        
+      - name: Check if file changed and commit
+        id: check_changes
+        run: |
+          # Make sure directory exists
+          mkdir -p kubernetes/apps/custom-arrscripts/scripts/
+          
+          # Copy the new file
+          cp gist/${{ env.GIST_FILE }} ${{ env.FILE_PATH }}.new
+          
+          # Check if file exists first
+          if [ -f ${{ env.FILE_PATH }} ]; then
+            # Compare files
+            if ! cmp -s ${{ env.FILE_PATH }}.new ${{ env.FILE_PATH }}; then
+              echo "File has changed - updating"
+              echo "changed=true" >> $GITHUB_OUTPUT
+              mv ${{ env.FILE_PATH }}.new ${{ env.FILE_PATH }}
+              chmod ${{ env.FILE_PERMISSION }} ${{ env.FILE_PATH }}
+              
+              # Add changes and commit
+              git add ${{ env.FILE_PATH }}
+              git commit -m "Update ${{ env.GIST_FILE }} from Gist"
+              
+              # Push changes with explicit upstream setting
+              git push --set-upstream origin ${{ env.BRANCH_NAME }}
+            else
+              echo "No changes to ${{ env.GIST_FILE }}"
+              echo "changed=false" >> $GITHUB_OUTPUT
+              rm ${{ env.FILE_PATH }}.new
+            fi
+          else
+            echo "File does not exist yet - creating"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            mv ${{ env.FILE_PATH }}.new ${{ env.FILE_PATH }}
+            
+            # Add changes and commit
+            git add ${{ env.FILE_PATH }}
+            git commit -m "Add ${{ env.GIST_FILE }} from Gist"
+            
+            # Push changes with explicit upstream setting
+            git push --set-upstream origin ${{ env.BRANCH_NAME }}
+          fi
+
+      - name: Create or update PR
+        if: steps.check_changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if PR already exists
+          PR_EXISTS=$(gh pr list --head "${{ env.BRANCH_NAME }}" --base "${{ env.BASE_BRANCH }}" --state open --json number | grep -c '"number":' || true)
+          
+          if [ "$PR_EXISTS" -gt 0 ]; then
+            echo "PR already exists, updated branch."
+          else
+            gh pr create \
+              --title "Update ${{ env.GIST_FILE }} from Gist" \
+              --body "This PR updates ${{ env.GIST_FILE }} with the latest content from the Gist." \
+              --head "${{ env.BRANCH_NAME }}" \
+              --base "${{ env.BASE_BRANCH }}" || echo "PR creation failed, branch may already be up-to-date with base"
+          fi
