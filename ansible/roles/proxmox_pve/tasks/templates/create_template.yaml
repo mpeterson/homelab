@@ -18,6 +18,7 @@
     - name: Get cloudimg {{ template.value.cloud_image_url }}
       ansible.builtin.get_url:
         url: "{{ template.value.cloud_image_url }}"
+        checksum: "{{ template.value.checksum | default('', true) }}"
         dest: /tmp
         mode: 0755
       register: downloaded_image
