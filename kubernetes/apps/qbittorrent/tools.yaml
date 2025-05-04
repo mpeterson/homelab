@@ -135,7 +135,7 @@ spec:
                   - --exclude-pattern
                   - "*/manual/*"
                   - --exclude-pattern
-                  - "*/torrents-files/*"
+                  - "*/torrents-files"
                   - --exclude-pattern
                   - "*/cross-seed/*"
                   - --server
