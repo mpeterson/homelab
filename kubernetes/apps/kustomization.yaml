@@ -5,6 +5,7 @@ kind: Kustomization
   
 resources:
   - cross-seed/app.yaml
+  - custom-arrscripts/app.yaml
   - mosquitto/app.yaml
   - plex/app.yaml
   - prowlarr/app.yaml

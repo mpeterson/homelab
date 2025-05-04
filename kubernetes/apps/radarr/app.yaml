@@ -47,6 +47,16 @@ spec:
                 image:
                   repository: &image ghcr.io/home-operations/radarr
                   tag: &tag 5.23.0.9907@sha256:fe8820f9be8a2afde3a3c081295b50eda67ecd5bd3b4438bfd6473c02590bebc
+                env:
+                  TORRENT_CLIENTS: qBittorrent
+                  USENET_CLIENTS: SABnzbd
+                  XSEED_HOST: cross-seed.media.svc.cluster.local
+                  XSEED_PORT: 2468
+                  XSEED_APIKEY:
+                    valueFrom:
+                      secretKeyRef:
+                        name: sabnzbd-secret
+                        key: xseed_api_key                
                 probes:
                   liveness: &probes
                     enabled: true
@@ -120,3 +130,9 @@ spec:
                 subPath: streaming
               - path: /data/downloads
                 subPath: downloads
+          scripts:
+            type: configMap
+            name: arr-scripts
+            defaultMode: 0775
+            globalMounts:
+                - path: /config/scripts

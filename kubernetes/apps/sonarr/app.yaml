@@ -47,6 +47,16 @@ spec:
                 image:
                   repository: &image ghcr.io/home-operations/sonarr
                   tag: &tag 4.0.14.2938@sha256:acd5416ab9c36d017687820a32f09d09a4e25a5754aa5ebeae2e7c63d7609c13
+                env:
+                  TORRENT_CLIENTS: qBittorrent
+                  USENET_CLIENTS: SABnzbd
+                  XSEED_HOST: cross-seed.media.svc.cluster.local
+                  XSEED_PORT: 2468
+                  XSEED_APIKEY:
+                    valueFrom:
+                      secretKeyRef:
+                        name: cross-seed-secret
+                        key: xseed_api_key
                 probes:
                   liveness: &probes
                     enabled: true
@@ -120,3 +130,9 @@ spec:
                 subPath: streaming
               - path: /data/downloads
                 subPath: downloads
+          scripts:
+            type: configMap
+            name: arr-scripts
+            defaultMode: 0775
+            globalMounts:
+                - path: /config/scripts
