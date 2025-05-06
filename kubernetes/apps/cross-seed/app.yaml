@@ -130,7 +130,7 @@ spec:
           media:
             type: nfs
             server: nas.lan.peterson.com.ar
-            path: /nibbler/media/
+            path: /nibbler/media/library/
             globalMounts:
               - path: /data/streaming
                 subPath: streaming

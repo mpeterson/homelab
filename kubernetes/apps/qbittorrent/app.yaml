@@ -154,14 +154,14 @@ spec:
           downloads:
             type: nfs
             server: nas.lan.peterson.com.ar
-            path: /nibbler/media/
+            path: /nibbler/media/library/
             advancedMounts:
               qbittorrent:
                 app:
                   - path: /data/downloads/torrents
                     subPath: downloads/torrents
-                  - path: /data/streaming
-                    subPath: streaming
+                  - path: /data/incomplete-downloads/torrents
+                    subPath: incomplete-downloads/torrents
           temp:
             type: emptyDir
             advancedMounts:

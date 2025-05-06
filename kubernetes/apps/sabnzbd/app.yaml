@@ -157,12 +157,12 @@ spec:
           downloads:
             type: nfs
             server: nas.lan.peterson.com.ar
-            path: /nibbler/media/
+            path: /nibbler/media/library/
             globalMounts:
               - path: /data/downloads/usenet/complete
                 subPath: downloads/usenet/complete
-              - path: /data/downloads/usenet/incomplete
-                subPath: downloads/usenet/incomplete
+              - path: /data/incomplete-downloads/usenet
+                subPath: incomplete-downloads/usenet
           temp:
             type: emptyDir
             advancedMounts:
