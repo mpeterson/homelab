@@ -1,0 +1,120 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app bazarr
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+        
+        controllers:
+          bazarr:
+            pod:
+              securityContext:
+                runAsUser: 65534
+                runAsGroup: 100
+                fsGroup: 65534
+                fsGroupChangePolicy: "OnRootMismatch"
+
+            containers:
+              app:
+                image:
+                  repository: &image ghcr.io/home-operations/bazarr
+                  tag: &tag 1.5.1@sha256:0ac96948fd8dbf1c9d8ffa83ed441d2e77c6fc79f81600c8ea160172cf66740e
+                probes:
+                  liveness: &probes
+                    enabled: true
+                    custom: true
+                    spec:
+                      httpGet:
+                        path: /health
+                        port: &port 6767
+                      initialDelaySeconds: 0
+                      periodSeconds: 10
+                      timeoutSeconds: 1
+                      failureThreshold: 3
+                  readiness: *probes
+                resources:
+                  requests:
+                    cpu: 15m
+                    memory: 256Mi
+                  limits:
+                    memory: 512Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
+
+        service:
+          app:
+            controller: *app
+            ports:
+              http:
+                port: *port
+
+        route:
+          app:
+            enabled: true
+            kind: HTTPRoute
+            hostnames:
+              - bazarr.lan.peterson.com.ar
+            parentRefs:
+              - kind: Gateway
+                name: internal-gateway
+                namespace: network
+                sectionName: https
+            rules:
+              - backendRefs:
+                  - name: *app
+                    port: *port
+                matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+
+        persistence:
+          config:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 500Mi
+            globalMounts:
+              - path: /config
+          temp:
+            type: emptyDir
+            globalMounts:
+              - path: /tmp
+          nfs-nas-media:
+            type: nfs
+            server: nas.lan.peterson.com.ar
+            path: /nibbler/media/
+            globalMounts:
+              - path: /data/streaming
+                subPath: streaming
