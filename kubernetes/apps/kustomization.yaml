@@ -11,7 +11,7 @@ resources:
   - plex/app.yaml
   - prowlarr/app.yaml
   - qbittorrent/app.yaml
-  - qbittorrent/tools.yaml
+  # - qbittorrent/tools.yaml
   - radarr/app.yaml
   - recyclarr/app.yaml
   - sabnzbd/app.yaml
