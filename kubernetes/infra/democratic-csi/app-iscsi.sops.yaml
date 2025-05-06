@@ -43,7 +43,7 @@ spec:
                               value: ENC[AES256_GCM,data:Q9Os1QapQQ==,iv:iRPV8U2CiuCdsCthVP4UzeYUVBq4aSZuv19Jg5KtgQw=,tag:aIDvzF3K/KRcw4pOHIWtpg==,type:str]
                             - name: ENC[AES256_GCM,data:QoXYmJBqw1UF9EZyVwEktl9u,iv:I5UQDM5MJGJz/BtvhiMOVLC2y2zYuPJD7xjxURd5k8E=,tag:AHplmfUAUqlLp0p5gAKd3A==,type:str]
                               value: ENC[AES256_GCM,data:Wc1CWpVcsMSwrVhJLNsXs7i7do20ng4b,iv:G7TDXuJVPEf/1EXs6jvHr7CpaZy8wPzIhVSQXGFE1eE=,tag:5lIvHyuDQd6DC2+TATCg4w==,type:str]
-                        iscsiDirHostPath: ENC[AES256_GCM,data:ro2B2HBTUEG0RlIchVo8j/ISEP8=,iv:VcADtHx6CjTC0mOLHQOpbJz1+sHB6hpmvAgnrmK2OgA=,tag:o6ywDOxX6tKuSghwtV5www==,type:str]
+                        iscsiDirHostPath: ENC[AES256_GCM,data:Y6UQqOOWu1XsPA==,iv:EmXLRB4Z/KQsDlaH31AsIPKnzUW/uM43fXUEYTixPFE=,tag:rimWmJEFf4Q/BlT8X24FXQ==,type:str]
                         iscsiDirHostPathType: ""
                 csiDriver:
                     #ENC[AES256_GCM,data:ptRl6NdAm41vFKyGf+s+eKBS/5cpw4k/g1mY/cfXSlHsPK2RSgg9T2GKYjfv9w==,iv:OKGVW5GNORJSk0p/ypJ0EnNadkVzGrCTEnTYbJxZxkc=,tag:Rez2BE7zDfHDUVq5lc93Uw==,type:comment]
@@ -169,8 +169,8 @@ sops:
             UDZiUVQxbGkvM0g3eEp1TE1rNVpLWnMK2evXAjmhnHawDVVBv8WuLaFsE1SKVxxX
             iHwO1m/MS/VwC79MZfFPX1Px9S+b5uxc9FQdzgNhjOGD7dW4Lj6bjQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-05-01T12:29:29Z"
-    mac: ENC[AES256_GCM,data:rUhe8lhnTBAlNVjLDm9qR+YEGcp6+U2v7BZoE1jwDtG0kEv5vhGphdNosAZiG7R2w6ABgpOu4S6g/fbZOPISnLIGJp8MzgkT4ffDAlXjla+IG900LEADZ9ducIO0Wn+dHILUy/8mNIlNQ0uk6xt8HFNSeTwV5KFZy7TQdWxCRiM=,iv:fcTcxqoTlIZNC8kQUmO/RvjnLE6fHZB5uz2g7xPCMLI=,tag:JpSV9t64gCa6VsTHKRZLQg==,type:str]
+    lastmodified: "2025-05-06T09:58:15Z"
+    mac: ENC[AES256_GCM,data:mOu1zZEJDxceaP9aGJOwCkG2qFed4PrMKeiN9XTort/DdOxLz2latOuhpbpSUeMBn08dFlAp/agxM9/tfWuScyR0Cl3TtNTlnzaAaTbt7mQaQ+OC4c0uks10EgxvWZwt9wEKDt8KMIy9i8HBsBC4ZbE04kD9zBGjHvY94RiiXEM=,iv:pAZMSVxP6XLwo87XwyOW/waD8jmnLV28jwRglful59o=,tag:SR9CmvyX5HOQZGup+2IbkA==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
     version: 3.9.4
