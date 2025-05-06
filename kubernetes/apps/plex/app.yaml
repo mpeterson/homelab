@@ -35,6 +35,7 @@ spec:
         
         controllers:
           plex:
+            replicas: 0
             pod:
               runtimeClassName: nvidia
               securityContext:
@@ -192,7 +193,7 @@ spec:
           nfs-nas-media:
             type: nfs
             server: nas.lan.peterson.com.ar
-            path: /nibbler/media/
+            path: /nibbler/media/library/
             advancedMounts:
               plex:
                 app:
