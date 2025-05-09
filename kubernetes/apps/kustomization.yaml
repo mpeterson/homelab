@@ -8,6 +8,7 @@ resources:
   - cross-seed/app.yaml
   - custom-arrscripts/app.yaml
   - mosquitto/app.yaml
+  - overseerr/app.yaml
   - plex/app.yaml
   - prowlarr/app.yaml
   - qbittorrent/app.yaml

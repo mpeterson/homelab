@@ -1,0 +1,126 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app overseerr
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+        
+        controllers:
+          overseerr:
+            pod:
+              securityContext:
+                runAsUser: 65534
+                runAsGroup: 100
+                fsGroup: 65534
+                fsGroupChangePolicy: "OnRootMismatch"
+
+            containers:
+              app:
+                image:
+                  repository: &image ghcr.io/sct/overseerr
+                  tag: &tag 1.34.0@sha256:4f38f58d68555004d3f487a4c5cbe2823e6a0942d946a25a2d9391d8492240a4
+                env:
+                  PORT: &port 5055
+                  TZ: Asia/Jerusalem
+                probes:
+                  liveness: &probes
+                    enabled: true
+                    custom: true
+                    spec:
+                      httpGet:
+                        path: /api/v1/status
+                        port: *port
+                      initialDelaySeconds: 0
+                      periodSeconds: 10
+                      timeoutSeconds: 1
+                      failureThreshold: 3
+                  readiness: *probes
+                resources:
+                  requests:
+                    cpu: 10m
+                    memory: 256Mi
+                  limits:
+                    memory: 512Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
+
+        service:
+          app:
+            controller: *app
+            ports:
+              http:
+                port: *port
+
+        route:
+          app:
+            enabled: true
+            kind: HTTPRoute
+            hostnames:
+              - requests-plex.peterson.com.ar
+            parentRefs:
+              - kind: Gateway
+                name: public-gateway
+                namespace: network
+                sectionName: https
+            rules:
+              - backendRefs:
+                  - name: *app
+                    port: *port
+                matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+
+        persistence:
+          config:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 500Mi
+            globalMounts:
+              - path: /app/config
+          cache:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 500Mi
+            globalMounts:
+              - path: /app/config/cache
+          config-logs:
+            type: emptyDir
+            globalMounts:
+              - path: /app/config/logs
+          temp:
+            type: emptyDir
+            globalMounts:
+              - path: /tmp
