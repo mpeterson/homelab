@@ -82,6 +82,47 @@ spec:
                 fsGroup: 1000
                 fsGroupChangePolicy: OnRootMismatch
 
+            initContainers:
+              init-config:
+                image:
+                  repository: docker.io/library/alpine
+                  tag: 3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
+                env:
+                  RADARR_URL:
+                    valueFrom:
+                      secretKeyRef:
+                        name: recyclarr-secret
+                        key: radarr_url
+                  RADARR_API_KEY:
+                    valueFrom:
+                      secretKeyRef:
+                        name: recyclarr-secret
+                        key: radarr_apikey
+                  SONARR_URL:
+                    valueFrom:
+                      secretKeyRef:
+                        name: recyclarr-secret
+                        key: sonarr_url
+                  SONARR_API_KEY:
+                    valueFrom:
+                      secretKeyRef:
+                        name: recyclarr-secret
+                        key: sonarr_apikey
+                command: ["/bin/sh", "-c"]
+                args:
+                  - |
+                    apk add --no-progress --quiet --no-cache bash curl jq &&
+                    bash /config/scripts/cleanup_unused_quality_profiles.sh
+                securityContext:
+                  runAsUser: 0
+                  runAsGroup: 0
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: false
+                  runAsNonRoot: false
+                  capabilities:
+                    drop:
+                      - ALL
+
             containers:
               app:
                 image:
@@ -125,3 +166,9 @@ spec:
               - path: /config/secrets.yml
                 subPath: secrets.yml
                 readOnly: true
+          scripts:
+            type: configMap
+            name: arr-scripts
+            defaultMode: 0775
+            globalMounts:
+                - path: /config/scripts
