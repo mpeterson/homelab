@@ -1,0 +1,187 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: idrac-fan-control-configs
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: utilities
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/apps/idrac-fan-control/
+    targetRevision: main
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app pve-01-idrac-fan-control
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: utilities
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+        
+        controllers: 
+          pve-01-idrac-fan-control:
+            pod:
+              securityContext:
+                runAsUser: 65534
+                runAsGroup: 100
+                fsGroup: 65534
+                fsGroupChangePolicy: "OnRootMismatch"
+
+            containers:
+              app:
+                image:
+                  repository: ghcr.io/tigerblue77/dell_idrac_fan_controller
+                  tag: latest@sha256:eda09016a4acbee8883996f3b8cd4832a723200999bd037934675e75e2f00908
+                env:
+                  IDRAC_HOST: 10.2.0.21
+                  FAN_SPEED: 30
+                  CPU_TEMPERATURE_THRESHOLD: 50
+                  CHECK_INTERVAL: 30
+                  DISABLE_THIRD_PARTY_PCIE_CARD_DELL_DEFAULT_COOLING_RESPONSE: true
+                  KEEP_THIRD_PARTY_PCIE_CARD_COOLING_RESPONSE_STATE_ON_EXIT: true
+                  IDRAC_USERNAME:
+                    valueFrom:
+                      secretKeyRef:
+                        name: idrac-fan-control-secret
+                        key: IDRAC_USERNAME
+                  IDRAC_PASSWORD:
+                    valueFrom:
+                      secretKeyRef:
+                        name: idrac-fan-control-secret
+                        key: IDRAC_PASSWORD
+                resources: &resources
+                  requests:
+                    cpu: 10m
+                    memory: 50Mi
+                  limits:
+                    memory: 100Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app pve-02-idrac-fan-control
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: utilities
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+        
+        controllers: 
+          pve-02-idrac-fan-control:
+            pod:
+              securityContext:
+                runAsUser: 65534
+                runAsGroup: 100
+                fsGroup: 65534
+                fsGroupChangePolicy: "OnRootMismatch"
+
+            containers:
+              app:
+                image:
+                  repository: ghcr.io/tigerblue77/dell_idrac_fan_controller
+                  tag: latest@sha256:eda09016a4acbee8883996f3b8cd4832a723200999bd037934675e75e2f00908
+                env:
+                  IDRAC_HOST: 10.2.0.22
+                  FAN_SPEED: 30
+                  CPU_TEMPERATURE_THRESHOLD: 50
+                  CHECK_INTERVAL: 30
+                  DISABLE_THIRD_PARTY_PCIE_CARD_DELL_DEFAULT_COOLING_RESPONSE: true
+                  KEEP_THIRD_PARTY_PCIE_CARD_COOLING_RESPONSE_STATE_ON_EXIT: true
+                  IDRAC_USERNAME:
+                    valueFrom:
+                      secretKeyRef:
+                        name: idrac-fan-control-secret
+                        key: IDRAC_USERNAME
+                  IDRAC_PASSWORD:
+                    valueFrom:
+                      secretKeyRef:
+                        name: idrac-fan-control-secret
+                        key: IDRAC_PASSWORD
+                resources: &resources
+                  requests:
+                    cpu: 10m
+                    memory: 50Mi
+                  limits:
+                    memory: 100Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
