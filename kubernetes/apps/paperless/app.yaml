@@ -1,0 +1,187 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: paperless-configs
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: selfhosted
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/apps/paperless/
+    targetRevision: main
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app paperless
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: selfhosted
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+        
+        controllers:
+          paperless:
+            containers:
+              app:
+                image:
+                  repository: &image ghcr.io/paperless-ngx/paperless-ngx
+                  tag: &tag 2.15.3@sha256:39b337e73c978238f0b529baf42f1b59b65d17eed35cd61bc1ccbbf779b5d58b
+                env:
+                  PAPERLESS_SECRET_KEY:
+                    valueFrom:
+                      secretKeyRef:
+                        name: paperless-secret
+                        key: PAPERLESS_SECRET_KEY
+                  PAPERLESS_URL: https://paperless.peterson.com.ar
+                  PAPERLESS_PORT: &port 8000
+                  PAPERLESS_TIME_ZONE: Asia/Jerusalem
+                  PAPERLESS_WEBSERVER_WORKERS: 2
+                  PAPERLESS_TASK_WORKERS: 2
+                  PAPERLESS_CONSUMPTION_DIR: /data/nas/incoming
+                  PAPERLESS_DATA_DIR: /data/local/data
+                  PAPERLESS_EXPORT_DIR: /data/nas/export
+                  PAPERLESS_MEDIA_ROOT: /data/local/media
+                  PAPERLESS_FILENAME_FORMAT: "{{ `{{ created }}-{{ correspondent }}-{{ title }}` }}"
+                  PAPERLESS_CONSUMER_POLLING: "60"
+                  PAPERLESS_CONSUMER_RECURSIVE: "true"
+                  PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
+                  PAPERLESS_OCR_LANGUAGE: eng+spa+heb
+                  PAPERLESS_OCR_LANGUAGES: heb
+                  PAPERLESS_CONSUMER_ENABLE_BARCODES: "true"
+                  PAPERLESS_CONSUMER_ENABLE_ASN_BARCODE: "true"
+                  PAPERLESS_REDIS: redis://paperless-redis.selfhosted.svc.cluster.local:6379
+                  USERMAP_UID: 65534
+                  USERMAP_GID: 100
+                  PAPERLESS_ADMIN_USER:
+                    valueFrom:
+                      secretKeyRef:
+                        name: paperless-secret
+                        key: PAPERLESS_ADMIN_USER
+                  PAPERLESS_ADMIN_PASSWORD:
+                    valueFrom:
+                      secretKeyRef:
+                        name: paperless-secret
+                        key: PAPERLESS_ADMIN_PASSWORD
+                probes:
+                  liveness:
+                    enabled: true
+                  readiness:
+                    enabled: true
+                  startup:
+                    enabled: true
+                    spec:
+                      failureThreshold: 30
+                      periodSeconds: 5
+                resources:
+                  requests:
+                    cpu: 25m
+                    memory: 1Gi
+                  limits:
+                    memory: 3Gi
+
+          redis:
+            containers:
+              redis:
+                image:
+                  repository: ghcr.io/valkey-io/valkey
+                  tag: 8.1.1@sha256:ff21bc0f8194dc9c105b769aeabf9585fea6a8ed649c0781caeac5cb3c247884
+                resources:
+                  requests:
+                    cpu: 5m
+                    memory: 32Mi
+                  limits:
+                    memory: 128Mi
+
+        service:
+          app:
+            primary: true
+            controller: *app
+            ports:
+              http:
+                port: *port
+          redis:
+            controller: redis
+            ports:
+              http:
+                port: 6379
+                
+        route:
+          app:
+            enabled: true
+            kind: HTTPRoute
+            hostnames:
+              - paperless.peterson.com.ar
+            parentRefs:
+              - kind: Gateway
+                name: public-gateway
+                namespace: network
+                sectionName: https
+            rules:
+              - backendRefs:
+                  - name: *app
+                    port: *port
+                matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+
+        persistence:
+          config:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 2Gi
+            globalMounts:
+              - path: /data/local
+          nfs-nas:
+            type: nfs
+            server: nas.lan.peterson.com.ar
+            path: /nibbler/apps/paperless
+            advancedMounts:
+              paperless:
+                app:
+                  - path: /data/nas
