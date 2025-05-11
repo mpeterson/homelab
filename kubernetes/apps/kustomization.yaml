@@ -8,6 +8,7 @@ resources:
   - cross-seed/app.yaml
   - custom-arrscripts/app.yaml
   - idrac-fan-control/app.yaml
+  - kometa/app.yaml
   - mosquitto/app.yaml
   - overseerr/app.yaml
   - paperless/app.yaml
