@@ -154,7 +154,7 @@ spec:
                   - path: /config
           config-file:
             type: configMap
-            name: mosquitto-configmap
+            name: recyclarr-configmap
             globalMounts:
               - path: /config/recyclarr.yml
                 subPath: recyclarr.yml

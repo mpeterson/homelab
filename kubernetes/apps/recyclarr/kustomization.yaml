@@ -7,7 +7,7 @@ generators:
   - secret-generator.yaml
 
 configMapGenerator:
-  - name: mosquitto-configmap
+  - name: recyclarr-configmap
     files:
       - recyclarr.yml=./config/recyclarr.yml
 
