@@ -1,0 +1,139 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: plex-auto-languages-configs
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/apps/plex-auto-languages/
+    targetRevision: main
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app plex-auto-languages
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+        
+        controllers:
+          plex-auto-languages:
+            pod:
+              runtimeClassName: nvidia
+              securityContext:
+                runAsUser: 65534
+                runAsGroup: 100
+                fsGroup: 100
+                fsGroupChangePolicy: "OnRootMismatch"
+
+            containers:
+              app:
+                image:
+                  repository: ghcr.io/journeydocker/plex-auto-languages
+                  tag: 1.3.9@sha256:246487922ab6bee68ca29b960ba93bee36e5ad95ca1ddfde6d68530cbe7948e7
+                env:
+                  TZ: Asia/Jerusalem
+                envFrom:
+                  - secretRef:
+                      name: plex-auto-languages-secret
+                probes:
+                  liveness: &probes
+                    enabled: true
+                    custom: true
+                    spec: &probes_spec
+                      httpGet:
+                        path: /ready
+                        port: 9880
+                      initialDelaySeconds: 0
+                      periodSeconds: 10
+                      timeoutSeconds: 1
+                      failureThreshold: 3
+                  readiness:
+                    <<: *probes
+                    spec:
+                      <<: *probes_spec
+                      initialDelaySeconds: 0
+                  startup:
+                    <<: *probes
+                    spec:
+                      <<: *probes_spec
+                      initialDelaySeconds: 0
+                      failureThreshold: 30
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
+                resources:
+                  requests:
+                    cpu: 100m
+                  limits:
+                    nvidia.com/gpu: 1
+                    memory: 9248M
+
+        persistence:
+          config:
+            enabled: true
+            type: emptyDir
+
+          local:
+            type: emptyDir
+            globalMounts:
+              - path: /.local
+
+          config-file:
+            type: configMap
+            name: plex-auto-languages-configmap
+            globalMounts:
+              - path: /config/config.yaml
+                subPath: config.yaml
+                readOnly: true

@@ -13,6 +13,7 @@ resources:
   - overseerr/app.yaml
   - paperless/app.yaml
   - plex/app.yaml
+  - plex-auto-languages/app.yaml
   - prowlarr/app.yaml
   - qbittorrent/app.yaml
   - qbittorrent/tools.yaml
