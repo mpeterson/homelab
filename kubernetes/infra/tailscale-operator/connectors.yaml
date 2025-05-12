@@ -1,0 +1,19 @@
+---
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: homelab-prod-cidrs-router
+spec:
+  hostname: homelab-prod-cidrs-router
+  subnetRouter:
+    advertiseRoutes:
+      - 10.3.0.0/24
+      - 10.3.1.0/24
+---
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: homelab-exit-node
+spec:
+  hostname: homelab-exit-node
+  exitNode: true
