@@ -14,5 +14,6 @@ resources:
   - node-feature-discovery/app.yaml
   - nvidia-device-plugin/app.yaml
   - nvidia-device-plugin/configs.yaml
+  - prometheus-operator/app.yaml
   - tailscale-operator/app.yaml
   - velero/app.yaml
