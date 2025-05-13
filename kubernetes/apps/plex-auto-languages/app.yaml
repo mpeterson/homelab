@@ -114,11 +114,10 @@ spec:
                     drop:
                       - ALL
                 resources:
-                  requests:
-                    cpu: 100m
                   limits:
-                    nvidia.com/gpu: 1
-                    memory: 9248M
+                    memory: 256M
+                  requests:
+                    cpu: 10m
 
         persistence:
           config:
