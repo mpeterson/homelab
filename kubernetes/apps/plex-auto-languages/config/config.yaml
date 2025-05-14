@@ -51,7 +51,7 @@ plexautolanguages:
   notifications:
     # Whether or not to enable the notifications through Apprise, defaults to 'false'
     # A notification is sent whenever a language change is performed
-    enable: true
+    enable: false
     # An array of Apprise configurations, see Apprise docs for more information: https://github.com/caronc/apprise
     # The array 'users' can be specified in order to link notification URLs with specific users
     #   Defaults to all users if not present
