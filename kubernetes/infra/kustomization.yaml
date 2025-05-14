@@ -7,6 +7,7 @@ generators:
   - secret-generator.yaml
 
 resources:
+  - alertmanager/app.yaml
   - cilium/app.yaml
   - cert-manager/app.yaml
   - democratic-csi/app-snapshotter.yaml
