@@ -3,7 +3,7 @@ receivers:
   - name: "null"
   - name: "healtcheck_canary"
     webhook_configs:
-      - url_file: /etc/secrets/healthcheck_url
+      - url_file: /etc/secrets/healthcheck_canary_url
         send_resolved: false
   - name: "pushover"
     pushover_configs:
