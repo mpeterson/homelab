@@ -1,6 +1,10 @@
 ---
 receivers:
   - name: "null"
+  - name: "healtcheck_canary"
+    webhook_config:
+      url_file: /etc/secrets/healthcheck_url
+      send_resolved: false
   - name: "pushover"
     pushover_configs:
       - html: true
@@ -43,7 +47,7 @@ route:
   repeat_interval: 6h
   receiver: "pushover"
   routes:
-    - receiver: "null"
+    - receiver: "healtcheck_canary"
       matchers:
         - alertname =~ "InfoInhibitor|Watchdog"
     - receiver: "pushover"
