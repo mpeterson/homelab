@@ -47,9 +47,13 @@ route:
   repeat_interval: 6h
   receiver: "pushover"
   routes:
+    - receiver: "null"
+      matchers:
+        - alertname = "InfoInhibitor"
     - receiver: "healtcheck_canary"
       matchers:
-        - alertname =~ "InfoInhibitor|Watchdog"
+        - alertname = "Watchdog"
+      repeat_interval: 5m
     - receiver: "pushover"
       matchers:
         - severity = critical
