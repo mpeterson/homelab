@@ -54,6 +54,7 @@ route:
       matchers:
         - alertname = "Watchdog"
       repeat_interval: 5m
+      group_interval: 1m
     - receiver: "pushover"
       matchers:
         - severity = critical
