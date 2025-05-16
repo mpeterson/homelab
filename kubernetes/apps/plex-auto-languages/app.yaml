@@ -67,7 +67,6 @@ spec:
         controllers:
           plex-auto-languages:
             pod:
-              runtimeClassName: nvidia
               securityContext:
                 runAsUser: 65534
                 runAsGroup: 100
