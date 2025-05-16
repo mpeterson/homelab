@@ -35,7 +35,7 @@ spec:
         
         controllers:
           tautulli:
-            replicas: 0
+            replicas: 1
             pod:
               securityContext:
                 runAsUser: 65534
