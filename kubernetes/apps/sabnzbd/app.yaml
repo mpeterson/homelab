@@ -64,6 +64,7 @@ spec:
         
         controllers:
           sabnzbd:
+            replicas: 0
             pod:
               securityContext:
                 runAsUser: 65534

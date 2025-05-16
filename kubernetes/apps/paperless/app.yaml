@@ -66,6 +66,7 @@ spec:
         
         controllers:
           paperless:
+            replicas: 0
             containers:
               app:
                 image:
