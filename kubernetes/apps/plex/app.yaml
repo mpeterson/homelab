@@ -179,7 +179,7 @@ spec:
             size: 50Gi
             globalMounts:
               - path: /config
-          plex-cache:
+          cache:
             storageClass: zfs-generic-iscsi-csi-xfs
             accessMode: ReadWriteOnce
             size: 10Gi
