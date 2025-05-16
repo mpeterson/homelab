@@ -35,7 +35,7 @@ spec:
         
         controllers:
           sonarr:
-            replicas: 0
+            replicas: 1
             pod:
               securityContext:
                 runAsUser: 65534
