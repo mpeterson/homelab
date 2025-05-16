@@ -176,8 +176,10 @@ spec:
             storageClass: zfs-generic-iscsi-csi-xfs
             accessMode: ReadWriteOnce
             size: 2Gi
-            globalMounts:
-              - path: /data/local
+            advancedMounts:
+              paperless:
+                app:
+                  - path: /data/local
           nfs-nas:
             type: nfs
             server: nas.lan.peterson.com.ar
