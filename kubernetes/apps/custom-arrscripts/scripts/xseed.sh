@@ -64,7 +64,7 @@ else
     USENET_CLIENTS=("SABnzbd")
 fi
 
-XSEED_HOST=${XSEED_HOST:-crossseed}
+XSEED_HOST=${XSEED_HOST:-cross-seed}
 XSEED_PORT=${XSEED_PORT:-8080}
 LOG_FILE=${LOG_FILE:-/config/xseed.log}
 LOGID_FILE=${LOGID_FILE:-/config/xseed-id.log}
