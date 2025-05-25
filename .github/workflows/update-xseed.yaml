@@ -72,7 +72,7 @@ jobs:
               
               # Add changes and commit
               git add ${{ env.FILE_PATH }}
-              git commit -m "Update ${{ env.GIST_FILE }} from Gist"
+              git commit -m "chore(deps): Update ${{ env.GIST_FILE }} from Gist"
               
               # Push changes with explicit upstream setting
               git push --set-upstream origin ${{ env.BRANCH_NAME }}
@@ -88,7 +88,7 @@ jobs:
             
             # Add changes and commit
             git add ${{ env.FILE_PATH }}
-            git commit -m "Add ${{ env.GIST_FILE }} from Gist"
+            git commit -m "chore(deps): Add ${{ env.GIST_FILE }} from Gist"
             
             # Push changes with explicit upstream setting
             git push --set-upstream origin ${{ env.BRANCH_NAME }}
