@@ -106,7 +106,7 @@ jobs:
             echo "PR already exists, updated branch."
           else
             gh pr create \
-              --title "Update ${{ env.GIST_FILE }} from Gist" \
+              --title "chore(deps): Update ${{ env.GIST_FILE }} from Gist" \
               --body "This PR updates ${{ env.GIST_FILE }} with the latest content from the Gist." \
               --head "${{ env.BRANCH_NAME }}" \
               --base "${{ env.BASE_BRANCH }}" || echo "PR creation failed, branch may already be up-to-date with base"
