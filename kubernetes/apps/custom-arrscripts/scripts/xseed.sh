@@ -6,6 +6,9 @@
 ### TO ENABLE THIS FEATURE YOU _MUST_ SWITCH TO THE
 ### ON IMPORT COMPLETE EVENT TYPE IN YOUR SONARR SETTINGS
 
+### SEE FURTHER DOWN FOR CONFIGURATION SECTION, LEAVE THE HYPHEN (-) 
+### IN FRONT OF THE CONFIGURATION OPTIONS AS SEEN IN THE EXAMPLES
+
 # Load environment variables from .env file if it exists
 # in the same directory as this bash script
 VERSION='4.0.1'
@@ -58,6 +61,9 @@ if [[ -n "$TORRENT_CLIENTS" || -n "$USENET_CLIENTS" ]]; then
 else
     # If you are not using environmental variables set your client here
     # format for up to as many clients as you need
+    # These must be exactly as they appear in the "Download Clients" section
+    # of your respective arr client
+    #
     # Multiple clients: (${TORRENT_CLIENTS:-"Qbit" "Qbit2"})
     # Single Client: (${TORRENT_CLIENTS:-"Qbit"})
     TORRENT_CLIENTS=("Qbit")
@@ -65,10 +71,10 @@ else
 fi
 
 XSEED_HOST=${XSEED_HOST:-cross-seed}
-XSEED_PORT=${XSEED_PORT:-8080}
+XSEED_PORT=${XSEED_PORT:-2468}
 LOG_FILE=${LOG_FILE:-/config/xseed.log}
 LOGID_FILE=${LOGID_FILE:-/config/xseed-id.log}
-XSEED_APIKEY=${XSEED_APIKEY:-}
+XSEED_APIKEY=${XSEED_APIKEY:-abc123crossseedapikey}
 
 ### END OF CONFIGURATION SECTION
 
