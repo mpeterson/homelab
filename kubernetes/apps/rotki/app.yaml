@@ -1,0 +1,116 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app rotki
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: selfhosted
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 4.0.1
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+        
+        controllers:
+          rotki:
+            # pod:
+            #   securityContext:
+            #     runAsUser: 65534
+            #     runAsGroup: 100
+            #     fsGroup: 65534
+            #     fsGroupChangePolicy: "OnRootMismatch"
+
+            containers:
+              app:
+                image:
+                  repository: &image rotki/rotki
+                  tag: &tag v1.38.4@sha256:2fec4e0a4cb9ca6add2602b1876caddbea146ff89263300613b81f81691bfaa2
+                env:
+                  TZ: Asia/Jerusalem
+                  ROTKI_ACCEPT_DOCKER_RISK: "1"
+                probes:
+                  liveness: &probes
+                    enabled: true
+                    custom: true
+                    spec:
+                      httpGet:
+                        path: /api/1/ping
+                        port: &port 80
+                      initialDelaySeconds: 0
+                      periodSeconds: 10
+                      timeoutSeconds: 1
+                      failureThreshold: 3
+                  readiness: *probes
+                resources:
+                  requests:
+                    cpu: 10m
+                    memory: 256Mi
+                  limits:
+                    memory: 512Mi
+                # securityContext:
+                #   allowPrivilegeEscalation: false
+                #   readOnlyRootFilesystem: true
+                #   capabilities:
+                #     drop:
+                #       - ALL
+
+        service:
+          app:
+            controller: *app
+            ports:
+              http:
+                port: *port
+
+        route:
+          app:
+            enabled: true
+            kind: HTTPRoute
+            hostnames:
+              - rotki.lan.peterson.com.ar
+            parentRefs:
+              - kind: Gateway
+                name: internal-gateway
+                namespace: network
+                sectionName: https
+            rules:
+              - backendRefs:
+                  - name: *app
+                    port: *port
+                matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+
+        persistence:
+          config:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 700Mi
+            globalMounts:
+              - path: /data
+          logs:
+            type: emptyDir
+            globalMounts:
+              - path: /logs

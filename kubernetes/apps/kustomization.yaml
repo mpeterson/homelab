@@ -19,6 +19,7 @@ resources:
   - qbittorrent/tools.yaml
   - radarr/app.yaml
   - recyclarr/app.yaml
+  - rotki/app.yaml
   - sabnzbd/app.yaml
   - sonarr/app.yaml
   - tautulli/app.yaml
