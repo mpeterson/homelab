@@ -72,10 +72,9 @@ fi
 
 XSEED_HOST=${XSEED_HOST:-cross-seed}
 XSEED_PORT=${XSEED_PORT:-2468}
+XSEED_APIKEY=${XSEED_APIKEY:-abc123crossseedapikey}
 LOG_FILE=${LOG_FILE:-/config/xseed.log}
 LOGID_FILE=${LOGID_FILE:-/config/xseed-id.log}
-XSEED_APIKEY=${XSEED_APIKEY:-abc123crossseedapikey}
-
 ### END OF CONFIGURATION SECTION
 
 # Restore original IFS
