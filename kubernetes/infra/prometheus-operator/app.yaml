@@ -90,7 +90,7 @@ spec:
   source:
     repoURL: https://prometheus-community.github.io/helm-charts
     chart: kube-prometheus-stack
-    targetRevision: 73.2.0
+    targetRevision: 73.2.3
     helm:
       valuesObject:
         crds:
