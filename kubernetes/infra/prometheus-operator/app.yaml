@@ -60,7 +60,7 @@ spec:
   source:
     repoURL: https://prometheus-community.github.io/helm-charts
     chart: prometheus-operator-crds
-    targetRevision: 20.0.1
+    targetRevision: 20.0.3
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
