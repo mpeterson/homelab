@@ -1,0 +1,81 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ollama-configs
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ai
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/apps/ollama/
+    targetRevision: main
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ollama
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ai
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+  
+  source:
+    repoURL: https://helm.otwld.com/
+    chart: ollama
+    targetRevision: 1.21.0
+    helm:
+      valuesObject:
+        autoscaling:
+          enabled: true
+
+        runtimeClassName: nvidia
+        
+        ollama:
+          gpu:
+            enabled: true
+            type: 'nvidia'
+            number: 1
+          
+          models:
+            pull:
+              - llama3.1:8b
+              - qwen2.5:7b
+            load:
+              - qwen2.5:7b
+
+        persistentVolume:
+          enabled: true
+          storageClass: zfs-generic-iscsi-csi-xfs
+          size: 100Gi

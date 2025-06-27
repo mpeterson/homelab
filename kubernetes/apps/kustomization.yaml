@@ -10,6 +10,7 @@ resources:
   - idrac-fan-control/app.yaml
   - kometa/app.yaml
   - mosquitto/app.yaml
+  - ollama/app.yaml
   - overseerr/app.yaml
   - paperless/app.yaml
   - plex/app.yaml
