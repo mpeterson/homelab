@@ -1,0 +1,143 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: n8n-configs
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: selfhosted
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/apps/n8n/
+    targetRevision: main
+
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app n8n
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: selfhosted
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 4.1.2
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+        
+        controllers:
+          n8n:
+            # annotations:
+            #   reloader.stakater.com/auto: "true"
+
+            pod:
+              securityContext:
+                runAsUser: 1000
+                runAsGroup: 1000
+                fsGroup: 1000
+                fsGroupChangePolicy: "OnRootMismatch"
+
+            containers:
+              app:
+                image:
+                  repository: ghcr.io/n8n-io/n8n
+                  tag: 1.101.0@sha256:0d7c763400ea01c3c0b78404e6b3b0c93a86cf9ff0a2f2fab44e947ab4258421
+                env:
+                  DB_SQLITE_VACUUM_ON_STARTUP: true
+                  EXECUTIONS_DATA_PRUNE: true
+                  EXECUTIONS_DATA_MAX_AGE: 7
+                  EXECUTIONS_DATA_PRUNE_MAX_COUNT: 50000
+                  GENERIC_TIMEZONE: "Asia/Jerusalem"
+                  N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: false
+                  N8N_PROTOCOL: "https"
+                  N8N_PORT: &port 8080
+                  N8N_HOST: &hostName n8n.peterson.com.ar
+                  N8N_LOG_LEVEL: info
+                  N8N_LOG_OUTPUT: console
+                  N8N_ENCRYPTION_KEY:
+                    valueFrom:
+                      secretKeyRef:
+                        name: n8n-secret
+                        key: N8N_ENCRYPTION_KEY
+                resources:
+                  requests:
+                    cpu: 5m
+                    memory: 128Mi
+                  limits:
+                    memory: 2Gi
+
+        service:
+          app:
+            ports:
+              http:
+                port: *port
+
+        persistence:
+          data:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 5Gi
+            advancedMounts:
+              n8n:
+                app:
+                  - path: /home/node/.n8n
+
+        route:
+          app:
+            hostnames:
+              - *hostName
+            parentRefs:
+              - name: public-gateway
+                namespace: network
+                sectionName: https
+
+          webhooks:
+            hostnames:
+              - n8n-webhook.peterson.com.ar
+            parentRefs:
+              - name: public-gateway
+                namespace: network
+                sectionName: https
+            rules:
+              - matches:
+                  - path:
+                      value: /webhook
+                backendRefs: [{}]
