@@ -86,6 +86,7 @@ spec:
                   EXECUTIONS_DATA_MAX_AGE: 7
                   EXECUTIONS_DATA_PRUNE_MAX_COUNT: 50000
                   GENERIC_TIMEZONE: "Asia/Jerusalem"
+                  N8N_EDITOR_BASE_URL: "https://n8n.lan.peterson.com.ar/"
                   N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: false
                   N8N_PROTOCOL: "https"
                   N8N_PORT: &port 8080
@@ -97,6 +98,7 @@ spec:
                       secretKeyRef:
                         name: n8n-secret
                         key: N8N_ENCRYPTION_KEY
+                  WEBHOOK_URL: "https://n8n-webhook.peterson.com.ar/"
                 resources:
                   requests:
                     cpu: 5m
