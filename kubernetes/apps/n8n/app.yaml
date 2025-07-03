@@ -89,7 +89,7 @@ spec:
                   N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: false
                   N8N_PROTOCOL: "https"
                   N8N_PORT: &port 8080
-                  N8N_HOST: &hostName n8n.peterson.com.ar
+                  N8N_HOST: &hostName n8n.lan.peterson.com.ar
                   N8N_LOG_LEVEL: info
                   N8N_LOG_OUTPUT: console
                   N8N_ENCRYPTION_KEY:
@@ -125,7 +125,7 @@ spec:
             hostnames:
               - *hostName
             parentRefs:
-              - name: public-gateway
+              - name: internal-gateway
                 namespace: network
                 sectionName: https
 
