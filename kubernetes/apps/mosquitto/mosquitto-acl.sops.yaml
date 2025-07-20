@@ -4,7 +4,7 @@ metadata:
     name: mosquitto-acl
     namespace: smarthome
 data:
-    acl: ENC[AES256_GCM,data:2TO/1mEXsMCuGQEhdMkRJuMQjaj9rgu+XFj92GSdajdszvEK4PTzSch8ujvr/hkoFcx4dpA2jaAs3DuQR8ZR+TYrWfULiGj4cPk8yqa/gRWiLZX2F9h9MIvASY3FZugjOQLMKVQmOZCwmg871A6lF8J6ChdOx+35WexJVtvf7cshCFsgEccjoVRxvOg/8jsNHfvbY5zA+BrkTAHUhL2zd5B1MTACqp9xhKaUw/PKl/jCtXxmrMcnQ3f4v/k6En+1HxNeX0a1LYGD55fQer0JWD5wS5SYTqdFKinDE1xbDbaRNtTzWAkCUiZdPtB5+DUZPPZ58DUoLg==,iv:zuye2px6XF0voWJGheKXgC0m9a4kICgZaVBiv7FWzII=,tag:rwwdet0im7tAnNUZxtMyEw==,type:str]
+    acl: ENC[AES256_GCM,data:vWiX4t46PEHVVSBGDMc0BO573+NsUhy+x/VBBPUFzU/QeYBSPPfWiFN3LYD7xOToky1gFoy3x8tLqz5M+AeAc/1uWDf6QNhwUwpxIqULfT2dhoIdpZr/gnTB2nMVs1CevYxk8QHdY06TUmz6Nz/yoQ04n07KOIBYgcI/HMamjF9ceY/J1d2b4kDBX7rzA8O3tXujYW8CLBrxVNhm29J746HAwGJuEzXLLaKEp0Ixy5JhUdJfHDb0xrrIGtUw4ycRgQiDD4ET2HQVqagBftDcUZWhnUYqzxffuu6TaRoFbzaJqEXEhWxZOyKESZgSSM43oZH6arDM+mGIyFk952mMzI+QygvzgzEWUaiJHFuYiyiW8kx/CVAmUjgRchDzKA==,iv:DhJrV/0deYwn5CeDADlEF7Uig1ymM+syBL0cRO482iY=,tag:Z6FOggR1MlxkUzxpAjPr2w==,type:str]
 sops:
     kms: []
     gcp_kms: []
@@ -20,8 +20,8 @@ sops:
             cU1PcUxpUTduZU9jM09JZmswdzNoR0kKlViiRbXzqq8OoH74MwKd3xBaRV0+l300
             7stdasNbsxpQKd00xINFwHCt2jAjjBZYf9WrdOClCIpjSwP5M6eWTw==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-27T11:13:46Z"
-    mac: ENC[AES256_GCM,data:yPYAi6PtXdUT/Y6MJOGnZHgzCuSoGzOgMfZ6OgES0rOHJO6Et1KtSXBsG5WMqbJEo9NNji4zv/MR6V0yhP9CRKm4bIr1SH7cAZuZeVDIJ4iyy7bGHS2K7mMhowsO1K20gcDUPATmuSCy4oMvn4IJFtNUsa/qLlWG1G8uSfUJgnk=,iv:Rs+Th3nTRZEh5B7Z9vZ0zKB8TdwpuigHuJhgDM/WQgg=,tag:+/v3odeJa7OJtFj6d7m4nQ==,type:str]
+    lastmodified: "2025-07-20T11:42:06Z"
+    mac: ENC[AES256_GCM,data:caNHQPzSIAjOeqJg/7c2JcJe6Jp0WioyU90rYmpa/xDcxxx75iiaoCatH8j0DmM/pr9wgIYExzs7umhHUwkKjeEnDZKmolV9En7n5rCG2034ZF7H9W8CR/+u+qTtKcpAMBEgoHSXvL6OfP9PCtP3lAyedppuayOKEjX2KDPQYiA=,iv:zO8SNxsD/P79cTvWEm64xeBPkg5YDYDkZytOZOlmy2g=,tag:emZQJvyqP52gbiVaW1RCHQ==,type:str]
     pgp: []
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
     version: 3.9.4
