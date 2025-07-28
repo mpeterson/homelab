@@ -58,7 +58,7 @@ spec:
   source:
     repoURL: https://bjw-s-labs.github.io/helm-charts
     chart: app-template
-    targetRevision: 4.1.2
+    targetRevision: 4.2.0
     helm:
       valuesObject:
         strategy: RollingUpdate
