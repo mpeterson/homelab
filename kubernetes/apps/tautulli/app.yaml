@@ -47,7 +47,7 @@ spec:
               app:
                 image:
                   repository: &image ghcr.io/home-operations/tautulli
-                  tag: &tag 2.15.2@sha256:cb8e3a4c2873edf7baa433e126f022f19eb43f256b65b2de3e8525dc2e4dc18e
+                  tag: &tag 2.15.3@sha256:3e0eaca8c082ebe121a0ae9125bea1b4e2d177fca34ac8df4ec14a28e62f63a4
                 probes:
                   liveness: &probes
                     enabled: true
