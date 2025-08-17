@@ -54,7 +54,7 @@ spec:
   source:
     repoURL: https://helm.otwld.com/
     chart: ollama
-    targetRevision: 1.26.0
+    targetRevision: 1.27.0
     helm:
       valuesObject:
         autoscaling:
