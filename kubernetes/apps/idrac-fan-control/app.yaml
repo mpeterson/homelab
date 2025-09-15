@@ -59,7 +59,7 @@ spec:
   source:
     repoURL: https://bjw-s-labs.github.io/helm-charts
     chart: app-template
-    targetRevision: 4.2.0
+    targetRevision: 4.3.0
     helm:
       valuesObject:
         strategy: RollingUpdate
@@ -137,7 +137,7 @@ spec:
   source:
     repoURL: https://bjw-s-labs.github.io/helm-charts
     chart: app-template
-    targetRevision: 4.2.0
+    targetRevision: 4.3.0
     helm:
       valuesObject:
         strategy: RollingUpdate
