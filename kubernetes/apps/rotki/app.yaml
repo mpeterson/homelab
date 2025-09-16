@@ -46,7 +46,7 @@ spec:
               app:
                 image:
                   repository: &image rotki/rotki
-                  tag: &tag v1.40.0@sha256:e8d9611b781bfe81c604e4c088ef2c5afc4e3bdfc4ff44d8e9e4654d7155bfb0
+                  tag: &tag v1.40.1@sha256:917cface3e2cbed9e7d63f5fda785f59aa6926cbb539384d09f0171365d5dcdf
                 env:
                   TZ: Asia/Jerusalem
                   ROTKI_ACCEPT_DOCKER_RISK: "1"
