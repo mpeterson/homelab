@@ -47,7 +47,7 @@ spec:
               app:
                 image:
                   repository: &image ghcr.io/home-operations/prowlarr
-                  tag: &tag 2.1.5.5213@sha256:52b40a9147d4056d8c5edc535adddad32da282df4c3099321378e40dbfcf898a
+                  tag: &tag 2.3.0.5236@sha256:1a8a4b11972b2e62671b49949c622b8cb1110e2b5c77199ac795a6d79fe106e8
                 probes:
                   liveness: &probes
                     enabled: true
