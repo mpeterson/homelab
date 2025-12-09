@@ -130,7 +130,7 @@ spec:
               redis:
                 image:
                   repository: ghcr.io/valkey-io/valkey
-                  tag: 8.1.4@sha256:81db6d39e1bba3b3ff32bd3a1b19a6d69690f94a3954ec131277b9a26b95b3aa
+                  tag: 9.0.1@sha256:fb8d272e529ea567b9bf1302245796f21a2672b8368ca3fcb938ac334e613c8f
                 resources:
                   requests:
                     cpu: 5m
