@@ -80,7 +80,7 @@ spec:
               alertmanager:
                 image:
                   repository: quay.io/prometheus/alertmanager
-                  tag: v0.29.0@sha256:88743b63b3e09ea6e31e140ced5bf45f4a8e82c617c2a963f78841f4995ad1d7
+                  tag: v0.30.1@sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4
                 args:
                   - --config.file=/etc/alertmanager/alertmanager.yml
                   - --storage.path=/alertmanager
