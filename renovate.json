@@ -22,8 +22,12 @@
   "git-submodules": {
     "enabled": true
   },
-  "addLabels": ["manual-review"],
   "packageRules": [
+    {
+      "description": "Default: label all PRs for manual review",
+      "matchUpdateTypes": ["major", "minor", "patch", "digest", "pin", "rollback", "bump"],
+      "labels": ["manual-review"]
+    },
     {
       "description": "Tier 1: Automerge patch + minor for low-risk apps and infra",
       "matchFileNames": [
