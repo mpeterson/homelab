@@ -17,7 +17,7 @@
       - 110
       - 111
       - 112
-    disk_size: "32" # in GB
+    disk_size: "32"  # in GB
     storage: "workloads"
     disk_options: "iothread=1"
     dry_run: false  # Set to true for dry-run mode

@@ -22,10 +22,10 @@ libraries:
         template_variables:
           rating1: user
           rating1_image: imdb
-          #rating2: audience
-          #rating2_image: rt_popcorn
-          #rating3: critic
-          #rating3_image: rt_tomato
+          # rating2: audience
+          # rating2_image: rt_popcorn
+          # rating3: critic
+          # rating3_image: rt_tomato
 
           horizontal_position: left
           vertical_position: bottom
@@ -69,10 +69,10 @@ libraries:
         template_variables:
           rating1: user
           rating1_image: imdb
-          #rating2: audience
-          #rating2_image: rt_popcorn
-          #rating3: critic
-          #rating3_image: rt_tomato
+          # rating2: audience
+          # rating2_image: rt_popcorn
+          # rating3: critic
+          # rating3_image: rt_tomato
 
           horizontal_position: left
           vertical_position: bottom
