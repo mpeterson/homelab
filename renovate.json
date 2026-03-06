@@ -83,6 +83,11 @@
       "description": "Group Velero and its plugins into a single PR",
       "matchFileNames": ["kubernetes/infra/velero/**"],
       "groupName": "velero"
+    },
+    {
+      "description": "Group kube-prometheus-stack and its CRDs into a single PR",
+      "matchFileNames": ["kubernetes/infra/prometheus-operator/**"],
+      "groupName": "kube-prometheus-stack"
     }
   ]
 }
