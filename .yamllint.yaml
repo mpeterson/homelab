@@ -7,7 +7,7 @@ rules:
   # Helm templates and SOPS files may have unconventional formatting
   comments-indentation: disable
   truthy:
-    allowed-values: ["true", "false", "yes", "no"]
+    allowed-values: ["true", "false", "yes", "no", "on"]
 
 ignore:
   # SOPS-encrypted files contain binary data that won't lint cleanly

@@ -1,13 +1,12 @@
+---
 name: CI
 
 on:
   pull_request:
     branches: [main]
     paths:
-      - "kubernetes/**/*.yaml"
-      - "kubernetes/**/*.yml"
-      - "ansible/**/*.yaml"
-      - "ansible/**/*.yml"
+      - "**/*.yaml"
+      - "**/*.yml"
       - ".yamllint.yaml"
       - ".github/workflows/ci.yaml"
 
@@ -19,11 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098  # v7
 
       - name: Run yamllint
-        uses: ibiqlik/action-yamllint@2576378a8e339169678f9939646ee3ee325e845c # v3
-        with:
-          config_file: .yamllint.yaml
-          file_or_dir: kubernetes/ ansible/
-          strict: true
+        run: uvx yamllint --strict --format github -c .yamllint.yaml .
