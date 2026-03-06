@@ -21,5 +21,47 @@
   },
   "git-submodules": {
     "enabled": true
-  }
+  },
+  "packageRules": [
+    {
+      "description": "Tier 1: Automerge patch + minor for low-risk apps and infra",
+      "matchFileNames": [
+        "kubernetes/apps/bazarr/**",
+        "kubernetes/apps/cross-seed/**",
+        "kubernetes/apps/custom-arrscripts/**",
+        "kubernetes/apps/idrac-fan-control/**",
+        "kubernetes/apps/kometa/**",
+        "kubernetes/apps/n8n/**",
+        "kubernetes/apps/ollama/**",
+        "kubernetes/apps/overseerr/**",
+        "kubernetes/apps/plex/**",
+        "kubernetes/apps/plex-auto-languages/**",
+        "kubernetes/apps/prowlarr/**",
+        "kubernetes/apps/qbittorrent/**",
+        "kubernetes/apps/radarr/**",
+        "kubernetes/apps/recyclarr/**",
+        "kubernetes/apps/rotki/**",
+        "kubernetes/apps/sabnzbd/**",
+        "kubernetes/apps/sonarr/**",
+        "kubernetes/apps/tautulli/**",
+        "kubernetes/infra/alertmanager/**",
+        "kubernetes/infra/metrics-server/**",
+        "kubernetes/infra/prometheus-operator/**",
+        "kubernetes/infra/tailscale-operator/**"
+      ],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Tier 2: Automerge patch only for medium-risk apps",
+      "matchFileNames": [
+        "kubernetes/apps/mosquitto/**",
+        "kubernetes/apps/paperless/**"
+      ],
+      "matchUpdateTypes": ["patch", "digest", "pin"],
+      "automerge": true,
+      "automergeType": "pr"
+    }
+  ]
 }
