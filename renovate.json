@@ -78,6 +78,11 @@
       "automerge": true,
       "automergeType": "pr",
       "labels": []
+    },
+    {
+      "description": "Group Velero and its plugins into a single PR",
+      "matchFileNames": ["kubernetes/infra/velero/**"],
+      "groupName": "velero"
     }
   ]
 }
