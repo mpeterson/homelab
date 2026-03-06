@@ -70,6 +70,14 @@
       "description": "Never automerge app-template Helm chart updates",
       "matchPackageNames": ["app-template"],
       "automerge": false
+    },
+    {
+      "description": "Automerge GitHub Actions digest updates",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["digest", "pin", "patch", "minor"],
+      "automerge": true,
+      "automergeType": "pr",
+      "labels": []
     }
   ]
 }
