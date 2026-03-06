@@ -22,7 +22,6 @@
   "git-submodules": {
     "enabled": true
   },
-  "platformAutomerge": false,
   "packageRules": [
     {
       "description": "Tier 1: Automerge patch + minor for low-risk apps and infra",

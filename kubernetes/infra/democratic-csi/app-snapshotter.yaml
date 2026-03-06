@@ -11,7 +11,7 @@ metadata:
 
 spec:
   project: default
-  
+
   destination:
     server: https://kubernetes.default.svc
     namespace: infra
@@ -24,7 +24,7 @@ spec:
     automated:
       selfHeal: true
       prune: true
-  
+
   source:
     repoURL: https://piraeus.io/helm-charts/
     chart: snapshot-controller

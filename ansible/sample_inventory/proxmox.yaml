@@ -8,7 +8,7 @@ proxmox:
               ansible_user: root
 
         pve_secondaries:
-          hosts: 
+          hosts:
             pve-02.local.example.com:
               ansible_user: root
             pve-03.local.example.com:

@@ -7,7 +7,7 @@ bind9:
           ansible_become: yes
 
     bind9_secondaries:
-      hosts: 
+      hosts:
         dns-02.local.example.com:
           ansible_user: mpeterson
           ansible_become: yes

@@ -9,7 +9,7 @@
   vars:
     create_params: >-
       {% for key, value in backup_config.value.items() %}
-        --{{ key }} '{{ value }}' 
+        --{{ key }} '{{ value }}'
       {% endfor %}
   ansible.builtin.command:
     pvesh create /cluster/backup --id {{ backup_config.key }} {{ create_params }}

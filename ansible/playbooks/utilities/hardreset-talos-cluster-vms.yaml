@@ -21,21 +21,21 @@
     storage: "workloads"
     disk_options: "iothread=1"
     dry_run: false  # Set to true for dry-run mode
-    
+
   tasks:
     - name: Notify about dry-run mode
       ansible.builtin.debug:
         msg: "Running in DRY-RUN mode. No changes will be made to the VMs."
       when: dry_run | bool
       run_once: true
-      
+
     - name: Show warning and get confirmation
       ansible.builtin.pause:
         prompt: "WARNING: This will reset all Talos VMs (IDs: {{ vm_ids | join(', ') }}). All data will be lost! Press Enter to continue or Ctrl+C to abort"
       delegate_to: localhost
       run_once: true
       when: not dry_run | bool
-      
+
     - name: Find which node is running each VM
       ansible.builtin.shell:
         cmd: "qm status {{ item }} 2>/dev/null || echo 'not_found'"
@@ -49,12 +49,12 @@
         found_vms: "{{ found_vms | default([]) + [{'id': item.item, 'status': item.stdout}] }}"
       when: item.stdout != "not_found" and item.stdout != ""
       with_items: "{{ vm_status_check.results }}"
-      
+
     - name: Display found VMs on this node
       ansible.builtin.debug:
         msg: "Found VMs on {{ inventory_hostname }}: {{ found_vms | map(attribute='id') | list }}"
       when: found_vms is defined and found_vms | length > 0
-      
+
     - name: Get disk configuration for each VM
       ansible.builtin.shell:
         cmd: "qm config {{ item.id }} | grep scsi0 || echo 'no_disk'"
@@ -62,7 +62,7 @@
       with_items: "{{ found_vms | default([]) }}"
       when: found_vms is defined and found_vms | length > 0
       changed_when: false
-      
+
     - name: Process each VM (DRY-RUN mode)
       block:
         - name: Display operations that would be performed
@@ -85,10 +85,10 @@
                 - Wait for disk creation
                 - Start VM {{ vm.id }}
               {% endfor %}
-      when: 
+      when:
         - found_vms is defined and found_vms | length > 0
         - dry_run | bool
-      
+
     - name: Process each VM (REAL mode)
       block:
         - name: Stop running VMs
@@ -98,7 +98,7 @@
           with_items: "{{ found_vms }}"
           when: "'running' in item.status"
           changed_when: stop_result.rc == 0
-          
+
         - name: Wait for VMs to stop
           ansible.builtin.shell:
             cmd: "qm status {{ item.id }} | grep -q 'status: stopped'"
@@ -109,7 +109,7 @@
           with_items: "{{ found_vms }}"
           when: "'running' in item.status"
           changed_when: false
-          
+
         - name: Dettach VM disks
           ansible.builtin.command:
             cmd: "qm set {{ item.item.id }} --delete scsi0"
@@ -117,7 +117,7 @@
           with_items: "{{ disk_configs.results }}"
           when: item is defined and item.stdout is defined and item.stdout != "no_disk" and "scsi0:" in item.stdout
           changed_when: delete_result.rc == 0
-          
+
         - name: Wait for disk dettach to complete
           ansible.builtin.shell:
             cmd: "qm config {{ item.item.id }} | grep -q 'scsi0:'"
@@ -136,7 +136,7 @@
           register: delete_result
           with_items: "{{ disk_configs.results }}"
           when: item is defined and item.stdout is defined and item.stdout != "no_disk" and "scsi0:" in item.stdout
-          changed_when: delete_result.rc == 0    
+          changed_when: delete_result.rc == 0
 
         - name: Create new disks
           ansible.builtin.command:
@@ -144,7 +144,7 @@
           register: create_result
           with_items: "{{ found_vms }}"
           changed_when: create_result.rc == 0
-          
+
         - name: Wait for disk creation to complete
           ansible.builtin.shell:
             cmd: "qm config {{ item.id }} | grep -q 'scsi0:'"
@@ -161,28 +161,28 @@
           register: bootorder_result
           with_items: "{{ found_vms }}"
           changed_when: bootorder_result.rc == 0
-          
+
         - name: Start VMs
           ansible.builtin.command:
             cmd: "qm start {{ item.id }}"
           register: start_result
           with_items: "{{ found_vms }}"
           changed_when: start_result.rc == 0
-          
-      when: 
+
+      when:
         - found_vms is defined and found_vms | length > 0
         - not dry_run | bool
-      
+
     - name: Summary for dry-run
       ansible.builtin.debug:
         msg: "[DRY-RUN] Reset would have been performed for VMs: {{ found_vms | map(attribute='id') | list }} on {{ inventory_hostname }}"
-      when: 
+      when:
         - found_vms is defined and found_vms | length > 0
         - dry_run | bool
-      
+
     - name: Summary for real run
       ansible.builtin.debug:
         msg: "Reset completed for VMs: {{ found_vms | map(attribute='id') | list }} on {{ inventory_hostname }}"
-      when: 
+      when:
         - found_vms is defined and found_vms | length > 0
         - not dry_run | bool

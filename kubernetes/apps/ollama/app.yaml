@@ -37,7 +37,7 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  
+
   destination:
     server: https://kubernetes.default.svc
     namespace: ai
@@ -50,7 +50,7 @@ spec:
     automated:
       selfHeal: true
       prune: true
-  
+
   source:
     repoURL: https://helm.otwld.com/
     chart: ollama
@@ -61,13 +61,13 @@ spec:
           enabled: true
 
         runtimeClassName: nvidia
-        
+
         ollama:
           gpu:
             enabled: true
             type: 'nvidia'
             number: 1
-          
+
           models:
             pull:
               - llama3.1:8b

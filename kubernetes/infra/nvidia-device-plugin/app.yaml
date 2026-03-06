@@ -38,8 +38,8 @@ spec:
 
         nfd:
           enabled: false
-          
-        config: 
+
+        config:
           map:
             config: |
               version: v1

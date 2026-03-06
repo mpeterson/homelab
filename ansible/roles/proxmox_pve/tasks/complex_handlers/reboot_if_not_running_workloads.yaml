@@ -12,7 +12,7 @@
 
 - name: Reboot if not running workloads - Trigger reboot (step 3/3)
   ansible.builtin.reboot:
-  when: 
+  when:
     - existing_vms_response.stdout is defined
     - existing_lxcs_response.stdout is defined
     - (existing_vms_response.stdout | from_json | length) == 0

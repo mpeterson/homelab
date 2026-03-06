@@ -62,7 +62,7 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
+
         controllers:
           n8n:
             # annotations:

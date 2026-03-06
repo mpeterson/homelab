@@ -61,7 +61,7 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
+
         controllers:
           sabnzbd:
             replicas: 1

@@ -32,7 +32,7 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
+
         controllers:
           radarr:
             replicas: 1
@@ -57,7 +57,7 @@ spec:
                     valueFrom:
                       secretKeyRef:
                         name: cross-seed-secret
-                        key: xseed_api_key                
+                        key: xseed_api_key
                 probes:
                   liveness: &probes
                     enabled: true
@@ -136,4 +136,4 @@ spec:
             name: arr-scripts
             defaultMode: 0775
             globalMounts:
-                - path: /config/scripts
+              - path: /config/scripts

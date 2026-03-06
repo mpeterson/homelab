@@ -61,7 +61,7 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
+
         controllers:
           qbittorrent:
             replicas: 1
@@ -101,7 +101,7 @@ spec:
                 securityContext:
                   allowPrivilegeEscalation: false
                   readOnlyRootFilesystem: true
-                  capabilities: { drop: ["ALL"] }
+                  capabilities: {drop: ["ALL"]}
                 resources:
                   requests:
                     cpu: 10m

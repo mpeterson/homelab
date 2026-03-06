@@ -6,13 +6,13 @@ proxmox_acme:
   staging: false
   plugin: acmedns
   plugin_settings:
-    acmedns_base_url:  https://auth.acme-dns.io
+    acmedns_base_url: https://auth.acme-dns.io
     acmedns_password: __REDACTED__
     acmedns_subdomain: __REDACTED__
     acmedns_username: __REDACTED__
 
 pve_templates:
-  9000:                                                                                                                                                                         
+  9000:
     name: almalinux-9
     cloud_image_url: https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/AlmaLinux-9-GenericCloud-latest.x86_64.qcow2
     storage: local-zfs
