@@ -1,3 +1,4 @@
+---
 name: Sync xseed.sh from Gist
 
 on:
@@ -18,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -35,10 +36,10 @@ jobs:
       - name: Create or update branch
         run: |
           echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
-          
+
           # Stash any uncommitted changes first
           git stash -u
-          
+
           # Check if branch exists remotely
           if git ls-remote --heads origin ${{ env.BRANCH_NAME }} | grep -q ${{ env.BRANCH_NAME }}; then
             echo "Branch ${{ env.BRANCH_NAME }} exists remotely, updating..."
@@ -48,19 +49,19 @@ jobs:
             echo "Creating new branch ${{ env.BRANCH_NAME }}..."
             git checkout -b ${{ env.BRANCH_NAME }}
           fi
-          
+
           # Apply stashed files if any were stashed
           git stash list | grep -q "stash@{0}" && git stash pop || echo "No stashed changes"
-        
+
       - name: Check if file changed and commit
         id: check_changes
         run: |
           # Make sure directory exists
           mkdir -p kubernetes/apps/custom-arrscripts/scripts/
-          
+
           # Copy the new file
           cp gist/${{ env.GIST_FILE }} ${{ env.FILE_PATH }}.new
-          
+
           # Check if file exists first
           if [ -f ${{ env.FILE_PATH }} ]; then
             # Compare files
@@ -69,11 +70,11 @@ jobs:
               echo "changed=true" >> $GITHUB_OUTPUT
               mv ${{ env.FILE_PATH }}.new ${{ env.FILE_PATH }}
               chmod ${{ env.FILE_PERMISSION }} ${{ env.FILE_PATH }}
-              
+
               # Add changes and commit
               git add ${{ env.FILE_PATH }}
               git commit -m "chore(deps): Update ${{ env.GIST_FILE }} from Gist"
-              
+
               # Push changes with explicit upstream setting
               git push --set-upstream origin ${{ env.BRANCH_NAME }}
             else
@@ -85,11 +86,11 @@ jobs:
             echo "File does not exist yet - creating"
             echo "changed=true" >> $GITHUB_OUTPUT
             mv ${{ env.FILE_PATH }}.new ${{ env.FILE_PATH }}
-            
+
             # Add changes and commit
             git add ${{ env.FILE_PATH }}
             git commit -m "chore(deps): Add ${{ env.GIST_FILE }} from Gist"
-            
+
             # Push changes with explicit upstream setting
             git push --set-upstream origin ${{ env.BRANCH_NAME }}
           fi
@@ -101,7 +102,7 @@ jobs:
         run: |
           # Check if PR already exists
           PR_EXISTS=$(gh pr list --head "${{ env.BRANCH_NAME }}" --base "${{ env.BASE_BRANCH }}" --state open --json number | grep -c '"number":' || true)
-          
+
           if [ "$PR_EXISTS" -gt 0 ]; then
             echo "PR already exists, updated branch."
           else
