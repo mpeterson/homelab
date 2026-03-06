@@ -84,7 +84,7 @@ spec:
               config:
                 region: us-west-001
                 s3Url: "https://s3.us-west-001.backblazeb2.com"
-                checksumAlgorithm: "" # required for Backblaze B2
+                checksumAlgorithm: ""  # required for Backblaze B2
 
           volumeSnapshotLocation:
             - name: democratic-csi
@@ -97,7 +97,7 @@ spec:
         schedules:
           daily-backups:
             disabled: false
-            schedule: "0 1 * * *" # once a day, at midnight
+            schedule: "0 1 * * *"  # once a day, at midnight
             useOwnerReferencesInBackup: false
             template:
               ttl: "240h"

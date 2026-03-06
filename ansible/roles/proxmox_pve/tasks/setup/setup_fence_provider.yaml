@@ -1,3 +1,4 @@
+---
 - name: Install HA Fence Watchdog
   when: pve_ha_fence_provider == 'idrac'
   block:

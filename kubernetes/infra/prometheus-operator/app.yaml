@@ -193,7 +193,7 @@ spec:
             podMonitorSelectorNilUsesHelmValues: false
             probeSelectorNilUsesHelmValues: false
             replicas: 1
-            replicaExternalLabelName: "__replica__" # must match with thanos value `.query.replicaLabel[0]`
+            replicaExternalLabelName: "__replica__"  # must match with thanos value `.query.replicaLabel[0]`
             resources:
               requests:
                 cpu: 100m
@@ -203,7 +203,7 @@ spec:
             retentionSize: 50GB
             ruleSelectorNilUsesHelmValues: false
             scrapeConfigSelectorNilUsesHelmValues: false
-            scrapeInterval: 1m # Must match interval in Grafana Helm chart
+            scrapeInterval: 1m  # Must match interval in Grafana Helm chart
             serviceMonitorSelectorNilUsesHelmValues: false
             storageSpec:
               volumeClaimTemplate:

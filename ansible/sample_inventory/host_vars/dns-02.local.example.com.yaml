@@ -1,3 +1,4 @@
+---
 slave_zones:
   local.example.com:
     master_groups:
