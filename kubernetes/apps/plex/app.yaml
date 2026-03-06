@@ -32,7 +32,7 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
+
         controllers:
           plex:
             pod:
@@ -65,7 +65,7 @@ spec:
             #         while [ ! -f /tmp/pms.tgz ]; do sleep 2; done;
 
             #         tar -xvzf /tmp/pms.tgz -C /config
-                    
+
             #         chown -R 65534:100 /config/Library || true
             #         find /config/Library -type d -exec chmod 755 {} +
             #         find /config/Library -type f -exec chmod 644 {} +

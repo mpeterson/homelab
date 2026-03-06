@@ -63,8 +63,8 @@ spec:
       valuesObject:
         crds:
           enabled: true
-          
+
         extraArgs:
-        - --enable-gateway-api
-        - --dns01-recursive-nameservers-only
-        - --dns01-recursive-nameservers=1.1.1.1:53
+          - --enable-gateway-api
+          - --dns01-recursive-nameservers-only
+          - --dns01-recursive-nameservers=1.1.1.1:53

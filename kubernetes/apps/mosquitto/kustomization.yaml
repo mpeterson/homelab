@@ -5,7 +5,7 @@ kind: Kustomization
 
 generators:
   - secret-generator.yaml
-  
+
 configMapGenerator:
   - name: mosquitto-configmap
     files:

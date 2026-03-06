@@ -2,95 +2,95 @@
 libraries:
   Movies:
     collection_files:
-    - default: basic
-    - default: imdb
-    - default: franchise
-      template_variables:
-        radarr_add_missing: true
-        radarr_add_missing_645: false
-        radarr_add_missing_8091: false
-        radarr_add_missing_2806: false
-        radarr_add_missing_87800: false
-        radarr_add_missing_477208: false
-        radarr_add_missing_228446: false
+      - default: basic
+      - default: imdb
+      - default: franchise
+        template_variables:
+          radarr_add_missing: true
+          radarr_add_missing_645: false
+          radarr_add_missing_8091: false
+          radarr_add_missing_2806: false
+          radarr_add_missing_87800: false
+          radarr_add_missing_477208: false
+          radarr_add_missing_228446: false
     overlay_files:
-    - remove_overlays: false
-    - reapply_overlays: false
-    - default: ribbon
-    - default: resolution
-    - default: ratings
-      template_variables:
-        rating1: user
-        rating1_image: imdb
-        #rating2: audience
-        #rating2_image: rt_popcorn
-        #rating3: critic
-        #rating3_image: rt_tomato
+      - remove_overlays: false
+      - reapply_overlays: false
+      - default: ribbon
+      - default: resolution
+      - default: ratings
+        template_variables:
+          rating1: user
+          rating1_image: imdb
+          #rating2: audience
+          #rating2_image: rt_popcorn
+          #rating3: critic
+          #rating3_image: rt_tomato
 
-        horizontal_position: left
-        vertical_position: bottom
-        rating_alignment: horizontal
+          horizontal_position: left
+          vertical_position: bottom
+          rating_alignment: horizontal
 
-    - default: mediastinger
-      template_variables:
-        horizontal_align: left
-        vertical_align: bottom
-        back_width: 80
-        back_height: 80
-        horizontal_offset: 345
+      - default: mediastinger
+        template_variables:
+          horizontal_align: left
+          vertical_align: bottom
+          back_width: 80
+          back_height: 80
+          horizontal_offset: 345
     operations:
       mass_user_rating_update: imdb
   Series:
     collection_files:
-    - default: basic
-    - default: imdb
-    - default: franchise
-      template_variables:
-        sonarr_add_missing: true
-        sonarr_add_missing_253: false
-        sonarr_add_missing_549: false
-        sonarr_add_missing_951: false
-        sonarr_add_missing_1402: false
-        sonarr_add_missing_1412: false
-        sonarr_add_missing_1431: false
-        sonarr_add_missing_4614: false
-        sonarr_add_missing_4629: false
-        sonarr_add_missing_8514: false
-        sonarr_add_missing_6357: false
-        sonarr_add_missing_10222: false
-        sonarr_add_missing_31917: false
-        sonarr_add_missing_44006: false
+      - default: basic
+      - default: imdb
+      - default: franchise
+        template_variables:
+          sonarr_add_missing: true
+          sonarr_add_missing_253: false
+          sonarr_add_missing_549: false
+          sonarr_add_missing_951: false
+          sonarr_add_missing_1402: false
+          sonarr_add_missing_1412: false
+          sonarr_add_missing_1431: false
+          sonarr_add_missing_4614: false
+          sonarr_add_missing_4629: false
+          sonarr_add_missing_8514: false
+          sonarr_add_missing_6357: false
+          sonarr_add_missing_10222: false
+          sonarr_add_missing_31917: false
+          sonarr_add_missing_44006: false
     overlay_files:
-    - remove_overlays: false
-    - reapply_overlays: false
-    - default: ribbon
-    - default: resolution
-    - default: ratings
-      template_variables:
-        rating1: user
-        rating1_image: imdb
-        #rating2: audience
-        #rating2_image: rt_popcorn
-        #rating3: critic
-        #rating3_image: rt_tomato
+      - remove_overlays: false
+      - reapply_overlays: false
+      - default: ribbon
+      - default: resolution
+      - default: ratings
+        template_variables:
+          rating1: user
+          rating1_image: imdb
+          #rating2: audience
+          #rating2_image: rt_popcorn
+          #rating3: critic
+          #rating3_image: rt_tomato
 
-        horizontal_position: left
-        vertical_position: bottom
-        rating_alignment: horizontal
-    - default: mediastinger
-      template_variables:
-        horizontal_align: left
-        vertical_align: bottom
-        back_width: 80
-        back_height: 80
-        horizontal_offset: 345
+          horizontal_position: left
+          vertical_position: bottom
+          rating_alignment: horizontal
+      - default: mediastinger
+        template_variables:
+          horizontal_align: left
+          vertical_align: bottom
+          back_width: 80
+          back_height: 80
+          horizontal_offset: 345
     operations:
       mass_user_rating_update: imdb
 
 playlist_files:
-- default: playlist
-  template_variables:
-    libraries: Movies, Series
+  - default: playlist
+    template_variables:
+      libraries: Movies, Series
 
 settings:
   cache: true
@@ -131,10 +131,10 @@ settings:
   custom_repo:
   check_nightly: false
   run_order:
-  - operations
-  - metadata
-  - collections
-  - overlays
+    - operations
+    - metadata
+    - collections
+    - overlays
   overlay_artwork_filetype: jpg
   overlay_artwork_quality: 90
   show_unfiltered: false

@@ -62,7 +62,7 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
+
         controllers:
           recyclarr:
             type: cronjob
@@ -171,4 +171,4 @@ spec:
             name: arr-scripts
             defaultMode: 0775
             globalMounts:
-                - path: /config/scripts
+              - path: /config/scripts

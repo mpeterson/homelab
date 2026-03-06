@@ -63,7 +63,7 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
+
         controllers:
           cross-seed:
             replicas: 1

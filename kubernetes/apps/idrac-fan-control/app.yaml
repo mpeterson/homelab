@@ -63,8 +63,8 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
-        controllers: 
+
+        controllers:
           pve-01-idrac-fan-control:
             pod:
               securityContext:
@@ -141,8 +141,8 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
-        controllers: 
+
+        controllers:
           pve-02-idrac-fan-control:
             pod:
               securityContext:

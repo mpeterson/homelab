@@ -63,7 +63,7 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
+
         controllers:
           paperless:
             replicas: 1
@@ -150,7 +150,7 @@ spec:
             ports:
               http:
                 port: 6379
-                
+
         route:
           app:
             enabled: true

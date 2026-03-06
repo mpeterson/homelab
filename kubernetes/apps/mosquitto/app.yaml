@@ -62,7 +62,7 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
+
         controllers:
           mosquitto:
             initContainers:
@@ -89,7 +89,7 @@ spec:
                 securityContext:
                   allowPrivilegeEscalation: false
                   readOnlyRootFilesystem: true
-                  capabilities: { drop: ["ALL"] }
+                  capabilities: {drop: ["ALL"]}
                 resources:
                   requests:
                     cpu: 10m
@@ -102,7 +102,7 @@ spec:
             runAsGroup: 568
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
-            seccompProfile: { type: RuntimeDefault }
+            seccompProfile: {type: RuntimeDefault}
 
         service:
           app:

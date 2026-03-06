@@ -1,0 +1,17 @@
+---
+extends: default
+
+rules:
+  # Long lines are common in Kubernetes manifests (URLs, annotations, etc.)
+  line-length: disable
+  # Helm templates and SOPS files may have unconventional formatting
+  comments-indentation: disable
+  truthy:
+    allowed-values: ["true", "false", "yes", "no"]
+
+ignore:
+  # SOPS-encrypted files contain binary data that won't lint cleanly
+  - "**/*.sops.yaml"
+  - "**/*.sops.yml"
+  # Git submodule — not maintained in this repo
+  - "ansible/roles/bind9/**"

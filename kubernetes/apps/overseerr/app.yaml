@@ -32,7 +32,7 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
+
         controllers:
           overseerr:
             pod:

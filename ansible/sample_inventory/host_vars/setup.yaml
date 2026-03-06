@@ -1,12 +1,12 @@
 ---
 - hosts: bind9
   name: bind9 setup
-  
+
   tags: bind9_setup
-  
+
   roles:
     - bind9
-    
+
   tasks:
     - name: Install fixed master zones
       ansible.builtin.copy:

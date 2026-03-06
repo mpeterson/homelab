@@ -63,7 +63,7 @@ spec:
     helm:
       valuesObject:
         strategy: RollingUpdate
-        
+
         controllers:
           plex-auto-languages:
             pod:

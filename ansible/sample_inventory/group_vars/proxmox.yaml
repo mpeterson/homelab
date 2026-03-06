@@ -32,7 +32,7 @@ pve_backup:
   host:
     enabled: 1
     storage: pbs-01
-      healtcheck_ping_url: https://hc-ping.com/123e4567-e89b-12d3-a456-426614174000
+    healtcheck_ping_url: https://hc-ping.com/123e4567-e89b-12d3-a456-426614174000
     schedule: '*-*-* 03:00:00'
   workload_schedules:
     backup-all-2100:
@@ -48,11 +48,11 @@ pve_notification:
     pushover-normal:
       body: __REDACTED_BASE64_BODY__
       header:
-      - name=Content-Type,value=YXBwbGljYXRpb24vanNvbg==
+        - name=Content-Type,value=YXBwbGljYXRpb24vanNvbg==
       method: post
       secret:
-      - name=apikey,value=__REDACTED_BASE64_SECRET__
-      - name=userkey,value=__REDACTED_BASE64_SECRET__
+        - name=apikey,value=__REDACTED_BASE64_SECRET__
+        - name=userkey,value=__REDACTED_BASE64_SECRET__
       url: https://api.pushover.net/1/messages.json
     healthcheck-backup-fail:
       method: get
@@ -63,41 +63,41 @@ pve_notification:
     pushover-high:
       body: __REDACTED_BASE64_BODY__
       header:
-      - name=Content-Type,value=YXBwbGljYXRpb24vanNvbg==
+        - name=Content-Type,value=YXBwbGljYXRpb24vanNvbg==
       method: post
       secret:
-      - name=apikey,value=__REDACTED_BASE64_SECRET__
-      - name=userkey,value=__REDACTED_BASE64_SECRET__
+        - name=apikey,value=__REDACTED_BASE64_SECRET__
+        - name=userkey,value=__REDACTED_BASE64_SECRET__
       url: https://api.pushover.net/1/messages.json
 
   matchers:
     errors:
       comment: Route errors
       match-severity:
-      - error
+        - error
       mode: all
       target:
-      - pushover-high
+        - pushover-high
     default:
       comment: Route non error notifications
       match-severity:
-      - info,notice,warning,unknown
+        - info,notice,warning,unknown
       mode: all
       target:
-      - pushover-normal
+        - pushover-normal
     backup-success:
       match-field:
-      - exact:type=vzdump
+        - exact:type=vzdump
       match-severity:
-      - info,notice,unknown
+        - info,notice,unknown
       mode: all
       target:
-      - healthcheck-backup-success
+        - healthcheck-backup-success
     backup-fail:
       match-field:
-      - exact:type=vzdump
+        - exact:type=vzdump
       match-severity:
-      - error
+        - error
       mode: all
       target:
-      - healthcheck-backup-fail
+        - healthcheck-backup-fail
