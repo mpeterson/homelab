@@ -1,0 +1,27 @@
+---
+name: PR Title
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize]
+
+jobs:
+  semantic-pr-title:
+    name: Semantic PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title follows Conventional Commits
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|chore|ci|docs|refactor|test|perf|build|style|revert)(\(.+\))?!?: .+'
+          if [[ ! "$PR_TITLE" =~ $pattern ]]; then
+            echo "::error::PR title must follow Conventional Commits format: <type>(<optional scope>): <description>"
+            echo ""
+            echo "Allowed types: feat, fix, chore, ci, docs, refactor, test, perf, build, style, revert"
+            echo "Examples:"
+            echo "  feat: add new feature"
+            echo "  fix(auth): resolve login bug"
+            echo "  chore(deps): update dependency"
+            exit 1
+          fi

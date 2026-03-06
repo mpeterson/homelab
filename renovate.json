@@ -92,6 +92,21 @@
       "description": "Group kube-prometheus-stack and its CRDs into a single PR",
       "matchFileNames": ["kubernetes/infra/prometheus-operator/**"],
       "groupName": "kube-prometheus-stack"
+    },
+    {
+      "description": "Group democratic-csi NFS, iSCSI, and snapshot-controller into a single PR",
+      "matchFileNames": ["kubernetes/infra/democratic-csi/**"],
+      "groupName": "democratic-csi"
+    },
+    {
+      "description": "Group qbittorrent and qbtools into a single PR",
+      "matchFileNames": ["kubernetes/apps/qbittorrent/**"],
+      "groupName": "qbittorrent"
+    },
+    {
+      "description": "Group paperless and its valkey dependency into a single PR",
+      "matchFileNames": ["kubernetes/apps/paperless/**"],
+      "groupName": "paperless"
     }
   ]
 }
