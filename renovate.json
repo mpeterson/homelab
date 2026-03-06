@@ -22,6 +22,7 @@
   "git-submodules": {
     "enabled": true
   },
+  "addLabels": ["manual-review"],
   "packageRules": [
     {
       "description": "Tier 1: Automerge patch + minor for low-risk apps and infra",
@@ -51,7 +52,8 @@
       ],
       "matchUpdateTypes": ["minor", "patch", "digest", "pin"],
       "automerge": true,
-      "automergeType": "pr"
+      "automergeType": "pr",
+      "labels": []
     },
     {
       "description": "Tier 2: Automerge patch only for medium-risk apps",
@@ -61,18 +63,13 @@
       ],
       "matchUpdateTypes": ["patch", "digest", "pin"],
       "automerge": true,
-      "automergeType": "pr"
+      "automergeType": "pr",
+      "labels": []
     },
     {
       "description": "Never automerge app-template Helm chart updates",
       "matchPackageNames": ["app-template"],
-      "automerge": false,
-      "addLabels": ["manual-review"]
-    },
-    {
-      "description": "Label major updates for manual review",
-      "matchUpdateTypes": ["major"],
-      "addLabels": ["manual-review"]
+      "automerge": false
     }
   ]
 }
