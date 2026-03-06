@@ -66,16 +66,12 @@
     {
       "description": "Never automerge app-template Helm chart updates",
       "matchPackageNames": ["app-template"],
-      "automerge": false
-    },
-    {
-      "description": "Label PRs that require manual review",
-      "matchUpdateTypes": ["major"],
+      "automerge": false,
       "addLabels": ["manual-review"]
     },
     {
-      "description": "Label non-automerge PRs for manual review",
-      "automerge": false,
+      "description": "Label major updates for manual review",
+      "matchUpdateTypes": ["major"],
       "addLabels": ["manual-review"]
     }
   ]
