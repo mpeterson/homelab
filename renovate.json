@@ -24,6 +24,12 @@
   },
   "packageRules": [
     {
+      "description": "SOPS files: never automerge, label for manual re-encryption",
+      "matchFileNames": ["**/*.sops.yaml", "**/*.sops.yml"],
+      "automerge": false,
+      "labels": ["manual-review", "sops-reencrypt"]
+    },
+    {
       "description": "Default: label all PRs for manual review",
       "matchUpdateTypes": ["major", "minor", "patch", "digest", "pin", "rollback", "bump"],
       "labels": ["manual-review"]
