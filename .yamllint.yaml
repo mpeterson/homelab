@@ -5,6 +5,8 @@ rules:
   # Long lines are common in Kubernetes manifests (URLs, annotations, etc.)
   line-length: disable
   # Helm templates and SOPS files may have unconventional formatting
+  comments:
+    min-spaces-from-content: 1
   comments-indentation: disable
   truthy:
     allowed-values: ["true", "false", "yes", "no", "on"]
