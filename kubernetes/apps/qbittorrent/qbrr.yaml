@@ -1,0 +1,62 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app qbrr
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 4.6.2
+    helm:
+      valuesObject:
+        defaultPodOptions:
+          securityContext:
+            runAsUser: 65534
+            runAsGroup: 100
+            fsGroup: 65534
+            fsGroupChangePolicy: "OnRootMismatch"
+
+        controllers:
+          reannounce:
+            containers:
+              app:
+                image:
+                  repository: ghcr.io/buroa/qbrr
+                  tag: 0.1.4
+                env:
+                  QBITTORRENT_HOST: http://qbittorrent.media.svc.cluster.local
+                resources:
+                  requests:
+                    memory: 128Mi
+                    cpu: 25m
+                  limits:
+                    memory: 256Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
