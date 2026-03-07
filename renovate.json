@@ -4,6 +4,8 @@
     "config:best-practices",
     ":disableRateLimiting"
   ],
+  "timezone": "Asia/Jerusalem",
+  "automergeSchedule": ["after 5:30am and before 6:00am"],
   "argocd": {
     "managerFilePatterns": [
       "/^kubernetes/.+\\.ya?ml$/"
@@ -31,7 +33,7 @@
     },
     {
       "description": "Default: label all PRs for manual review",
-      "matchUpdateTypes": ["major", "minor", "patch", "digest", "pin", "rollback", "bump"],
+      "matchUpdateTypes": ["major", "minor", "patch", "digest", "pin", "pinDigest", "rollback", "bump"],
       "labels": ["manual-review"]
     },
     {
@@ -60,7 +62,7 @@
         "kubernetes/infra/prometheus-operator/**",
         "kubernetes/infra/tailscale-operator/**"
       ],
-      "matchUpdateTypes": ["minor", "patch", "digest", "pin"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
       "automerge": true,
       "automergeType": "pr",
       "labels": []
@@ -71,7 +73,7 @@
         "kubernetes/apps/mosquitto/**",
         "kubernetes/apps/paperless/**"
       ],
-      "matchUpdateTypes": ["patch", "digest", "pin"],
+      "matchUpdateTypes": ["patch", "digest", "pin", "pinDigest"],
       "automerge": true,
       "automergeType": "pr",
       "labels": []
@@ -84,7 +86,7 @@
     {
       "description": "Automerge GitHub Actions digest updates",
       "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["digest", "pin", "patch", "minor"],
+      "matchUpdateTypes": ["digest", "pin", "pinDigest", "patch", "minor"],
       "automerge": true,
       "automergeType": "pr",
       "labels": []
