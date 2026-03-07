@@ -99,7 +99,7 @@
       "groupName": "democratic-csi"
     },
     {
-      "description": "Group qbittorrent and qbtools into a single PR",
+      "description": "Group qbittorrent, tqm, and qbrr into a single PR",
       "matchFileNames": ["kubernetes/apps/qbittorrent/**"],
       "groupName": "qbittorrent"
     },

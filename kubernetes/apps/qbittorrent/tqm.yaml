@@ -3,7 +3,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: &app qbtools
+  name: &app tqm
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -41,7 +41,7 @@ spec:
             fsGroupChangePolicy: "OnRootMismatch"
 
         controllers:
-          prune:
+          tqm:
             type: cronjob
 
             cronjob: &cronJobSpec
@@ -55,23 +55,13 @@ spec:
               restartPolicy: Never
 
             initContainers:
-              tagging: &container
+              retag: &container
                 image:
-                  repository: ghcr.io/buroa/qbtools
-                  tag: v0.21.2@sha256:33da584c9d71bb2d8b9931995c41599bef1fdebf52cf5408cdd09175069f299a
+                  repository: ghcr.io/home-operations/tqm
+                  tag: 1.19.0
                 args:
-                  - tagging
-                  - --added-on
-                  - --expired
-                  - --last-activity
-                  - --sites
-                  - --unregistered
-                  - --server
-                  - &qbittorrent_host qbittorrent.media.svc.cluster.local
-                  - --port
-                  - &qbittorrent_port "80"
-                  - --config
-                  - /config/config.yaml
+                  - retag
+                  - qb
                 resources:
                   requests:
                     memory: 128Mi
@@ -86,39 +76,11 @@ spec:
                       - ALL
 
             containers:
-              expired:
+              clean:
                 <<: *container
                 args:
-                  - prune
-                  - --exclude-category
-                  - manual
-                  - --exclude-category
-                  - cross-seed
-                  - --exclude-tag
-                  - added:24h
-                  - --include-tag
-                  - expired
-                  - --server
-                  - *qbittorrent_host
-                  - --port
-                  - *qbittorrent_port
-
-              unregistered:
-                <<: *container
-                args:
-                  - prune
-                  - --exclude-category
-                  - manual
-                  - --exclude-category
-                  - cross-seed
-                  - --exclude-tag
-                  - added:24h
-                  - --include-tag
-                  - unregistered
-                  - --server
-                  - *qbittorrent_host
-                  - --port
-                  - *qbittorrent_port
+                  - clean
+                  - qb
 
           orphaned:
             type: cronjob
@@ -131,36 +93,19 @@ spec:
               app:
                 <<: *container
                 args:
-                  - orphaned
-                  - --exclude-pattern
-                  - "*/manual/*"
-                  - --exclude-pattern
-                  - "*/torrents-files"
-                  - --exclude-pattern
-                  - "*/cross-seed/*"
-                  - --server
-                  - *qbittorrent_host
-                  - --port
-                  - *qbittorrent_port
-
-          reannounce:
-            containers:
-              app:
-                <<: *container
-                args:
-                  - reannounce
-                  - --process-seeding
-                  - --server
-                  - *qbittorrent_host
-                  - --port
-                  - *qbittorrent_port
+                  - orphan
+                  - qb
 
         persistence:
+          config:
+            type: emptyDir
+            globalMounts:
+              - path: /.config/tqm
           config-file:
             type: secret
-            name: qbtools-secret
+            name: tqm-secret
             globalMounts:
-              - path: /config/config.yaml
+              - path: /.config/tqm/config.yaml
                 subPath: config.yaml
                 readOnly: true
           downloads:
