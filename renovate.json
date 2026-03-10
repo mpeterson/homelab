@@ -5,7 +5,7 @@
     ":disableRateLimiting"
   ],
   "timezone": "Asia/Jerusalem",
-  "automergeSchedule": ["after 5:30am and before 6:00am"],
+  "automergeSchedule": ["after 2am and before 7am"],
   "argocd": {
     "managerFilePatterns": [
       "/^kubernetes/.+\\.ya?ml$/"
