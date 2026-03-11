@@ -2,9 +2,7 @@
 name: SOPS Integrity Check
 on:
   pull_request:
-    paths:
-      - "**/*.sops.yaml"
-      - "**/*.sops.yml"
+    branches: [main]
 
 jobs:
   check-sops-mac:
@@ -18,7 +16,7 @@ jobs:
         run: |
           changed_sops=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- '*.sops.yaml' '*.sops.yml')
           if [ -z "$changed_sops" ]; then
-            echo "No SOPS files changed"
+            echo "No SOPS files changed — skipping"
             exit 0
           fi
 
