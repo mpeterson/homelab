@@ -24,6 +24,7 @@
   "git-submodules": {
     "enabled": true
   },
+  "platformAutomerge": false,
   "packageRules": [
     {
       "description": "SOPS files: never automerge, label for manual re-encryption",

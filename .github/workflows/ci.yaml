@@ -4,11 +4,6 @@ name: CI
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "**/*.yaml"
-      - "**/*.yml"
-      - ".yamllint.yaml"
-      - ".github/workflows/ci.yaml"
 
   workflow_dispatch:
 
