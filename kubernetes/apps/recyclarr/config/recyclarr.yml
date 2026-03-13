@@ -1,12 +1,7 @@
 # yaml-language-server: $schema=https://schemas.recyclarr.dev/v8/config-schema.json
 ---
-################################################################################
-## Radarr: UHD Bluray + WEB
-##
-## https://trash-guides.info/Radarr/radarr-setup-quality-profiles/#uhd-bluray-web
-################################################################################
 radarr:
-  uhd-bluray-web:
+  movies:
     base_url: !secret radarr_url
     api_key: !secret radarr_apikey
     delete_old_custom_formats: true
@@ -25,6 +20,10 @@ radarr:
         name: UHD Bluray + WEB
         reset_unmatched_scores:
           enabled: true
+      - trash_id: d1d67249d3890e49bc12e275d989a7e9  # HD Bluray + WEB
+        name: HD Bluray + WEB
+        reset_unmatched_scores:
+          enabled: true
 
     custom_format_groups:
       add:
@@ -32,6 +31,10 @@ radarr:
           select:
             # - dc98083864ea246d05a42df0d05f81cc  # x265 (HD)
             - 839bea857ed2c0a8e084f3cbdbd65ecb  # x265 (no HDR/DV)
+        - trash_id: f8bf8eab4617f12dfdbd16303d8da245  # [Required] Golden Rule HD
+          select:
+            - dc98083864ea246d05a42df0d05f81cc  # x265 (HD)
+            # - 839bea857ed2c0a8e084f3cbdbd65ecb  # x265 (no HDR/DV)
         - trash_id: b29413a7487478fe98228ce79e5689e4  # [HDR Formats] HDR10+ Boost
         - trash_id: f4f1474b963b24cf983455743aa9906c  # [Optional] Movie Versions
           select:
@@ -41,48 +44,8 @@ radarr:
             - 9c38ebb7384dada637be8899efa68e6f  # SDR
             # - 25c12f78430a3a23413652cbd1d48d77  # SDR (no WEBDL)
 
-  ################################################################################
-  ## Radarr: HD Bluray + WEB
-  ##
-  ## https://trash-guides.info/Radarr/radarr-setup-quality-profiles/#hd-bluray-web
-  ################################################################################
-  hd-bluray-web:
-    base_url: !secret radarr_url
-    api_key: !secret radarr_apikey
-    delete_old_custom_formats: true
-
-    media_naming:
-      folder: plex-tmdb
-      movie:
-        rename: true
-        standard: plex-tmdb
-
-    quality_definition:
-      type: movie
-
-    quality_profiles:
-      - trash_id: d1d67249d3890e49bc12e275d989a7e9  # HD Bluray + WEB
-        name: HD Bluray + WEB
-        reset_unmatched_scores:
-          enabled: true
-
-    custom_format_groups:
-      add:
-        - trash_id: f8bf8eab4617f12dfdbd16303d8da245  # [Required] Golden Rule HD
-          select:
-            - dc98083864ea246d05a42df0d05f81cc  # x265 (HD)
-            # - 839bea857ed2c0a8e084f3cbdbd65ecb  # x265 (no HDR/DV)
-        - trash_id: f4f1474b963b24cf983455743aa9906c  # [Optional] Movie Versions
-          select:
-            - 9f6cbff8cfe4ebbc1bde14c7b7bec0de  # IMAX Enhanced
-
-################################################################################
-## Sonarr: WEB-2160p
-##
-## https://trash-guides.info/Sonarr/sonarr-setup-quality-profiles/#web-2160p
-################################################################################
 sonarr:
-  web-2160p:
+  tv:
     base_url: !secret sonarr_url
     api_key: !secret sonarr_apikey
     delete_old_custom_formats: true
@@ -104,6 +67,10 @@ sonarr:
         name: WEB-2160p
         reset_unmatched_scores:
           enabled: true
+      - trash_id: 72dae194fc92bf828f32cde7744e51a1  # WEB-1080p
+        name: WEB-1080p
+        reset_unmatched_scores:
+          enabled: true
 
     custom_format_groups:
       add:
@@ -111,6 +78,10 @@ sonarr:
           select:
             # - 47435ece6b99a0b477caf360e79ba0bb  # x265 (HD)
             - 9b64dff695c2115facf1b6ea59c9bd07  # x265 (no HDR/DV)
+        - trash_id: 158188097a58d7687dee647e04af0da3  # [Required] Golden Rule HD
+          select:
+            - 47435ece6b99a0b477caf360e79ba0bb  # x265 (HD)
+            # - 9b64dff695c2115facf1b6ea59c9bd07  # x265 (no HDR/DV)
         - trash_id: 7d366c213e5c23a052b157356fac1921  # [HDR Formats] HDR10+ Boost
         - trash_id: f4a0410a1df109a66d6e47dcadcce014  # [Optional] Miscellaneous
           select:
@@ -123,45 +94,3 @@ sonarr:
           select:
             - 2016d1676f5ee13a5b7257ff86ac9a93  # SDR
             # - 83304f261cf516bb208c18c54c0adf97  # SDR (no WEBDL)
-
-  ################################################################################
-  ## Sonarr: WEB-1080p
-  ##
-  ## https://trash-guides.info/Sonarr/sonarr-setup-quality-profiles/#web-1080p
-  ################################################################################
-  web-1080p:
-    base_url: !secret sonarr_url
-    api_key: !secret sonarr_apikey
-    delete_old_custom_formats: true
-
-    media_naming:
-      series: plex-tvdb
-      season: default
-      episodes:
-        rename: true
-        standard: default
-        daily: default
-        anime: default
-
-    quality_definition:
-      type: series
-
-    quality_profiles:
-      - trash_id: 72dae194fc92bf828f32cde7744e51a1  # WEB-1080p
-        name: WEB-1080p
-        reset_unmatched_scores:
-          enabled: true
-
-    custom_format_groups:
-      add:
-        - trash_id: 158188097a58d7687dee647e04af0da3  # [Required] Golden Rule HD
-          select:
-            - 47435ece6b99a0b477caf360e79ba0bb  # x265 (HD)
-            # - 9b64dff695c2115facf1b6ea59c9bd07  # x265 (no HDR/DV)
-        - trash_id: f4a0410a1df109a66d6e47dcadcce014  # [Optional] Miscellaneous
-          select:
-            - 32b367365729d530ca1c124a0b180c64  # Bad Dual Groups
-            - 82d40da2bc6923f41e14394075dd4b03  # No-RlsGroup
-            - e1a997ddb54e3ecbfe06341ad323c458  # Obfuscated
-            - 06d66ab109d4d2eddb2794d21526d140  # Retags
-            - 1b3994c551cbb92a2c781af061f4ab44  # Scene
