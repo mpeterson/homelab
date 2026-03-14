@@ -70,10 +70,10 @@ spec:
 
           models:
             pull:
-              - llama3.1:8b
-              - qwen2.5:7b
+              - llama3.2:1b
+              - qwen3.5:0.8b
             load:
-              - qwen2.5:7b
+              - qwen3.5:0.8b
 
         persistentVolume:
           enabled: true
