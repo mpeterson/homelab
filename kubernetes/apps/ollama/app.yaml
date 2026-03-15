@@ -72,8 +72,9 @@ spec:
             pull:
               - llama3.2:1b
               - qwen3.5:0.8b
+              - qwen2.5:3b
             load:
-              - qwen3.5:0.8b
+              - qwen2.5:3b
 
         persistentVolume:
           enabled: true
