@@ -94,8 +94,10 @@ spec:
                       secretKeyRef:
                         name: stirling-pdf-secret
                         key: SECURITY_INITIALLOGIN_PASSWORD
-                  SYSTEM_DEFAULTLOCALE: en_US
-                  SYSTEM_MAXFILESIZE: "2000"
+                  SYSTEM_DEFAULTLOCALE: en-US
+                  SYSTEM_MAXFILESIZE: "999"
+                  SPRINGDOC_API_DOCS_ENABLED: "false"
+                  SPRINGDOC_SWAGGER_UI_ENABLED: "false"
                 probes:
                   liveness:
                     enabled: true
