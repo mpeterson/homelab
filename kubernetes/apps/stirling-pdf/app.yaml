@@ -1,0 +1,170 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: stirling-pdf-configs
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: selfhosted
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/apps/stirling-pdf/
+    targetRevision: main
+
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app stirling-pdf
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: selfhosted
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 4.6.2
+    helm:
+      valuesObject:
+        strategy: RollingUpdate
+
+        controllers:
+          stirling-pdf:
+            replicas: 1
+            pod:
+              securityContext:
+                runAsUser: 1000
+                runAsGroup: 1000
+                fsGroup: 1000
+                fsGroupChangePolicy: "OnRootMismatch"
+
+            containers:
+              app:
+                image:
+                  repository: ghcr.io/stirling-tools/s-pdf
+                  tag: latest-fat
+                env:
+                  DOCKER_ENABLE_SECURITY: "true"
+                  SECURITY_ENABLELOGIN: "true"
+                  SECURITY_INITIALLOGIN_USERNAME:
+                    valueFrom:
+                      secretKeyRef:
+                        name: stirling-pdf-secret
+                        key: SECURITY_INITIALLOGIN_USERNAME
+                  SECURITY_INITIALLOGIN_PASSWORD:
+                    valueFrom:
+                      secretKeyRef:
+                        name: stirling-pdf-secret
+                        key: SECURITY_INITIALLOGIN_PASSWORD
+                  SYSTEM_DEFAULTLOCALE: en_US
+                  SYSTEM_MAXFILESIZE: "2000"
+                probes:
+                  liveness:
+                    enabled: true
+                  readiness:
+                    enabled: true
+                  startup:
+                    enabled: true
+                    spec:
+                      failureThreshold: 30
+                      periodSeconds: 5
+                resources:
+                  requests:
+                    cpu: 25m
+                    memory: 512Mi
+                  limits:
+                    memory: 4Gi
+
+        service:
+          app:
+            controller: *app
+            ports:
+              http:
+                port: &port 8080
+
+        route:
+          app:
+            enabled: true
+            kind: HTTPRoute
+            hostnames:
+              - pdf.peterson.com.ar
+            parentRefs:
+              - kind: Gateway
+                name: public-gateway
+                namespace: network
+                sectionName: https
+            rules:
+              - backendRefs:
+                  - name: stirling-pdf
+                    port: *port
+                matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+
+        persistence:
+          configs:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 500Mi
+            globalMounts:
+              - path: /configs
+          tessdata:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            globalMounts:
+              - path: /usr/share/tessdata
+          logs:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 500Mi
+            globalMounts:
+              - path: /logs
+          pipeline:
+            storageClass: zfs-generic-iscsi-csi-xfs
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            globalMounts:
+              - path: /pipeline
+          tmp:
+            type: emptyDir
+            globalMounts:
+              - path: /tmp
