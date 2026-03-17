@@ -70,8 +70,6 @@ spec:
             replicas: 1
             pod:
               securityContext:
-                runAsUser: 1000
-                runAsGroup: 1000
                 fsGroup: 1000
                 fsGroupChangePolicy: "OnRootMismatch"
 
@@ -81,6 +79,9 @@ spec:
                   repository: ghcr.io/stirling-tools/s-pdf
                   tag: latest-fat
                 env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  UMASK: "022"
                   DOCKER_ENABLE_SECURITY: "true"
                   SECURITY_ENABLELOGIN: "true"
                   SECURITY_INITIALLOGIN_USERNAME:
