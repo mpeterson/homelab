@@ -5,6 +5,7 @@
     ":disableRateLimiting"
   ],
   "timezone": "Asia/Jerusalem",
+  "schedule": ["after 2am and before 7am"],
   "argocd": {
     "managerFilePatterns": [
       "/^kubernetes/.+\\.ya?ml$/"
