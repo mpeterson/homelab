@@ -57,6 +57,7 @@
         "kubernetes/apps/rotki/**",
         "kubernetes/apps/sabnzbd/**",
         "kubernetes/apps/sonarr/**",
+        "kubernetes/apps/stirling-pdf/**",
         "kubernetes/apps/tautulli/**",
         "kubernetes/infra/alertmanager/**",
         "kubernetes/infra/metrics-server/**",
