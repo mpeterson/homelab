@@ -96,7 +96,6 @@ spec:
                         key: SECURITY_INITIALLOGIN_PASSWORD
                   SYSTEM_DEFAULTLOCALE: en-US
                   SYSTEM_MAXFILESIZE: "999"
-                  DOCKER_INSTALL_LANGS: heb
                   SPRINGDOC_API_DOCS_ENABLED: "false"
                   SPRINGDOC_SWAGGER_UI_ENABLED: "false"
                 probes:
