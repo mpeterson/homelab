@@ -6,6 +6,8 @@ metadata:
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
+    - post-delete-finalizer.argocd.argoproj.io
+    - post-delete-finalizer.argocd.argoproj.io/cleanup
   annotations:
     argocd.argoproj.io/sync-wave: "-4"
 spec:
