@@ -31,6 +31,8 @@ spec:
     targetRevision: 0.18.3
     helm:
       valuesObject:
+        postDeleteCleanup: false
+
         master:
           config:
             extraLabelNs:
