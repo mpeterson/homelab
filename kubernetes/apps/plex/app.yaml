@@ -116,6 +116,7 @@ spec:
                 resources:
                   requests:
                     cpu: 100m
+                    memory: 2Gi
                   limits:
                     nvidia.com/gpu: 1
                     memory: 9248M
