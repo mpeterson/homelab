@@ -114,9 +114,10 @@ spec:
                       - ALL
                 resources:
                   limits:
-                    memory: 256M
+                    memory: 512M
                   requests:
                     cpu: 10m
+                    memory: 128M
 
         persistence:
           config:
