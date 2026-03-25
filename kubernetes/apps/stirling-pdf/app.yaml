@@ -77,7 +77,7 @@ spec:
               app:
                 image:
                   repository: ghcr.io/stirling-tools/s-pdf
-                  tag: 2.7.3-fat@sha256:6e01e599115e6269ee49f4421fa7a91c9f7c27186b8480899df3091f75d96d8e
+                  tag: 2.8.0-fat@sha256:ca065d7e15faeb09e48dc565f88ec49205fb3e1322d1bacc9990a2a08ad55254
                 env:
                   PUID: "1000"
                   PGID: "1000"
