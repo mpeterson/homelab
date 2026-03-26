@@ -11,12 +11,10 @@ mod velero "kubernetes/infra/velero"
 [doc('List available recipes')]
 [private]
 default:
-    @echo "Modules:"
-    @echo "  argocd     Manage ArgoCD reconciliation and pruning"
-    @echo "  bootstrap  Bootstrap the cluster (ArgoCD + apps)"
-    @echo "  velero     Manage Velero backups and PVC restores"
-    @echo ""
-    @just --list --list-submodules
+    @just --list --list-submodules \
+      | sed 's/^    argocd:$/    argocd: # Manage ArgoCD reconciliation and pruning/' \
+      | sed 's/^    bootstrap:$/    bootstrap: # Bootstrap the cluster (ArgoCD + apps)/' \
+      | sed 's/^    velero:$/    velero: # Manage Velero backups and PVC restores/'
 
 [private]
 _require *tools:
