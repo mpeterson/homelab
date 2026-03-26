@@ -69,12 +69,6 @@ restore-pvc backup app *pvc: (_require "velero" "kubectl")
     echo "==> Pausing ArgoCD reconciliation for '{{app}}'..."
     just argocd pause {{app}}
 
-    cleanup() {
-      echo "==> Resuming ArgoCD reconciliation for '{{app}}'..."
-      just argocd resume {{app}}
-    }
-    trap cleanup EXIT
-
     echo "==> Scaling down '{{app}}' in namespace '$NAMESPACE'..."
     kubectl scale deployment {{app}} -n "$NAMESPACE" --replicas=0
     kubectl wait --for=delete pod \
@@ -125,6 +119,9 @@ restore-pvc backup app *pvc: (_require "velero" "kubectl")
         kubectl get events -n "$NAMESPACE" \
           --field-selector "involvedObject.name=$PVC_NAME" \
           --sort-by=.lastTimestamp | tail -5
+        echo ""
+        echo "WARNING: ArgoCD reconciliation is still paused for '{{app}}'."
+        echo "  Resume manually when ready: just argocd resume {{app}}"
         exit 1
       fi
     done
@@ -132,5 +129,8 @@ restore-pvc backup app *pvc: (_require "velero" "kubectl")
     echo "==> Scaling up '{{app}}'..."
     kubectl scale deployment {{app}} -n "$NAMESPACE" --replicas=1
     kubectl rollout status deployment {{app}} -n "$NAMESPACE" --timeout=120s
+
+    echo "==> Resuming ArgoCD reconciliation for '{{app}}'..."
+    just argocd resume {{app}}
 
     echo "==> Done! Verify the application is working correctly."
