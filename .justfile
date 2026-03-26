@@ -3,18 +3,14 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 
 [doc('Bootstrap the cluster (ArgoCD + apps)')]
 mod bootstrap "kubernetes/bootstrap"
-[doc('Manage ArgoCD reconciliation and pruning')]
 mod argocd "kubernetes/bootstrap/argocd"
-[doc('Manage Velero backups and PVC restores')]
 mod velero "kubernetes/infra/velero"
 
 [doc('List available recipes')]
 [private]
 default:
     @just --color always --list --list-submodules \
-      | sed 's/^    argocd:$/    argocd: \x1b[34m#\x1b[0m \x1b[34mManage ArgoCD reconciliation and pruning\x1b[0m/' \
-      | sed 's/^    bootstrap:$/    bootstrap \x1b[34m#\x1b[0m \x1b[34mBootstrap the cluster (ArgoCD + apps)\x1b[0m/' \
-      | sed 's/^    velero:$/    velero: \x1b[34m#\x1b[0m \x1b[34mManage Velero backups and PVC restores\x1b[0m/'
+      | sed 's/^    bootstrap:$/    bootstrap \x1b[34m#\x1b[0m \x1b[34mBootstrap the cluster (ArgoCD + apps)\x1b[0m/'
 
 [private]
 _require *tools:
