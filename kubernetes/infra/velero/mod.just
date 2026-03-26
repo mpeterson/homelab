@@ -16,7 +16,7 @@ backups: (_require "velero")
     velero backup get
 
 [doc('List PVCs included in a Velero backup, optionally filtered by search string')]
-backup-pvcs backup filter="": (_require "velero")
+view-pvc backup filter="": (_require "velero")
     #!/usr/bin/env bash
     set -euo pipefail
 
