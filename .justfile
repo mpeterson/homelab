@@ -8,7 +8,7 @@ mod velero "kubernetes/infra/velero"
 [doc('List available recipes')]
 [private]
 default:
-    @just --list
+    @just --list --list-submodules
 
 [private]
 _require *tools:
