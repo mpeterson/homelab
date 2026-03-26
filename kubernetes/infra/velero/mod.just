@@ -25,55 +25,81 @@ check-backup backup app="": (_require "velero")
     fi
 
 # Usage:
-#   just velero restore-pvc overseerr media overseerr-config velero-daily-backups-20260316010049
-#   just velero restore-pvc paperless paperless paperless-data velero-daily-backups-20260325010002
-[doc('Restore a PVC from a Velero backup using CSI snapshots')]
-restore-pvc app namespace pvc backup: (_require "velero" "kubectl")
+#   just velero restore-pvc velero-daily-backups-20260316010049 overseerr
+#   just velero restore-pvc velero-daily-backups-20260325010002 paperless paperless-data
+[doc('Restore PVCs from a Velero backup (namespace inferred from ArgoCD, PVC defaults to all)')]
+restore-pvc backup app pvc="": (_require "velero" "kubectl")
     #!/usr/bin/env bash
     set -euo pipefail
+
+    NAMESPACE=$(kubectl get application {{app}} -n argocd \
+      -o jsonpath='{.spec.destination.namespace}' 2>/dev/null) || {
+      echo "ERROR: Could not find ArgoCD application '{{app}}'"
+      exit 1
+    }
+    echo "==> Resolved namespace: $NAMESPACE"
 
     echo "==> Pausing ArgoCD reconciliation for '{{app}}'..."
     just argocd pause {{app}}
 
-    echo "==> Scaling down '{{app}}' in namespace '{{namespace}}'..."
-    kubectl scale deployment {{app}} -n {{namespace}} --replicas=0
+    echo "==> Scaling down '{{app}}' in namespace '$NAMESPACE'..."
+    kubectl scale deployment {{app}} -n "$NAMESPACE" --replicas=0
     kubectl wait --for=delete pod \
-      -l app.kubernetes.io/name={{app}} -n {{namespace}} --timeout=120s || true
+      -l app.kubernetes.io/name={{app}} -n "$NAMESPACE" --timeout=120s || true
 
-    echo "==> Deleting PVC '{{pvc}}'..."
-    kubectl delete pvc {{pvc}} -n {{namespace}} --timeout=60s
+    if [ -n "{{pvc}}" ]; then
+      PVCS="{{pvc}}"
+    else
+      PVCS=$(kubectl get pvc -n "$NAMESPACE" \
+        -l app.kubernetes.io/name={{app}} \
+        -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+      if [ -z "$PVCS" ]; then
+        echo "ERROR: No PVCs found for app '{{app}}' in namespace '$NAMESPACE'"
+        just argocd resume {{app}}
+        exit 1
+      fi
+      echo "==> Found PVCs: $PVCS"
+    fi
+
+    for PVC_NAME in $PVCS; do
+      echo "==> Deleting PVC '$PVC_NAME'..."
+      kubectl delete pvc "$PVC_NAME" -n "$NAMESPACE" --timeout=60s
+    done
 
     echo "==> Restoring from backup '{{backup}}'..."
-    RESTORE_NAME="{{app}}-{{pvc}}-restore-$(date +%s)"
+    RESTORE_NAME="{{app}}-restore-$(date +%s)"
     velero restore create "$RESTORE_NAME" \
       --from-backup {{backup}} \
-      --include-namespaces {{namespace}} \
+      --include-namespaces "$NAMESPACE" \
       --include-resources persistentvolumeclaims,persistentvolumes,volumesnapshots.snapshot.storage.k8s.io,volumesnapshotcontents.snapshot.storage.k8s.io \
       --selector "app.kubernetes.io/name={{app}}" \
       --existing-resource-policy none
 
-    echo "==> Waiting for PVC '{{pvc}}' to bind..."
-    for i in $(seq 1 30); do
-      STATUS=$(kubectl get pvc {{pvc}} -n {{namespace}} -o jsonpath='{.status.phase}' 2>/dev/null || echo "NotFound")
-      if [ "$STATUS" = "Bound" ]; then
-        echo "    PVC is Bound!"
-        break
+    echo "==> Waiting for PVCs to bind..."
+    for PVC_NAME in $PVCS; do
+      for i in $(seq 1 30); do
+        STATUS=$(kubectl get pvc "$PVC_NAME" -n "$NAMESPACE" \
+          -o jsonpath='{.status.phase}' 2>/dev/null || echo "NotFound")
+        if [ "$STATUS" = "Bound" ]; then
+          echo "    PVC '$PVC_NAME' is Bound!"
+          break
+        fi
+        echo "    [$i/30] PVC '$PVC_NAME' status: $STATUS"
+        sleep 10
+      done
+
+      if [ "$STATUS" != "Bound" ]; then
+        echo "ERROR: PVC '$PVC_NAME' did not bind within 5 minutes. Check events:"
+        kubectl get events -n "$NAMESPACE" \
+          --field-selector "involvedObject.name=$PVC_NAME" \
+          --sort-by=.lastTimestamp | tail -5
+        exit 1
       fi
-      echo "    [$i/30] PVC status: $STATUS"
-      sleep 10
     done
 
-    if [ "$STATUS" != "Bound" ]; then
-      echo "ERROR: PVC did not bind within 5 minutes. Check events:"
-      kubectl get events -n {{namespace}} \
-        --field-selector involvedObject.name={{pvc}} \
-        --sort-by=.lastTimestamp | tail -5
-      exit 1
-    fi
-
     echo "==> Scaling up '{{app}}'..."
-    kubectl scale deployment {{app}} -n {{namespace}} --replicas=1
-    kubectl rollout status deployment {{app}} -n {{namespace}} --timeout=120s
+    kubectl scale deployment {{app}} -n "$NAMESPACE" --replicas=1
+    kubectl rollout status deployment {{app}} -n "$NAMESPACE" --timeout=120s
 
     echo "==> Resuming ArgoCD reconciliation for '{{app}}'..."
     just argocd resume {{app}}
