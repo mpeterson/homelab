@@ -26,6 +26,7 @@ sops-age-secret: (_require "kubectl")
       | kubectl apply --server-side -f -
 
 [doc('Install ArgoCD via kustomize using upstream HA manifests')]
+[private]
 argocd: (_require "kubectl")
     kubectl apply --server-side -f {{ bootstrap_dir }}/argocd/namespace.yaml
     just bootstrap sops-age-secret
@@ -40,6 +41,7 @@ argocd: (_require "kubectl")
       -n argocd --timeout=300s
 
 [doc('Apply bootstrap Applications')]
+[private]
 apps: (_require "kubectl")
     kubectl apply --server-side -f {{ bootstrap_dir }}/argocd/app.yaml
     kubectl apply --server-side -f {{ bootstrap_dir }}/infra.yaml
