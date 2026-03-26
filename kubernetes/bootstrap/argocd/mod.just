@@ -24,7 +24,7 @@ resume app: (_require "kubectl")
     @echo "ArgoCD reconciliation resumed for '{{app}}'"
 
 [doc('Sync ArgoCD with pruning to remove orphaned resources')]
-prune: (_require "kubectl" "argocd")
+prune app="argocd": (_require "kubectl" "argocd")
     #!/usr/bin/env bash
     set -euo pipefail
 
@@ -32,7 +32,7 @@ prune: (_require "kubectl" "argocd")
 
     echo "==> Checking for orphaned resources..."
 
-    ORPHANS=$(argocd app resources argocd --orphaned --core \
+    ORPHANS=$(argocd app resources {{app}} --orphaned --core \
       --kube-context "$KCTX" 2>/dev/null \
       | tail -n +2) || {
       echo "ERROR: Cannot query ArgoCD."
@@ -55,4 +55,4 @@ prune: (_require "kubectl" "argocd")
     fi
 
     echo ""
-    argocd app sync argocd --prune --core --kube-context "$KCTX"
+    argocd app sync {{app}} --prune --core --kube-context "$KCTX"
