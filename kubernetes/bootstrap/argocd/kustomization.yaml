@@ -6,7 +6,7 @@ namespace: argocd
 
 resources:
   - namespace.yaml
-  - https://github.com/argoproj/argo-cd//manifests/ha/cluster-install?ref=v3.3.4
+  - https://github.com/argoproj/argo-cd//manifests/ha/cluster-install?ref=v3.3.5
 
 patches:
   - path: patches/argocd-cm.yaml
