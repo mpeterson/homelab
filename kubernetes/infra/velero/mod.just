@@ -15,8 +15,8 @@ _require *tools:
 backups: (_require "velero")
     velero backup get
 
-[doc('List PVCs included in a Velero backup, optionally filtered by app')]
-backup-pvcs backup app="": (_require "velero")
+[doc('List PVCs included in a Velero backup, optionally filtered by search string')]
+backup-pvcs backup filter="": (_require "velero")
     #!/usr/bin/env bash
     set -euo pipefail
 
@@ -42,9 +42,9 @@ backup-pvcs backup app="": (_require "velero")
       exit 0
     fi
 
-    if [ -n "{{app}}" ]; then
-      echo "PVCs matching '{{app}}':"
-      echo "$PVCS" | grep -i "{{app}}" || echo "  (none)"
+    if [ -n "{{filter}}" ]; then
+      echo "PVCs matching '{{filter}}':"
+      echo "$PVCS" | grep -i "{{filter}}" || echo "  (none)"
     else
       echo "PVCs in backup:"
       echo "$PVCS" | awk -F'/' '{printf "  %-20s %s\n", $1, $2}'
