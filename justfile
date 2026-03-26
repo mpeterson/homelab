@@ -1,4 +1,8 @@
-# Homelab management recipes
+set quiet := true
+set shell := ['bash', '-euo', 'pipefail', '-c']
+
+mod bootstrap "kubernetes/bootstrap"
+mod argocd "kubernetes/bootstrap/argocd"
 
 # List available backups
 velero-backups:
