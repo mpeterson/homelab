@@ -15,13 +15,45 @@ _require *tools:
 backups: (_require "velero")
     velero backup get
 
-[doc('Check which PVCs are included in a Velero backup')]
-check-backup backup app="": (_require "velero")
+[doc('Show PVCs included in a Velero backup, optionally filtered by app')]
+check-backup backup app="": (_require "velero" "kubectl")
     #!/usr/bin/env bash
+    set -euo pipefail
+
+    DETAILS=$(velero backup describe {{backup}} --details 2>&1)
+
+    if echo "$DETAILS" | grep -q "not found"; then
+      echo "ERROR: Backup '{{backup}}' not found"
+      exit 1
+    fi
+
+    PHASE=$(echo "$DETAILS" | awk '/^Phase:/{print $2}')
+    echo "Backup: {{backup}} (Phase: $PHASE)"
+    echo ""
+
+    PVCS=$(velero backup describe {{backup}} --details 2>&1 \
+      | grep -E "^  (pv|persistentvolumeclaims)" -A 9999 \
+      | grep -Eo "ns/[^ ]+" \
+      | sort -u)
+
+    if [ -z "$PVCS" ]; then
+      PVCS=$(kubectl get volumesnapshots -A \
+        -l velero.io/backup-name={{backup}} \
+        -o custom-columns='NAMESPACE:.metadata.namespace,PVC:.spec.source.persistentVolumeClaimName' \
+        --no-headers 2>/dev/null | sort -u)
+    fi
+
+    if [ -z "$PVCS" ]; then
+      echo "No PVC snapshots found in this backup."
+      exit 0
+    fi
+
     if [ -n "{{app}}" ]; then
-      velero backup describe {{backup}} --details 2>&1 | grep -i "{{app}}"
+      echo "PVCs matching '{{app}}':"
+      echo "$PVCS" | grep -i "{{app}}" || echo "  (none)"
     else
-      velero backup describe {{backup}} --details 2>&1 | grep -E "Operation for|Operation ID"
+      echo "PVCs in backup:"
+      echo "$PVCS"
     fi
 
 # Usage:
