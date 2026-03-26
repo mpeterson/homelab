@@ -53,8 +53,9 @@ view-pvc backup filter="": (_require "velero")
 # Usage:
 #   just velero restore-pvc velero-daily-backups-20260316010049 overseerr
 #   just velero restore-pvc velero-daily-backups-20260325010002 paperless paperless-data
+#   just velero restore-pvc velero-daily-backups-20260325010002 stirling-pdf stirling-pdf-configs stirling-pdf-logs
 [doc('Restore PVCs from a Velero backup (namespace inferred from ArgoCD, PVC defaults to all)')]
-restore-pvc backup app pvc="": (_require "velero" "kubectl")
+restore-pvc backup app *pvc: (_require "velero" "kubectl")
     #!/usr/bin/env bash
     set -euo pipefail
 
@@ -67,6 +68,12 @@ restore-pvc backup app pvc="": (_require "velero" "kubectl")
 
     echo "==> Pausing ArgoCD reconciliation for '{{app}}'..."
     just argocd pause {{app}}
+
+    cleanup() {
+      echo "==> Resuming ArgoCD reconciliation for '{{app}}'..."
+      just argocd resume {{app}}
+    }
+    trap cleanup EXIT
 
     echo "==> Scaling down '{{app}}' in namespace '$NAMESPACE'..."
     kubectl scale deployment {{app}} -n "$NAMESPACE" --replicas=0
@@ -81,7 +88,6 @@ restore-pvc backup app pvc="": (_require "velero" "kubectl")
         -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
       if [ -z "$PVCS" ]; then
         echo "ERROR: No PVCs found for app '{{app}}' in namespace '$NAMESPACE'"
-        just argocd resume {{app}}
         exit 1
       fi
       echo "==> Found PVCs: $PVCS"
@@ -126,8 +132,5 @@ restore-pvc backup app pvc="": (_require "velero" "kubectl")
     echo "==> Scaling up '{{app}}'..."
     kubectl scale deployment {{app}} -n "$NAMESPACE" --replicas=1
     kubectl rollout status deployment {{app}} -n "$NAMESPACE" --timeout=120s
-
-    echo "==> Resuming ArgoCD reconciliation for '{{app}}'..."
-    just argocd resume {{app}}
 
     echo "==> Done! Verify the application is working correctly."
