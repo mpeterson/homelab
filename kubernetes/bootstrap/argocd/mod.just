@@ -2,6 +2,10 @@ set quiet := true
 set shell := ['bash', '-euo', 'pipefail', '-c']
 
 [private]
+default:
+    @just --unstable --list argocd
+
+[private]
 _require *tools:
     #!/usr/bin/env bash
     for tool in {{tools}}; do
