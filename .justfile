@@ -20,8 +20,8 @@ _require *tools:
       fi
     done
 
-[doc('Restart all deployments that use iSCSI PVCs (e.g. after PCS failover)')]
-restart-iscsi-pods: (_require "kubectl" "jq")
+[doc('Restart all deployments that use PVCs (e.g. after PCS failover)')]
+restart-deployments-with-pvc: (_require "kubectl" "jq")
     #!/usr/bin/env bash
     set -euo pipefail
 
