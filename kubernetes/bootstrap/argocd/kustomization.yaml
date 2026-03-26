@@ -21,3 +21,7 @@ patches:
     target:
       kind: Deployment
       name: argocd-repo-server
+  - path: patches/argocd-redis-ha-haproxy.yaml
+    target:
+      kind: Deployment
+      name: argocd-redis-ha-haproxy
