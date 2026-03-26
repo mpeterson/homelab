@@ -12,9 +12,12 @@ prune:
     echo "==> Scanning for orphaned resources..."
 
     # Managed resources (authoritative: the ArgoCD self-managing Application)
-    if ! argocd app resources argocd -o json > "$TMPDIR/managed.json" 2>/dev/null; then
-      echo "ERROR: Cannot query ArgoCD. Is the 'argocd' CLI configured?"
-      echo "  Try: argocd login --core"
+    if ! argocd app resources argocd -o json --core \
+         --kube-context "$(kubectl config current-context)" \
+         > "$TMPDIR/managed.json" 2>/dev/null; then
+      echo "ERROR: Cannot query ArgoCD."
+      echo "  Ensure your kubeconfig context namespace is 'argocd':"
+      echo "    kubectl config set-context --current --namespace=argocd"
       exit 1
     fi
 
