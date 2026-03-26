@@ -15,8 +15,8 @@ _require *tools:
 backups: (_require "velero")
     velero backup get
 
-[doc('Show PVCs included in a Velero backup, optionally filtered by app')]
-check-backup backup app="": (_require "velero")
+[doc('List PVCs included in a Velero backup, optionally filtered by app')]
+backup-pvcs backup app="": (_require "velero")
     #!/usr/bin/env bash
     set -euo pipefail
 
