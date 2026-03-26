@@ -13,7 +13,7 @@ mod velero "kubernetes/infra/velero"
 default:
     @just --list --list-submodules \
       | sed 's/^    argocd:$/    argocd: # Manage ArgoCD reconciliation and pruning/' \
-      | sed 's/^    bootstrap:$/    bootstrap: # Bootstrap the cluster (ArgoCD + apps)/' \
+      | sed 's/^    bootstrap:$/    bootstrap # Bootstrap the cluster (ArgoCD + apps)/' \
       | sed 's/^    velero:$/    velero: # Manage Velero backups and PVC restores/'
 
 [private]
