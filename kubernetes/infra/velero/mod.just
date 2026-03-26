@@ -103,27 +103,35 @@ restore-pvc backup app *pvc: (_require "velero" "kubectl")
 
     echo "==> Waiting for PVCs to bind..."
     for PVC_NAME in $PVCS; do
-      for i in $(seq 1 30); do
-        STATUS=$(kubectl get pvc "$PVC_NAME" -n "$NAMESPACE" \
-          -o jsonpath='{.status.phase}' 2>/dev/null || echo "NotFound")
-        if [ "$STATUS" = "Bound" ]; then
-          echo "    PVC '$PVC_NAME' is Bound!"
+      while true; do
+        BOUND=false
+        for i in $(seq 1 30); do
+          STATUS=$(kubectl get pvc "$PVC_NAME" -n "$NAMESPACE" \
+            -o jsonpath='{.status.phase}' 2>/dev/null || echo "NotFound")
+          if [ "$STATUS" = "Bound" ]; then
+            echo "    PVC '$PVC_NAME' is Bound!"
+            BOUND=true
+            break
+          fi
+          echo "    [$i/30] PVC '$PVC_NAME' status: $STATUS"
+          sleep 10
+        done
+
+        if [ "$BOUND" = "true" ]; then
           break
         fi
-        echo "    [$i/30] PVC '$PVC_NAME' status: $STATUS"
-        sleep 10
-      done
 
-      if [ "$STATUS" != "Bound" ]; then
-        echo "ERROR: PVC '$PVC_NAME' did not bind within 5 minutes. Check events:"
-        kubectl get events -n "$NAMESPACE" \
-          --field-selector "involvedObject.name=$PVC_NAME" \
-          --sort-by=.lastTimestamp | tail -5
         echo ""
-        echo "WARNING: ArgoCD reconciliation is still paused for '{{app}}'."
-        echo "  Resume manually when ready: just argocd resume {{app}}"
-        exit 1
-      fi
+        echo "    PVC '$PVC_NAME' has not bound after 5 minutes."
+        read -rp "    Continue waiting? [Y/n] " REPLY
+        if [[ "$REPLY" =~ ^[Nn]$ ]]; then
+          echo ""
+          echo "WARNING: ArgoCD reconciliation is still paused for '{{app}}'."
+          echo "  Resume manually when ready: just argocd resume {{app}}"
+          exit 1
+        fi
+        echo "    Waiting another 5 minutes..."
+      done
     done
 
     echo "==> Scaling up '{{app}}'..."
