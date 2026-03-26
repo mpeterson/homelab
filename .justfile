@@ -1,14 +1,17 @@
 set quiet := true
 set shell := ['bash', '-euo', 'pipefail', '-c']
 
+[doc('Bootstrap the cluster (ArgoCD + apps)')]
 mod bootstrap "kubernetes/bootstrap"
+[doc('Manage ArgoCD reconciliation and pruning')]
 mod argocd "kubernetes/bootstrap/argocd"
+[doc('Manage Velero backups and PVC restores')]
 mod velero "kubernetes/infra/velero"
 
 [doc('List available recipes')]
 [private]
 default:
-    @just --list --list-submodules
+    @just --list
 
 [private]
 _require *tools:
