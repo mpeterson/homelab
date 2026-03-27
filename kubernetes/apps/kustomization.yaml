@@ -12,7 +12,7 @@ resources:
   - mosquitto/app.yaml
   - n8n/app.yaml
   - ollama/app.yaml
-  - overseerr/app.yaml
+  - seerr/app.yaml
   - paperless/app.yaml
   - plex/app.yaml
   - plex-auto-languages/app.yaml

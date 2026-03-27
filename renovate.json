@@ -47,7 +47,7 @@
         "kubernetes/apps/kometa/**",
         "kubernetes/apps/n8n/**",
         "kubernetes/apps/ollama/**",
-        "kubernetes/apps/overseerr/**",
+        "kubernetes/apps/seerr/**",
         "kubernetes/apps/plex/**",
         "kubernetes/apps/plex-auto-languages/**",
         "kubernetes/apps/prowlarr/**",
