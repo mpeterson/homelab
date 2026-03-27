@@ -28,7 +28,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/kubernetes/bootstrap/argocd/patches/argocd-repo-server-ksops\.yaml$/"
+        "/kubernetes/bootstrap/argocd/patches/argocd-repo-server-ksops\\.yaml$/"
       ],
       "matchStrings": ["# renovate: datasource=github-releases depName=(?<depName>[^\\s]+)\\s+KSOPS_VERSION=\"(?<currentValue>v[^\"]+)\""],
       "datasourceTemplate": "github-releases"
