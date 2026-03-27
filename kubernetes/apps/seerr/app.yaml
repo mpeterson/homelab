@@ -3,6 +3,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  # App name kept as overseerr to preserve existing PVCs; image migrated to Seerr
   name: &app overseerr
   namespace: argocd
   finalizers:
@@ -37,16 +38,16 @@ spec:
           overseerr:
             pod:
               securityContext:
-                runAsUser: 65534
-                runAsGroup: 100
-                fsGroup: 65534
+                runAsUser: 1000
+                runAsGroup: 1000
+                fsGroup: 1000
                 fsGroupChangePolicy: "OnRootMismatch"
 
             containers:
               app:
                 image:
-                  repository: &image ghcr.io/sct/overseerr
-                  tag: &tag 1.35.0@sha256:6197516c9d7b58ccf113455e32aafb94df5d91995fe50e8c2cae6ba6c7c7b7de
+                  repository: &image ghcr.io/seerr-team/seerr
+                  tag: &tag latest
                 env:
                   PORT: &port 5055
                   TZ: Asia/Jerusalem
