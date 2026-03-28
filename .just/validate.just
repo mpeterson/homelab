@@ -19,7 +19,7 @@ _error file msg:
     if [ -n "${GITHUB_ACTIONS:-}" ]; then
       echo "::error file={{file}}::{{msg}}"
     else
-      echo "ERROR: {{msg}} ({{file}})"
+      echo -e "\033[1;31mERROR:\033[0m {{msg}} (\033[33m{{file}}\033[0m)"
     fi
 
 [doc('Run all validation checks')]
@@ -172,7 +172,7 @@ images: (_require "crane" "yq")
           if [ -n "${GITHUB_ACTIONS:-}" ]; then
             echo "::error::Image not found: ${image_ref}"
           else
-            echo "  ✗ ${image_ref}"
+            echo -e "  \033[1;31m✗\033[0m ${image_ref}"
           fi
           exit 1
         fi
