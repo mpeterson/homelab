@@ -3,7 +3,7 @@
 "aqua:kubernetes/kubectl" = "1.35.3"
 "aqua:jqlang/jq" = "1.7.1"
 "aqua:argoproj/argo-cd" = "3.3.6"
-"aqua:vmware-tanzu/velero" = "1.15.3"
+"aqua:vmware-tanzu/velero" = "1.18.0"
 "aqua:getsops/sops" = "3.12.2"
 "aqua:google/yamlfmt" = "0.21.0"
 
