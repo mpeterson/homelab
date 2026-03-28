@@ -11,6 +11,7 @@ resources:
   - cilium/app.yaml
   - cert-manager/app.yaml
   - democratic-csi/app-snapshotter.yaml
+  - kromgo/app.yaml
   - metrics-server/app.yaml
   - node-feature-discovery/app.yaml
   - nvidia-device-plugin/app.yaml
