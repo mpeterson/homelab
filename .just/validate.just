@@ -6,13 +6,13 @@ repo_root := source_directory() / ".."
 [doc('Run all validation checks')]
 [private]
 default:
-    @echo "==> Validating Kustomize overlays..."
+    @printf "\033[1;34m==> Validating Kustomize overlays...\033[0m \033[2m(just validate kustomize)\033[0m\n"
     @just validate kustomize
     @echo ""
-    @echo "==> Validating Helm charts..."
+    @printf "\033[1;34m==> Validating Helm charts...\033[0m \033[2m(just validate helm)\033[0m\n"
     @just validate helm
     @echo ""
-    @echo "==> Verifying container images..."
+    @printf "\033[1;34m==> Verifying container images...\033[0m \033[2m(just validate images)\033[0m\n"
     @just validate images
 
 # Bash function for error reporting (works in subshells too)

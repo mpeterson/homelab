@@ -6,19 +6,19 @@ repo_root := source_directory() / ".."
 [doc('Run all linters')]
 [private]
 default:
-    @echo "==> Linting YAML..."
+    @printf "\033[1;34m==> Linting YAML...\033[0m \033[2m(just lint yaml)\033[0m\n"
     @just lint yaml
     @echo ""
-    @echo "==> Linting JSON..."
+    @printf "\033[1;34m==> Linting JSON...\033[0m \033[2m(just lint json)\033[0m\n"
     @just lint json
     @echo ""
-    @echo "==> Linting Actions..."
+    @printf "\033[1;34m==> Linting Actions...\033[0m \033[2m(just lint actions)\033[0m\n"
     @just lint actions
     @echo ""
-    @echo "==> Linting Markdown..."
+    @printf "\033[1;34m==> Linting Markdown...\033[0m \033[2m(just lint markdown)\033[0m\n"
     @just lint markdown
     @echo ""
-    @echo "==> Validating Renovate config..."
+    @printf "\033[1;34m==> Validating Renovate config...\033[0m \033[2m(just lint renovate)\033[0m\n"
     @just lint renovate
 
 [doc('Lint YAML files with yamllint')]
