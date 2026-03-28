@@ -59,7 +59,7 @@ spec:
       prune: true
 
   source:
-    repoURL: https://ghcr.io/bjw-s-labs/helm
+    repoURL: https://bjw-s-labs.github.io/helm-charts
     chart: app-template
     targetRevision: 4.6.2
 
