@@ -9,6 +9,10 @@ auto_install = true
 "aqua:vmware-tanzu/velero" = "1.18.0"
 "aqua:getsops/sops" = "3.12.2"
 "aqua:google/yamlfmt" = "0.21.0"
+"aqua:kubernetes-sigs/kustomize" = "5.8.1"
+"aqua:helm/helm" = "3.20.1"
+"aqua:mikefarah/yq" = "4.52.5"
+"aqua:google/go-containerregistry" = "0.21.3"
 
 [env]
 # Ensure just uses unstable features (needed for mod support)
