@@ -1,0 +1,3 @@
+---
+# Disable line length - badge URLs and tech descriptions are naturally long
+MD013: false
