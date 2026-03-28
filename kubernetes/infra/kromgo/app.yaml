@@ -1,0 +1,143 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kromgo-configs
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/infra/kromgo/
+    targetRevision: main
+
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app kromgo
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://ghcr.io/bjw-s-labs/helm
+    chart: app-template
+    targetRevision: 4.6.2
+
+    helm:
+      valuesObject:
+        controllers:
+          kromgo:
+            replicas: 1
+            strategy: RollingUpdate
+            containers:
+              app:
+                image:
+                  repository: ghcr.io/kashalls/kromgo
+                  tag: v0.8.0
+                env:
+                  PROMETHEUS_URL: http://prometheus-operated.monitoring.svc.cluster.local:9090
+                  SERVER_HOST: 0.0.0.0
+                  SERVER_PORT: &port 8080
+                  HEALTH_HOST: 0.0.0.0
+                  HEALTH_PORT: &hport 8888
+                probes:
+                  liveness: &probes
+                    enabled: true
+                    custom: true
+                    spec:
+                      httpGet:
+                        path: /readyz
+                        port: *hport
+                      initialDelaySeconds: 0
+                      periodSeconds: 10
+                      timeoutSeconds: 1
+                      failureThreshold: 3
+                  readiness: *probes
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - "ALL"
+                resources:
+                  requests:
+                    cpu: 5m
+                    memory: 10M
+                  limits:
+                    memory: 64M
+
+        service:
+          app:
+            controller: kromgo
+            ports:
+              http:
+                primary: true
+                port: *port
+
+        route:
+          app:
+            enabled: true
+            kind: HTTPRoute
+            hostnames:
+              - stats-k8s.peterson.com.ar
+            parentRefs:
+              - kind: Gateway
+                name: public-gateway
+                namespace: network
+                sectionName: https
+            rules:
+              - backendRefs:
+                  - name: kromgo
+                    port: *port
+                matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+
+        persistence:
+          config-file:
+            type: configMap
+            name: kromgo-config
+            globalMounts:
+              - path: /kromgo/config.yaml
+                subPath: config.yaml
