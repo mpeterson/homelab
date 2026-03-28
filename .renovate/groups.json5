@@ -2,8 +2,13 @@
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   packageRules: [
     {
-      description: "Group Velero and its plugins into a single PR",
+      description: "Group Velero Helm chart and plugins into a single PR",
       matchFileNames: ["kubernetes/infra/velero/**"],
+      groupName: "velero",
+    },
+    {
+      description: "Group Velero CLI (mise) with Velero deployment",
+      matchPackageNames: ["aqua:vmware-tanzu/velero"],
       groupName: "velero",
     },
     {
@@ -27,9 +32,19 @@
       groupName: "paperless",
     },
     {
-      description: "Group ArgoCD and KSOPS into a single PR",
+      description: "Group ArgoCD server and KSOPS into a single PR",
       matchFileNames: ["kubernetes/bootstrap/argocd/**"],
       groupName: "argocd",
+    },
+    {
+      description: "Group ArgoCD CLI (mise) with ArgoCD deployment",
+      matchPackageNames: ["aqua:argoproj/argo-cd"],
+      groupName: "argocd",
+    },
+    {
+      description: "Group SOPS CLI (mise) with KSOPS",
+      matchPackageNames: ["aqua:getsops/sops", "viaduct-ai/kustomize-sops"],
+      groupName: "sops",
     },
   ],
 }
