@@ -15,19 +15,23 @@ default:
     @echo "==> Verifying container images..."
     @just validate images
 
-[private]
-_error file msg:
-    #!/usr/bin/env bash
-    if [ -n "${GITHUB_ACTIONS:-}" ]; then
-      echo "::error file={{file}}::{{msg}}"
-    else
-      echo -e "\033[1;31mERROR:\033[0m {{msg}} (\033[33m{{file}}\033[0m)"
-    fi
+# Bash function for error reporting (works in subshells too)
+_error_fn := '
+_error() {
+  local file="$1" msg="$2"
+  if [ -n "${GITHUB_ACTIONS:-}" ]; then
+    echo "::error file=${file}::${msg}"
+  else
+    echo -e "  \033[1;31mERROR:\033[0m ${msg} (\033[33m${file}\033[0m)"
+  fi
+}
+'
 
 [doc('Validate Kustomize overlays and sub-directory builds')]
 kustomize:
     #!/usr/bin/env bash
     set -euo pipefail
+    {{ _error_fn }}
     mise install --quiet
     cd "{{ repo_root }}"
     status=0
@@ -39,14 +43,14 @@ kustomize:
 
     echo "Apps..."
     if ! kustomize build "$workdir/kubernetes/apps/" > /dev/null; then
-      just validate _error "kubernetes/apps/kustomization.yaml" "kustomize build failed for kubernetes/apps"
+      _error "kubernetes/apps/kustomization.yaml" "kustomize build failed for kubernetes/apps"
       status=1
     fi
 
     echo "Infra..."
     yq -i 'del(.generators)' "$workdir/kubernetes/infra/kustomization.yaml"
     if ! kustomize build "$workdir/kubernetes/infra/" > /dev/null; then
-      just validate _error "kubernetes/infra/kustomization.yaml" "kustomize build failed for kubernetes/infra"
+      _error "kubernetes/infra/kustomization.yaml" "kustomize build failed for kubernetes/infra"
       status=1
     fi
 
@@ -72,7 +76,7 @@ kustomize:
 
       echo "  $rel_dir ..."
       if ! kustomize build "$dir" > /dev/null 2>&1; then
-        just validate _error "$rel_dir/kustomization.yaml" "kustomize build failed for $rel_dir"
+        _error "$rel_dir/kustomization.yaml" "kustomize build failed for $rel_dir"
         kustomize build "$dir" 2>&1 || true
         status=1
       fi
@@ -84,6 +88,7 @@ kustomize:
 helm:
     #!/usr/bin/env bash
     set -euo pipefail
+    {{ _error_fn }}
     mise install --quiet
     cd "{{ repo_root }}"
     status=0
@@ -117,7 +122,7 @@ helm:
 
         err_file=$(mktemp)
         if ! "${helm_cmd[@]}" > /dev/null 2>"$err_file"; then
-          just validate _error "$file" "Helm template failed for ${app_name} (${chart}@${version})"
+          _error "$file" "Helm template failed for ${app_name} (${chart}@${version})"
           cat "$err_file"
           status=1
         fi
@@ -132,6 +137,7 @@ helm:
 images:
     #!/usr/bin/env bash
     set -euo pipefail
+    {{ _error_fn }}
     mise install --quiet
     cd "{{ repo_root }}"
     status=0
@@ -162,20 +168,12 @@ images:
 
       (
         if ! actual_sha=$(crane digest "$image_ref" 2>/dev/null); then
-          if [ -n "${GITHUB_ACTIONS:-}" ]; then
-            echo "::error::Image not found: ${image_ref}"
-          else
-            echo -e "  \033[1;31m✗\033[0m ${image_ref} (not found)"
-          fi
+          _error "$image_ref" "Image not found"
           exit 1
         fi
 
         if [ "$expected_sha" != "$image" ] && [ "$actual_sha" != "$expected_sha" ]; then
-          if [ -n "${GITHUB_ACTIONS:-}" ]; then
-            echo "::error::Digest mismatch for ${image_ref}: expected ${expected_sha}, got ${actual_sha}"
-          else
-            echo -e "  \033[1;31m✗\033[0m ${image_ref} (digest mismatch: expected ${expected_sha}, got ${actual_sha})"
-          fi
+          _error "$image_ref" "Digest mismatch: expected ${expected_sha}, got ${actual_sha}"
           exit 1
         fi
 
