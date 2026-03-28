@@ -6,6 +6,9 @@ mod bootstrap "kubernetes/bootstrap"
 mod argocd "kubernetes/bootstrap/argocd"
 mod velero "kubernetes/infra/velero"
 
+[doc('Day-to-day Kubernetes operations')]
+mod k8s "kubernetes"
+
 [doc('List available recipes')]
 [private]
 default:
