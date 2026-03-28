@@ -13,17 +13,17 @@ data:
 
     metrics:
       - name: talos_version
-        query: label_replace(node_os_info{name="Talos"}, "version_id", "$1", "version_id", "v(.+)")
+        query: node_os_info{name="Talos"}
         label: version_id
         title: Talos
 
       - name: kubernetes_version
-        query: label_replace(kubernetes_build_info{service="kubernetes"}, "git_version", "$1", "git_version", "v(.+)")
+        query: kubernetes_build_info{service="kubernetes"}
         label: git_version
         title: Kubernetes
 
       - name: cluster_node_count
-        query: count(count by (node) (kube_node_status_condition{condition="Ready"}))
+        query: count(kube_node_status_condition{condition="Ready",status="true"})
         title: Nodes
 
       - name: cluster_pod_count
@@ -31,7 +31,7 @@ data:
         title: Pods
 
       - name: cluster_cpu_usage
-        query: round(avg(instance:node_cpu_utilisation:rate5m{kubernetes_node!=""}) * 100, 0.1)
+        query: round((1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))) * 100, 0.1)
         title: CPU
         suffix: "%"
         colors:
@@ -46,7 +46,7 @@ data:
             max: 9999
 
       - name: cluster_memory_usage
-        query: round(sum(node_memory_MemTotal_bytes{kubernetes_node!=""} - node_memory_MemAvailable_bytes{kubernetes_node!=""}) / sum(node_memory_MemTotal_bytes{kubernetes_node!=""}) * 100, 0.1)
+        query: round(sum(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes) * 100, 0.1)
         title: Memory
         suffix: "%"
         colors:
@@ -61,7 +61,7 @@ data:
             max: 9999
 
       - name: cluster_age_days
-        query: round((time() - max(kube_node_created) ) / 86400)
+        query: round((time() - min(kube_node_created)) / 86400)
         title: Age
         suffix: "d"
         colors:
@@ -76,7 +76,7 @@ data:
             max: 9999
 
       - name: cluster_alert_count
-        query: count(ALERTS{alertstate="firing"}) - 1
+        query: count(ALERTS{alertstate="firing",alertname!="Watchdog"}) OR vector(0)
         title: Alerts
         colors:
           - color: "green"
