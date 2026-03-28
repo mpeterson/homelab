@@ -42,13 +42,9 @@ jobs:
           persist-credentials: false
 
       - name: Install tools
-        run: |
-          # Install kustomize
-          curl -sL "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-          sudo mv kustomize /usr/local/bin/
-          # Install yq
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          install_args: "kustomize yq"
 
       - name: Validate apps kustomization
         run: kustomize build kubernetes/apps/ > /dev/null
@@ -104,10 +100,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install yq
-        run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
+      - name: Install tools
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          install_args: "helm yq"
 
       - name: Validate Helm charts
         run: |
@@ -173,13 +169,9 @@ jobs:
           persist-credentials: false
 
       - name: Install tools
-        run: |
-          # Install crane
-          CRANE_VERSION=$(curl -sL https://api.github.com/repos/google/go-containerregistry/releases/latest | jq -r '.tag_name')
-          curl -sL "https://github.com/google/go-containerregistry/releases/download/${CRANE_VERSION}/go-containerregistry_Linux_x86_64.tar.gz" | sudo tar xz -C /usr/local/bin crane
-          # Install yq
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          install_args: "go-containerregistry yq"
 
       - name: Extract and compare images
         id: compare
