@@ -42,9 +42,9 @@ jobs:
           persist-credentials: false
 
       - name: Install tools
-        run: |
-          curl -sS https://mise.run | sh
-          mise install kustomize yq
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          install_args: "kustomize yq"
 
       - name: Validate apps kustomization
         run: kustomize build kubernetes/apps/ > /dev/null
@@ -101,9 +101,9 @@ jobs:
           persist-credentials: false
 
       - name: Install tools
-        run: |
-          curl -sS https://mise.run | sh
-          mise install helm yq
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          install_args: "helm yq"
 
       - name: Validate Helm charts
         run: |
@@ -169,9 +169,9 @@ jobs:
           persist-credentials: false
 
       - name: Install tools
-        run: |
-          curl -sS https://mise.run | sh
-          mise install go-containerregistry yq
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          install_args: "go-containerregistry yq"
 
       - name: Extract and compare images
         id: compare
