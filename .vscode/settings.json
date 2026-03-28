@@ -1,0 +1,19 @@
+{
+  "yaml.schemas": {
+    "kubernetes": [
+      "kubernetes/**/*.yaml",
+      "kubernetes/**/*.yml"
+    ]
+  },
+  "files.associations": {
+    "*.yaml": "yaml",
+    "*.yml": "yaml",
+    "*.sops.yaml": "yaml"
+  },
+  "editor.formatOnSave": false,
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  }
+}

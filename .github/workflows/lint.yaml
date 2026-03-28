@@ -1,0 +1,132 @@
+---
+name: Lint
+
+on:
+  pull_request:
+    branches: [main]
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  yamllint:
+    name: YAML
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get changed files
+        id: changed-files
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
+        with:
+          patterns: |-
+            **/*.yaml
+            **/*.yml
+      - name: Checkout
+        if: steps.changed-files.outputs.changed_files != '[]'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
+        if: steps.changed-files.outputs.changed_files != '[]'
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        if: steps.changed-files.outputs.changed_files != '[]'
+        run: just lint yaml
+
+  jsonlint:
+    name: JSON
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get changed files
+        id: changed-files
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
+        with:
+          patterns: |-
+            **/*.json
+            **/*.json5
+      - name: Checkout
+        if: steps.changed-files.outputs.changed_files != '[]'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
+        if: steps.changed-files.outputs.changed_files != '[]'
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        if: steps.changed-files.outputs.changed_files != '[]'
+        run: just lint json
+
+  actionlint:
+    name: Actions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get changed files
+        id: changed-files
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
+        with:
+          patterns: |-
+            .github/workflows/*.yaml
+            .github/workflows/*.yml
+      - name: Checkout
+        if: steps.changed-files.outputs.changed_files != '[]'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
+        if: steps.changed-files.outputs.changed_files != '[]'
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        if: steps.changed-files.outputs.changed_files != '[]'
+        run: just lint actions
+
+  markdownlint:
+    name: Markdown
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get changed files
+        id: changed-files
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
+        with:
+          patterns: |-
+            **/*.md
+      - name: Checkout
+        if: steps.changed-files.outputs.changed_files != '[]'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
+        if: steps.changed-files.outputs.changed_files != '[]'
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        if: steps.changed-files.outputs.changed_files != '[]'
+        run: just lint markdown
+
+  renovatelint:
+    name: Renovate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        run: just lint renovate
+
+  lint-success:
+    name: All linters passed
+    if: ${{ !cancelled() }}
+    needs: [yamllint, jsonlint, actionlint, markdownlint, renovatelint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check lint results
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: |
+          echo "::error::One or more lint jobs failed"
+          exit 1

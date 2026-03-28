@@ -1,0 +1,18 @@
+---
+"area/ci":
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
+
+"area/kubernetes":
+  - changed-files:
+      - any-glob-to-any-file: "kubernetes/**"
+
+"area/ansible":
+  - changed-files:
+      - any-glob-to-any-file: "ansible/**"
+
+"area/docs":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docs/**"
+          - "*.md"

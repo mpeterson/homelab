@@ -1,0 +1,87 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kromgo-config
+  namespace: monitoring
+data:
+  config.yaml: |
+    ---
+    badge:
+      font: Verdana.ttf
+      size: 12
+
+    metrics:
+      - name: talos_version
+        query: node_os_info{name="Talos"}
+        label: version_id
+        title: Talos
+
+      - name: kubernetes_version
+        query: kubernetes_build_info{service="kubernetes"}
+        label: git_version
+        title: Kubernetes
+
+      - name: cluster_node_count
+        query: count(kube_node_status_condition{condition="Ready",status="true"})
+        title: Nodes
+
+      - name: cluster_pod_count
+        query: sum(kube_pod_status_phase{phase="Running"})
+        title: Pods
+
+      - name: cluster_cpu_usage
+        query: round((1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))) * 100, 0.1)
+        title: CPU
+        suffix: "%"
+        colors:
+          - color: "green"
+            min: 0
+            max: 35
+          - color: "orange"
+            min: 36
+            max: 75
+          - color: "red"
+            min: 76
+            max: 9999
+
+      - name: cluster_memory_usage
+        query: round(sum(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes) * 100, 0.1)
+        title: Memory
+        suffix: "%"
+        colors:
+          - color: "green"
+            min: 0
+            max: 35
+          - color: "orange"
+            min: 36
+            max: 75
+          - color: "red"
+            min: 76
+            max: 9999
+
+      - name: cluster_age_days
+        query: round((time() - min(kube_node_created)) / 86400)
+        title: Age
+        suffix: "d"
+        colors:
+          - color: "green"
+            min: 0
+            max: 180
+          - color: "orange"
+            min: 181
+            max: 360
+          - color: "red"
+            min: 361
+            max: 9999
+
+      - name: cluster_alert_count
+        query: count(ALERTS{alertstate="firing",alertname!="Watchdog"}) OR vector(0)
+        title: Alerts
+        colors:
+          - color: "green"
+            min: 0
+            max: 0
+          - color: "red"
+            min: 1
+            max: 9999

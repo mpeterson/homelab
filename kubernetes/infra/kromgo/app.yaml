@@ -1,20 +1,20 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: &app tautulli
+  name: kromgo-configs
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 
 spec:
   project: default
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: media
-
+    namespace: monitoring
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -26,61 +26,100 @@ spec:
       prune: true
 
   source:
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/infra/kromgo/
+    targetRevision: main
+
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app kromgo
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
     repoURL: https://bjw-s-labs.github.io/helm-charts
     chart: app-template
     targetRevision: 4.6.2
+
     helm:
       valuesObject:
-        strategy: RollingUpdate
-
         controllers:
-          tautulli:
+          kromgo:
             replicas: 1
-            pod:
-              securityContext:
-                runAsUser: 65534
-                runAsGroup: 65534
-                fsGroup: 65534
-                fsGroupChangePolicy: "OnRootMismatch"
-
+            strategy: RollingUpdate
             containers:
               app:
                 image:
-                  repository: &image ghcr.io/home-operations/tautulli
-                  tag: &tag 2.17.0@sha256:b90b30e15d1b6d12fc726fac1ef9778ad92f405ac8f8ccb30a34d7f6673c113d
+                  repository: ghcr.io/kashalls/kromgo
+                  tag: v0.8.0
+                env:
+                  PROMETHEUS_URL: http://prometheus-operated.monitoring.svc.cluster.local:9090
+                  SERVER_HOST: 0.0.0.0
+                  SERVER_PORT: &port 8080
+                  HEALTH_HOST: 0.0.0.0
+                  HEALTH_PORT: &hport 8888
                 probes:
                   liveness: &probes
                     enabled: true
                     custom: true
                     spec:
                       httpGet:
-                        path: /status
-                        port: 8181
+                        path: /readyz
+                        port: *hport
                       initialDelaySeconds: 0
                       periodSeconds: 10
                       timeoutSeconds: 1
                       failureThreshold: 3
                   readiness: *probes
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - "ALL"
                 resources:
                   requests:
                     cpu: 5m
-                    memory: 128Mi
+                    memory: 10M
                   limits:
-                    memory: 512Mi
+                    memory: 64M
 
         service:
           app:
-            controller: *app
+            controller: kromgo
             ports:
               http:
-                port: &port 8181
+                primary: true
+                port: *port
 
         route:
           app:
             enabled: true
             kind: HTTPRoute
             hostnames:
-              - stats-plex.peterson.com.ar
+              - stats-k8s.peterson.com.ar
             parentRefs:
               - kind: Gateway
                 name: public-gateway
@@ -88,7 +127,7 @@ spec:
                 sectionName: https
             rules:
               - backendRefs:
-                  - name: *app
+                  - name: kromgo
                     port: *port
                 matches:
                   - path:
@@ -96,9 +135,9 @@ spec:
                       value: /
 
         persistence:
-          config:
-            storageClass: zfs-generic-iscsi-csi-xfs
-            accessMode: ReadWriteOnce
-            size: 5Gi
+          config-file:
+            type: configMap
+            name: kromgo-config
             globalMounts:
-              - path: /config
+              - path: /kromgo/config.yaml
+                subPath: config.yaml

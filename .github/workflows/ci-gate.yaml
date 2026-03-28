@@ -1,0 +1,102 @@
+---
+name: CI Gate
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize, labeled, unlabeled]
+
+jobs:
+  do-not-merge:
+    name: Do Not Merge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for do-not-merge label
+        env:
+          LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+        run: |
+          if echo "$LABELS" | jq -e 'map(select(. == "do-not-merge")) | length > 0' > /dev/null; then
+            echo "::error::This PR has the 'do-not-merge' label and cannot be merged."
+            exit 1
+          fi
+
+  semantic-pr-title:
+    name: Semantic PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title follows Conventional Commits
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|chore|ci|docs|refactor|test|perf|build|style|revert)(\(.+\))?!?: .+'
+          if [[ ! "$PR_TITLE" =~ $pattern ]]; then
+            echo "::error::PR title must follow Conventional Commits format: <type>(<optional scope>): <description>"
+            echo ""
+            echo "Allowed types: feat, fix, chore, ci, docs, refactor, test, perf, build, style, revert"
+            echo "Examples:"
+            echo "  feat: add new feature"
+            echo "  fix(auth): resolve login bug"
+            echo "  chore(deps): update dependency"
+            exit 1
+          fi
+
+  sops-integrity:
+    name: SOPS Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check SOPS files were properly re-encrypted
+        run: |
+          changed_sops=$(git diff --name-only "origin/${{ github.event.pull_request.base.ref }}...HEAD" -- '*.sops.yaml' '*.sops.yml')
+          if [ -z "$changed_sops" ]; then
+            echo "No SOPS files changed — skipping"
+            exit 0
+          fi
+
+          echo "Changed SOPS files:"
+          echo "$changed_sops"
+          echo ""
+
+          failed=0
+          for file in $changed_sops; do
+            if [ ! -f "$file" ]; then
+              echo "  $file: deleted (skipping)"
+              continue
+            fi
+
+            lastmod=$(grep 'lastmodified:' "$file" | awk '{print $2}' | tr -d '"')
+            old_lastmod=$(git show "origin/${{ github.event.pull_request.base.ref }}:$file" 2>/dev/null | grep 'lastmodified:' | awk '{print $2}' | tr -d '"')
+
+            if [ "$lastmod" = "$old_lastmod" ]; then
+              echo "::error file=$file::SOPS file modified but lastmodified timestamp unchanged — file was likely edited without running sops, which breaks MAC integrity. Re-encrypt with: sops encrypt --in-place $file"
+              failed=1
+            else
+              echo "  $file: lastmodified updated ($old_lastmod → $lastmod) ✓"
+            fi
+          done
+
+          if [ "$failed" -eq 1 ]; then
+            echo ""
+            echo "::error::One or more SOPS files have stale MACs. Re-encrypt them before merging."
+            exit 1
+          fi
+
+          echo ""
+          echo "All SOPS files appear properly re-encrypted."
+
+  ci-gate-success:
+    name: All CI gates passed
+    if: ${{ !cancelled() }}
+    needs: [do-not-merge, semantic-pr-title, sops-integrity]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check gate results
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: |
+          echo "::error::One or more CI gates failed"
+          exit 1
