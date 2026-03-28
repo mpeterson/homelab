@@ -1,0 +1,45 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:best-practices",
+    ":disableRateLimiting",
+    // Local modular configs
+    "local>michelp/homelab//.renovate/autoMerge.json5",
+    "local>michelp/homelab//.renovate/groups.json5",
+    "local>michelp/homelab//.renovate/customManagers.json5",
+  ],
+  timezone: "Asia/Jerusalem",
+  schedule: ["after 2am and before 7am"],
+  platformAutomerge: true,
+  // Manager file patterns for Kubernetes manifests
+  argocd: {
+    managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"],
+  },
+  "helm-values": {
+    managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"],
+  },
+  kubernetes: {
+    managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"],
+  },
+  "git-submodules": {
+    enabled: true,
+  },
+  packageRules: [
+    {
+      description: "SOPS files: never automerge, label for manual re-encryption",
+      matchFileNames: ["**/*.sops.yaml", "**/*.sops.yml"],
+      automerge: false,
+      labels: ["manual-review", "sops-reencrypt"],
+    },
+    {
+      description: "Default: label all PRs for manual review",
+      matchUpdateTypes: ["major", "minor", "patch", "digest", "pin", "pinDigest", "rollback", "bump"],
+      labels: ["manual-review"],
+    },
+    {
+      description: "Never automerge app-template Helm chart updates",
+      matchPackageNames: ["app-template"],
+      automerge: false,
+    },
+  ],
+}
