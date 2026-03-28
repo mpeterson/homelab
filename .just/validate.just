@@ -158,18 +158,28 @@ images:
 
     while IFS= read -r image; do
       image_ref="${image%%@sha256:*}"
+      expected_sha="${image#*@}"
 
       (
-        if crane manifest "$image_ref" > /dev/null 2>&1; then
-          echo "  ✓ ${image_ref}"
-        else
+        if ! actual_sha=$(crane digest "$image_ref" 2>/dev/null); then
           if [ -n "${GITHUB_ACTIONS:-}" ]; then
             echo "::error::Image not found: ${image_ref}"
           else
-            echo -e "  \033[1;31m✗\033[0m ${image_ref}"
+            echo -e "  \033[1;31m✗\033[0m ${image_ref} (not found)"
           fi
           exit 1
         fi
+
+        if [ "$expected_sha" != "$image" ] && [ "$actual_sha" != "$expected_sha" ]; then
+          if [ -n "${GITHUB_ACTIONS:-}" ]; then
+            echo "::error::Digest mismatch for ${image_ref}: expected ${expected_sha}, got ${actual_sha}"
+          else
+            echo -e "  \033[1;31m✗\033[0m ${image_ref} (digest mismatch: expected ${expected_sha}, got ${actual_sha})"
+          fi
+          exit 1
+        fi
+
+        echo -e "  \033[32m✓\033[0m ${image_ref}"
       ) &
       pids+=($!)
       parallel_count=$((parallel_count + 1))
