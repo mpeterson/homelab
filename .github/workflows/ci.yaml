@@ -38,3 +38,23 @@ jobs:
             fi
           done < <(find . \( -name '*.json' -o -name '*.json5' \) -not -path './.git/*')
           exit "$status"
+
+  actionlint:
+    name: Action Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Run actionlint
+        uses: reviewdog/action-actionlint@05c9d7bef25a46caf572b3bd62ae4d8ed5bb3aab  # v1
+
+  markdownlint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Run markdownlint
+        uses: DavidAnson/markdownlint-cli2-action@db43aef879112c3119571b0a020a13571e8c2703  # v19
