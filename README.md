@@ -1,18 +1,17 @@
 # 🏠 Homelab
 
-[![Talos](https://img.shields.io/endpoint?url=https%3A%2F%2Fstats-k8s.peterson.com.ar%2Ftalos_version&style=for-the-badge&logo=talos&logoColor=white&color=orange&label=talos)](https://talos.dev)&nbsp;
+[![Talos](https://img.shields.io/endpoint?url=https%3A%2F%2Fstats-k8s.peterson.com.ar%2Ftalos_version&style=for-the-badge&logo=talos&logoColor=white&color=orange&label=talos)](https://talos.dev)
 [![Kubernetes](https://img.shields.io/endpoint?url=https%3A%2F%2Fstats-k8s.peterson.com.ar%2Fkubernetes_version&style=for-the-badge&logo=kubernetes&logoColor=white&color=blue&label=k8s)](https://kubernetes.io)
 
-[![Age](https://stats-k8s.peterson.com.ar/cluster_age_days?format=badge)](https://github.com/kashalls/kromgo/)&nbsp;
-[![Nodes](https://stats-k8s.peterson.com.ar/cluster_node_count?format=badge)](https://github.com/kashalls/kromgo/)&nbsp;
-[![Pods](https://stats-k8s.peterson.com.ar/cluster_pod_count?format=badge)](https://github.com/kashalls/kromgo/)&nbsp;
-[![CPU](https://stats-k8s.peterson.com.ar/cluster_cpu_usage?format=badge)](https://github.com/kashalls/kromgo/)&nbsp;
-[![Memory](https://stats-k8s.peterson.com.ar/cluster_memory_usage?format=badge)](https://github.com/kashalls/kromgo/)&nbsp;
+[![Age](https://stats-k8s.peterson.com.ar/cluster_age_days?format=badge)](https://github.com/kashalls/kromgo/)
+[![Nodes](https://stats-k8s.peterson.com.ar/cluster_node_count?format=badge)](https://github.com/kashalls/kromgo/)
+[![Pods](https://stats-k8s.peterson.com.ar/cluster_pod_count?format=badge)](https://github.com/kashalls/kromgo/)
+[![CPU](https://stats-k8s.peterson.com.ar/cluster_cpu_usage?format=badge)](https://github.com/kashalls/kromgo/)
+[![Memory](https://stats-k8s.peterson.com.ar/cluster_memory_usage?format=badge)](https://github.com/kashalls/kromgo/)
 [![Alerts](https://stats-k8s.peterson.com.ar/cluster_alert_count?format=badge)](https://github.com/kashalls/kromgo/)
 
 ---
 
-[![Lint](https://img.shields.io/github/actions/workflow/status/mpeterson/homelab/lint.yaml?branch=main&style=flat-square&logo=github&label=Lint)](https://github.com/mpeterson/homelab/actions/workflows/lint.yaml)
 [![License](https://img.shields.io/github/license/mpeterson/homelab?style=flat-square)](LICENSE)
 [![Last Commit](https://img.shields.io/github/last-commit/mpeterson/homelab?style=flat-square)](https://github.com/mpeterson/homelab/commits/main)
 [![Stars](https://img.shields.io/github/stars/mpeterson/homelab?style=flat-square)](https://github.com/mpeterson/homelab/stargazers)
