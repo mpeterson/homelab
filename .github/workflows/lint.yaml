@@ -1,0 +1,76 @@
+---
+name: Lint
+
+on:
+  pull_request:
+    branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  yamllint:
+    name: YAML
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7
+
+      - name: Run yamllint
+        run: uvx yamllint --strict --format github -c .yamllint.yaml .
+
+  jsonlint:
+    name: JSON
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Validate JSON/JSON5 files
+        run: |
+          status=0
+          while IFS= read -r file; do
+            if ! npx --yes json5 -v "$file" > /dev/null 2>&1; then
+              echo "::error file=${file}::Invalid JSON/JSON5"
+              status=1
+            fi
+          done < <(find . \( -name '*.json' -o -name '*.json5' \) -not -path './.git/*')
+          exit "$status"
+
+  actionlint:
+    name: Actions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Install actionlint
+        run: bash <(curl -s https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+
+      - name: Run actionlint
+        run: ./actionlint -color
+
+  markdownlint:
+    name: Markdown
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Run markdownlint
+        uses: DavidAnson/markdownlint-cli2-action@ce4853d43830c74c1753b39f3cf40f71c2031eb9  # v23.0.0
+
+  lint-success:
+    name: All linters passed
+    if: always()
+    needs: [yamllint, jsonlint, actionlint, markdownlint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check lint results
+        run: |
+          if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
+            echo "::error::One or more lint jobs failed"
+            exit 1
+          fi

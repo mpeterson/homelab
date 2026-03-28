@@ -41,13 +41,13 @@ jobs:
           git stash -u
 
           # Check if branch exists remotely
-          if git ls-remote --heads origin ${{ env.BRANCH_NAME }} | grep -q ${{ env.BRANCH_NAME }}; then
+          if git ls-remote --heads origin "${{ env.BRANCH_NAME }}" | grep -q "${{ env.BRANCH_NAME }}"; then
             echo "Branch ${{ env.BRANCH_NAME }} exists remotely, updating..."
-            git fetch origin ${{ env.BRANCH_NAME }}
-            git checkout -B ${{ env.BRANCH_NAME }} origin/${{ env.BRANCH_NAME }}
+            git fetch origin "${{ env.BRANCH_NAME }}"
+            git checkout -B "${{ env.BRANCH_NAME }}" "origin/${{ env.BRANCH_NAME }}"
           else
             echo "Creating new branch ${{ env.BRANCH_NAME }}..."
-            git checkout -b ${{ env.BRANCH_NAME }}
+            git checkout -b "${{ env.BRANCH_NAME }}"
           fi
 
           # Apply stashed files if any were stashed
@@ -60,39 +60,39 @@ jobs:
           mkdir -p kubernetes/apps/custom-arrscripts/scripts/
 
           # Copy the new file
-          cp gist/${{ env.GIST_FILE }} ${{ env.FILE_PATH }}.new
+          cp "gist/${{ env.GIST_FILE }}" "${{ env.FILE_PATH }}.new"
 
           # Check if file exists first
-          if [ -f ${{ env.FILE_PATH }} ]; then
+          if [ -f "${{ env.FILE_PATH }}" ]; then
             # Compare files
-            if ! cmp -s ${{ env.FILE_PATH }}.new ${{ env.FILE_PATH }}; then
+            if ! cmp -s "${{ env.FILE_PATH }}.new" "${{ env.FILE_PATH }}"; then
               echo "File has changed - updating"
-              echo "changed=true" >> $GITHUB_OUTPUT
-              mv ${{ env.FILE_PATH }}.new ${{ env.FILE_PATH }}
-              chmod ${{ env.FILE_PERMISSION }} ${{ env.FILE_PATH }}
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              mv "${{ env.FILE_PATH }}.new" "${{ env.FILE_PATH }}"
+              chmod "${{ env.FILE_PERMISSION }}" "${{ env.FILE_PATH }}"
 
               # Add changes and commit
-              git add ${{ env.FILE_PATH }}
+              git add "${{ env.FILE_PATH }}"
               git commit -m "chore(deps): Update ${{ env.GIST_FILE }} from Gist"
 
               # Push changes with explicit upstream setting
-              git push --set-upstream origin ${{ env.BRANCH_NAME }}
+              git push --set-upstream origin "${{ env.BRANCH_NAME }}"
             else
               echo "No changes to ${{ env.GIST_FILE }}"
-              echo "changed=false" >> $GITHUB_OUTPUT
-              rm ${{ env.FILE_PATH }}.new
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              rm "${{ env.FILE_PATH }}.new"
             fi
           else
             echo "File does not exist yet - creating"
-            echo "changed=true" >> $GITHUB_OUTPUT
-            mv ${{ env.FILE_PATH }}.new ${{ env.FILE_PATH }}
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            mv "${{ env.FILE_PATH }}.new" "${{ env.FILE_PATH }}"
 
             # Add changes and commit
-            git add ${{ env.FILE_PATH }}
+            git add "${{ env.FILE_PATH }}"
             git commit -m "chore(deps): Add ${{ env.GIST_FILE }} from Gist"
 
             # Push changes with explicit upstream setting
-            git push --set-upstream origin ${{ env.BRANCH_NAME }}
+            git push --set-upstream origin "${{ env.BRANCH_NAME }}"
           fi
 
       - name: Create or update PR
