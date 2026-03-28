@@ -1,0 +1,5 @@
+*.yaml linguist-detectable linguist-language=YAML
+*.yml linguist-detectable linguist-language=YAML
+*.just linguist-detectable linguist-language=Just
+*.json5 linguist-detectable linguist-language=JSON5
+*.sops.yaml linguist-generated
