@@ -1,3 +1,6 @@
+[settings]
+auto_install = true
+
 [tools]
 "aqua:casey/just" = "1.48.1"
 "aqua:kubernetes/kubectl" = "1.35.3"
