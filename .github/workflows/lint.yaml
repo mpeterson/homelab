@@ -7,117 +7,127 @@ on:
 
   workflow_dispatch:
 
-jobs:
-  yamllint:
-    name: YAML
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
-        with:
-          persist-credentials: false
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
 
-      - name: Get changed files
-        id: changed-files
-        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e  # v0.5.0
+permissions:
+  contents: read
+
+jobs:
+  filter-changes:
+    name: Filter changes
+    runs-on: ubuntu-latest
+    outputs:
+      yaml-changed: ${{ steps.yaml.outputs.changed_files }}
+      json-changed: ${{ steps.json.outputs.changed_files }}
+      actions-changed: ${{ steps.actions.outputs.changed_files }}
+      markdown-changed: ${{ steps.markdown.outputs.changed_files }}
+    steps:
+      - name: YAML changes
+        id: yaml
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
         with:
           patterns: |-
             **/*.yaml
             **/*.yml
-
-      - name: Setup uv
-        if: steps.changed-files.outputs.changed_files != '[]'
-        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7
-
-      - name: Run yamllint
-        if: steps.changed-files.outputs.changed_files != '[]'
-        run: uvx yamllint --strict --format github -c .yamllint.yaml .
-
-  jsonlint:
-    name: JSON
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
-        with:
-          persist-credentials: false
-
-      - name: Get changed files
-        id: changed-files
-        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e  # v0.5.0
+      - name: JSON changes
+        id: json
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
         with:
           patterns: |-
             **/*.json
             **/*.json5
-
-      - name: Validate JSON/JSON5 files
-        if: steps.changed-files.outputs.changed_files != '[]'
-        run: |
-          status=0
-          while IFS= read -r file; do
-            if ! npx --yes json5 -v "$file" > /dev/null 2>&1; then
-              echo "::error file=${file}::Invalid JSON/JSON5"
-              status=1
-            fi
-          done < <(find . \( -name '*.json' -o -name '*.json5' \) -not -path './.git/*')
-          exit "$status"
-
-  actionlint:
-    name: Actions
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
-        with:
-          persist-credentials: false
-
-      - name: Get changed files
-        id: changed-files
-        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e  # v0.5.0
+      - name: Actions changes
+        id: actions
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
         with:
           patterns: |-
             .github/workflows/*.yaml
             .github/workflows/*.yml
-
-      - name: Install actionlint
-        if: steps.changed-files.outputs.changed_files != '[]'
-        run: bash <(curl -s https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-
-      - name: Run actionlint
-        if: steps.changed-files.outputs.changed_files != '[]'
-        run: ./actionlint -color
-
-  markdownlint:
-    name: Markdown
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
-        with:
-          persist-credentials: false
-
-      - name: Get changed files
-        id: changed-files
-        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e  # v0.5.0
+      - name: Markdown changes
+        id: markdown
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
         with:
           patterns: |-
             **/*.md
 
-      - name: Run markdownlint
-        if: steps.changed-files.outputs.changed_files != '[]'
-        uses: DavidAnson/markdownlint-cli2-action@ce4853d43830c74c1753b39f3cf40f71c2031eb9  # v23.0.0
+  yamllint:
+    if: ${{ needs.filter-changes.outputs.yaml-changed != '[]' }}
+    name: YAML
+    runs-on: ubuntu-latest
+    needs:
+      - filter-changes
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        run: just lint yaml
+
+  jsonlint:
+    if: ${{ needs.filter-changes.outputs.json-changed != '[]' }}
+    name: JSON
+    runs-on: ubuntu-latest
+    needs:
+      - filter-changes
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        run: just lint json
+
+  actionlint:
+    if: ${{ needs.filter-changes.outputs.actions-changed != '[]' }}
+    name: Actions
+    runs-on: ubuntu-latest
+    needs:
+      - filter-changes
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        run: just lint actions
+
+  markdownlint:
+    if: ${{ needs.filter-changes.outputs.markdown-changed != '[]' }}
+    name: Markdown
+    runs-on: ubuntu-latest
+    needs:
+      - filter-changes
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        run: just lint markdown
 
   renovatelint:
     name: Renovate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
-
-      - name: Validate Renovate config
-        run: npx --yes --package renovate@latest -- renovate-config-validator --strict
+      - name: Install tools
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        run: just lint renovate
 
   lint-success:
     name: All linters passed
