@@ -4,9 +4,9 @@
     "config:best-practices",
     ":disableRateLimiting",
     // Local modular configs
-    "local>//.renovate/autoMerge.json5",
-    "local>//.renovate/groups.json5",
-    "local>//.renovate/customManagers.json5",
+    "github>mpeterson/homelab//.renovate/autoMerge.json5",
+    "github>mpeterson/homelab//.renovate/groups.json5",
+    "github>mpeterson/homelab//.renovate/customManagers.json5",
   ],
   timezone: "Asia/Jerusalem",
   schedule: ["after 2am and before 7am"],
