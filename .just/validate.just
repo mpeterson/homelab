@@ -108,11 +108,12 @@ helm:
         app_name=$(yq "select(document_index == $i) | .metadata.name // \"unknown\"" "$file")
         repo_url=$(yq "select(document_index == $i) | .spec.source.repoURL" "$file")
         version=$(yq "select(document_index == $i) | .spec.source.targetRevision" "$file")
+        namespace=$(yq "select(document_index == $i) | .spec.destination.namespace // \"default\"" "$file")
         has_values=$(yq "select(document_index == $i) | .spec.source.helm.valuesObject // \"\"" "$file")
 
         echo "  ${app_name} (${chart}@${version}) ..."
 
-        helm_cmd=(helm template "$app_name" "$chart" --repo "$repo_url" --version "$version")
+        helm_cmd=(helm template "$app_name" "$chart" --repo "$repo_url" --version "$version" --namespace "$namespace")
 
         values_file=$(mktemp)
         if [ -n "$has_values" ] && [ "$has_values" != "null" ]; then
