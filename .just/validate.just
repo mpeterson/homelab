@@ -4,7 +4,15 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 repo_root := source_directory() / ".."
 
 [doc('Run all validation checks')]
-default: kustomize helm images
+default:
+    @echo "==> Validating Kustomize overlays..."
+    @just validate kustomize
+    @echo ""
+    @echo "==> Validating Helm charts..."
+    @just validate helm
+    @echo ""
+    @echo "==> Verifying container images..."
+    @just validate images
 
 [private]
 _error file msg:
@@ -23,13 +31,13 @@ kustomize:
     cd "{{ repo_root }}"
     status=0
 
-    echo "==> Validating apps kustomization..."
+    echo "Apps..."
     if ! kustomize build kubernetes/apps/ > /dev/null; then
       just validate _error "kubernetes/apps/kustomization.yaml" "kustomize build failed for kubernetes/apps"
       status=1
     fi
 
-    echo "==> Validating infra kustomization..."
+    echo "Infra..."
     # Work on a copy to avoid modifying the repo
     infra_kust=$(mktemp)
     cp kubernetes/infra/kustomization.yaml "$infra_kust"
@@ -41,7 +49,7 @@ kustomize:
     cp "$infra_kust" kubernetes/infra/kustomization.yaml
     rm -f "$infra_kust"
 
-    echo "==> Validating sub-directory kustomizations..."
+    echo "Sub-directories..."
     while IFS= read -r kust_file; do
       dir=$(dirname "$kust_file")
 
@@ -135,7 +143,7 @@ images:
     cd "{{ repo_root }}"
     status=0
 
-    echo "==> Extracting images..."
+    echo "Extracting images..."
     images=$(find kubernetes/ -name '*.yaml' -not -name '*.sops.yaml' -type f -exec \
       yq -N '.. | select(has("repository") and has("tag")) | .repository + ":" + (.tag | tostring)' {} + 2>/dev/null \
       | sort -u \
@@ -150,7 +158,7 @@ images:
     fi
 
     count=$(echo "$images" | wc -l | tr -d ' ')
-    echo "==> Verifying $count images..."
+    echo "Checking $count images..."
 
     parallel_count=0
     pids=()
