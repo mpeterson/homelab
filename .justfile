@@ -29,7 +29,7 @@ _require *tools:
     done
 
 [doc('Run all linters and validators')]
-check:
+verify:
     @just lint
     @just validate
 
