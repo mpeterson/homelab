@@ -141,10 +141,10 @@ spec:
           enabled: false
 
         kubeStateMetrics:
-          enabled: false
+          enabled: true
 
         nodeExporter:
-          enabled: false
+          enabled: true
 
         grafana:
           enabled: false
