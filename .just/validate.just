@@ -19,7 +19,7 @@ _error file msg:
 kustomize:
     #!/usr/bin/env bash
     set -euo pipefail
-    mise install
+    mise install --quiet
     cd "{{ repo_root }}"
     status=0
 
@@ -83,7 +83,7 @@ kustomize:
 helm:
     #!/usr/bin/env bash
     set -euo pipefail
-    mise install
+    mise install --quiet
     cd "{{ repo_root }}"
     status=0
 
@@ -131,7 +131,7 @@ helm:
 images:
     #!/usr/bin/env bash
     set -euo pipefail
-    mise install
+    mise install --quiet
     cd "{{ repo_root }}"
     status=0
 
