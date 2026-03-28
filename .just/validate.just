@@ -31,35 +31,32 @@ kustomize:
     cd "{{ repo_root }}"
     status=0
 
+    # Work on a temporary copy to avoid modifying the repo
+    workdir=$(mktemp -d)
+    trap 'rm -rf "$workdir"' EXIT
+    cp -a kubernetes/ "$workdir/kubernetes/"
+
     echo "Apps..."
-    if ! kustomize build kubernetes/apps/ > /dev/null; then
+    if ! kustomize build "$workdir/kubernetes/apps/" > /dev/null; then
       just validate _error "kubernetes/apps/kustomization.yaml" "kustomize build failed for kubernetes/apps"
       status=1
     fi
 
     echo "Infra..."
-    # Work on a copy to avoid modifying the repo
-    infra_kust=$(mktemp)
-    cp kubernetes/infra/kustomization.yaml "$infra_kust"
-    yq -i 'del(.generators)' kubernetes/infra/kustomization.yaml
-    if ! kustomize build kubernetes/infra/ > /dev/null; then
+    yq -i 'del(.generators)' "$workdir/kubernetes/infra/kustomization.yaml"
+    if ! kustomize build "$workdir/kubernetes/infra/" > /dev/null; then
       just validate _error "kubernetes/infra/kustomization.yaml" "kustomize build failed for kubernetes/infra"
       status=1
     fi
-    cp "$infra_kust" kubernetes/infra/kustomization.yaml
-    rm -f "$infra_kust"
 
     echo "Sub-directories..."
     while IFS= read -r kust_file; do
       dir=$(dirname "$kust_file")
+      rel_dir="${dir#$workdir/}"
 
-      case "$dir" in
+      case "$rel_dir" in
         kubernetes/apps|kubernetes/infra|kubernetes/bootstrap|kubernetes/bootstrap/argocd) continue ;;
       esac
-
-      # Work on a copy
-      backup=$(mktemp)
-      cp "$kust_file" "$backup"
 
       if yq -e '.generators' "$kust_file" > /dev/null 2>&1; then
         yq -i 'del(.generators)' "$kust_file"
@@ -69,21 +66,16 @@ kustomize:
       has_content=$(yq '.resources // [] | length' "$kust_file" 2>/dev/null)
       has_configmaps=$(yq '.configMapGenerator // [] | length' "$kust_file" 2>/dev/null)
       if [ "${has_content:-0}" = "0" ] && [ "${has_configmaps:-0}" = "0" ]; then
-        cp "$backup" "$kust_file"
-        rm -f "$backup"
         continue
       fi
 
-      echo "  $dir ..."
+      echo "  $rel_dir ..."
       if ! kustomize build "$dir" > /dev/null 2>&1; then
-        just validate _error "$kust_file" "kustomize build failed for $dir"
+        just validate _error "$rel_dir/kustomization.yaml" "kustomize build failed for $rel_dir"
         kustomize build "$dir" 2>&1 || true
         status=1
       fi
-
-      cp "$backup" "$kust_file"
-      rm -f "$backup"
-    done < <(find kubernetes/apps kubernetes/infra -name 'kustomization.yaml' -type f)
+    done < <(find "$workdir/kubernetes/apps" "$workdir/kubernetes/infra" -name 'kustomization.yaml' -type f)
 
     exit "$status"
 

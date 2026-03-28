@@ -43,8 +43,6 @@ jobs:
 
       - name: Install tools
         uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
-        with:
-          install_args: "kustomize yq"
 
       - name: Validate
         run: just validate kustomize
@@ -63,8 +61,6 @@ jobs:
 
       - name: Install tools
         uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
-        with:
-          install_args: "helm yq"
 
       - name: Validate
         run: just validate helm
@@ -83,8 +79,6 @@ jobs:
 
       - name: Install tools
         uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
-        with:
-          install_args: "go-containerregistry yq"
 
       - name: Validate
         run: just validate images
