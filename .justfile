@@ -10,6 +10,9 @@ mod validate ".just/validate.just"
 [doc('Lint code (YAML, JSON, Actions, Markdown, Renovate)')]
 mod lint ".just/lint.just"
 
+[doc('Day-to-day Kubernetes operations')]
+mod k8s "kubernetes"
+
 [doc('List available recipes')]
 [private]
 default:
