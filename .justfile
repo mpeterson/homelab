@@ -5,6 +5,7 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 mod bootstrap "kubernetes/bootstrap"
 mod argocd "kubernetes/bootstrap/argocd"
 mod velero "kubernetes/infra/velero"
+mod validate ".just/validate.just"
 
 [doc('List available recipes')]
 [private]
