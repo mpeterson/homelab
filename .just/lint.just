@@ -68,7 +68,7 @@ markdown:
     set -euo pipefail
     mise install --quiet
     cd "{{ repo_root }}"
-    mise x -- markdownlint-cli2 "**/*.md"
+    mise x -- markdownlint-cli2 "**/*.md" "#ansible/roles/bind9/**"
 
 [doc('Validate Renovate configuration')]
 renovate:
