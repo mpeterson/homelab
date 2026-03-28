@@ -4,14 +4,8 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 repo_root := source_directory() / ".."
 
 [private]
-_require *tools:
-    #!/usr/bin/env bash
-    for tool in {{tools}}; do
-      if ! command -v "$tool" &>/dev/null; then
-        echo "Error: '$tool' is required but not installed." >&2
-        exit 1
-      fi
-    done
+_setup *tools:
+    mise install {{tools}}
 
 [private]
 _error file msg:
@@ -26,7 +20,7 @@ _error file msg:
 default: kustomize helm images
 
 [doc('Validate Kustomize overlays and sub-directory builds')]
-kustomize: (_require "kustomize" "yq")
+kustomize: (_setup "kustomize" "yq")
     #!/usr/bin/env bash
     set -euo pipefail
     cd "{{ repo_root }}"
@@ -89,7 +83,7 @@ kustomize: (_require "kustomize" "yq")
     exit "$status"
 
 [doc('Validate Helm chart values for all ArgoCD Applications')]
-helm: (_require "helm" "yq")
+helm: (_setup "helm" "yq")
     #!/usr/bin/env bash
     set -euo pipefail
     cd "{{ repo_root }}"
@@ -136,7 +130,7 @@ helm: (_require "helm" "yq")
     exit "$status"
 
 [doc('Verify all container images exist in their registries')]
-images: (_require "crane" "yq")
+images: (_setup "crane" "yq")
     #!/usr/bin/env bash
     set -euo pipefail
     cd "{{ repo_root }}"
