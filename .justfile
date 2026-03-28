@@ -28,6 +28,11 @@ _require *tools:
       fi
     done
 
+[doc('Run all linters and validators')]
+check:
+    @just lint
+    @just validate
+
 [doc('Restart all deployments that use PVCs (e.g. after PCS failover)')]
 restart-deployments-with-pvc: (_require "kubectl" "jq")
     #!/usr/bin/env bash
