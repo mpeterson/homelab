@@ -39,7 +39,6 @@ Kubernetes-based homelab running on bare-metal, managed entirely through GitOps.
 ```text
 📂 ansible/          # Ansible playbooks and roles for node provisioning
 📂 docs/             # Documentation
-📂 hack/             # Ad-hoc manifests and utilities
 📂 kubernetes/
 ├── 📂 apps/         # Application workloads
 ├── 📂 bootstrap/    # Cluster bootstrap (ArgoCD)
@@ -51,7 +50,7 @@ Kubernetes-based homelab running on bare-metal, managed entirely through GitOps.
 List all available commands:
 
 ```sh
-just --list
+just
 ```
 
 ## License
