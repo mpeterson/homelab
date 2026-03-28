@@ -5,13 +5,15 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 mod bootstrap "kubernetes/bootstrap"
 mod argocd "kubernetes/bootstrap/argocd"
 mod velero "kubernetes/infra/velero"
+[doc('Validate Kubernetes manifests (Kustomize, Helm, images)')]
 mod validate ".just/validate.just"
 
 [doc('List available recipes')]
 [private]
 default:
     @just --color always --list --list-submodules \
-      | sed 's/^    bootstrap:$/    bootstrap \x1b[34m#\x1b[0m \x1b[34mBootstrap the cluster (ArgoCD + apps)\x1b[0m/'
+      | sed 's/^    bootstrap:$/    bootstrap \x1b[34m#\x1b[0m \x1b[34mBootstrap the cluster (ArgoCD + apps)\x1b[0m/' \
+      | sed 's/^    validate:$/    validate  \x1b[34m#\x1b[0m \x1b[34mValidate Kubernetes manifests (Kustomize, Helm, images)\x1b[0m/'
 
 [private]
 _require *tools:
