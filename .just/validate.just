@@ -4,6 +4,7 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 repo_root := source_directory() / ".."
 
 [doc('Run all validation checks')]
+[private]
 default:
     @echo "==> Validating Kustomize overlays..."
     @just validate kustomize
