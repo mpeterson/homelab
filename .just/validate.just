@@ -118,7 +118,7 @@ helm:
 
         values_file=$(mktemp)
         if [ -n "$has_values" ] && [ "$has_values" != "null" ]; then
-          yq "explode(.) | select(document_index == $i) | .spec.source.helm.valuesObject" "$file" > "$values_file"
+          yq --yaml-fix-merge-anchor-to-spec "explode(.) | select(document_index == $i) | .spec.source.helm.valuesObject" "$file" > "$values_file"
           helm_cmd+=(-f "$values_file")
         fi
 
