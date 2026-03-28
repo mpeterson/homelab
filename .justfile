@@ -30,7 +30,10 @@ _require *tools:
 
 [doc('Run all linters and validators')]
 verify:
+    @echo "==> Linting..."
     @just lint
+    @echo ""
+    @echo "==> Validating manifests..."
     @just validate
 
 [doc('Restart all deployments that use PVCs (e.g. after PCS failover)')]
