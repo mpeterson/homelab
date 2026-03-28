@@ -3,9 +3,8 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 
 repo_root := source_directory() / ".."
 
-[private]
-_setup *tools:
-    mise install {{tools}}
+[doc('Run all validation checks')]
+default: kustomize helm images
 
 [private]
 _error file msg:
@@ -16,13 +15,11 @@ _error file msg:
       echo -e "\033[1;31mERROR:\033[0m {{msg}} (\033[33m{{file}}\033[0m)"
     fi
 
-[doc('Run all validation checks')]
-default: kustomize helm images
-
 [doc('Validate Kustomize overlays and sub-directory builds')]
-kustomize: (_setup "kustomize" "yq")
+kustomize:
     #!/usr/bin/env bash
     set -euo pipefail
+    mise install
     cd "{{ repo_root }}"
     status=0
 
@@ -83,9 +80,10 @@ kustomize: (_setup "kustomize" "yq")
     exit "$status"
 
 [doc('Validate Helm chart values for all ArgoCD Applications')]
-helm: (_setup "helm" "yq")
+helm:
     #!/usr/bin/env bash
     set -euo pipefail
+    mise install
     cd "{{ repo_root }}"
     status=0
 
@@ -130,9 +128,10 @@ helm: (_setup "helm" "yq")
     exit "$status"
 
 [doc('Verify all container images exist in their registries')]
-images: (_setup "crane" "yq")
+images:
     #!/usr/bin/env bash
     set -euo pipefail
+    mise install
     cd "{{ repo_root }}"
     status=0
 
