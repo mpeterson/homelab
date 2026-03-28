@@ -222,7 +222,7 @@ jobs:
 
           while IFS= read -r image; do
             # Strip digest if present (image:tag@sha256:...)
-            image_ref=$(echo "$image" | sed 's/@sha256:.*//')
+            image_ref="${image%%@sha256:*}"
 
             (
               if crane manifest "$image_ref" > /dev/null 2>&1; then
