@@ -7,13 +7,16 @@ mod argocd "kubernetes/bootstrap/argocd"
 mod velero "kubernetes/infra/velero"
 [doc('Validate Kubernetes manifests (Kustomize, Helm, images)')]
 mod validate ".just/validate.just"
+[doc('Lint code (YAML, JSON, Actions, Markdown, Renovate)')]
+mod lint ".just/lint.just"
 
 [doc('List available recipes')]
 [private]
 default:
     @just --color always --list --list-submodules \
       | sed 's/^    bootstrap:$/    bootstrap \x1b[34m#\x1b[0m \x1b[34mBootstrap the cluster (ArgoCD + apps)\x1b[0m/' \
-      | sed 's/^    validate:$/    validate  \x1b[34m#\x1b[0m \x1b[34mValidate Kubernetes manifests (Kustomize, Helm, images)\x1b[0m/'
+      | sed 's/^    validate:$/    validate  \x1b[34m#\x1b[0m \x1b[34mValidate Kubernetes manifests (Kustomize, Helm, images)\x1b[0m/' \
+      | sed 's/^    lint:$/    lint      \x1b[34m#\x1b[0m \x1b[34mLint code (YAML, JSON, Actions, Markdown, Renovate)\x1b[0m/'
 
 [private]
 _require *tools:
@@ -24,6 +27,14 @@ _require *tools:
         exit 1
       fi
     done
+
+[doc('Run all linters and validators')]
+verify:
+    @printf "\033[1;36m==> Linting...\033[0m \033[2m(just lint)\033[0m\n"
+    @just lint
+    @echo ""
+    @printf "\033[1;36m==> Validating manifests...\033[0m \033[2m(just validate)\033[0m\n"
+    @just validate
 
 [doc('Restart all deployments that use PVCs (e.g. after PCS failover)')]
 restart-deployments-with-pvc: (_require "kubectl" "jq")

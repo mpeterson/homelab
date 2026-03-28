@@ -7,117 +7,117 @@ on:
 
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   yamllint:
     name: YAML
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
-        with:
-          persist-credentials: false
-
       - name: Get changed files
         id: changed-files
-        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e  # v0.5.0
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
         with:
           patterns: |-
             **/*.yaml
             **/*.yml
-
-      - name: Setup uv
+      - name: Checkout
         if: steps.changed-files.outputs.changed_files != '[]'
-        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7
-
-      - name: Run yamllint
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
         if: steps.changed-files.outputs.changed_files != '[]'
-        run: uvx yamllint --strict --format github -c .yamllint.yaml .
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        if: steps.changed-files.outputs.changed_files != '[]'
+        run: just lint yaml
 
   jsonlint:
     name: JSON
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
-        with:
-          persist-credentials: false
-
       - name: Get changed files
         id: changed-files
-        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e  # v0.5.0
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
         with:
           patterns: |-
             **/*.json
             **/*.json5
-
-      - name: Validate JSON/JSON5 files
+      - name: Checkout
         if: steps.changed-files.outputs.changed_files != '[]'
-        run: |
-          status=0
-          while IFS= read -r file; do
-            if ! npx --yes json5 -v "$file" > /dev/null 2>&1; then
-              echo "::error file=${file}::Invalid JSON/JSON5"
-              status=1
-            fi
-          done < <(find . \( -name '*.json' -o -name '*.json5' \) -not -path './.git/*')
-          exit "$status"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
+        if: steps.changed-files.outputs.changed_files != '[]'
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        if: steps.changed-files.outputs.changed_files != '[]'
+        run: just lint json
 
   actionlint:
     name: Actions
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
-        with:
-          persist-credentials: false
-
       - name: Get changed files
         id: changed-files
-        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e  # v0.5.0
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
         with:
           patterns: |-
             .github/workflows/*.yaml
             .github/workflows/*.yml
-
-      - name: Install actionlint
+      - name: Checkout
         if: steps.changed-files.outputs.changed_files != '[]'
-        run: bash <(curl -s https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-
-      - name: Run actionlint
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
         if: steps.changed-files.outputs.changed_files != '[]'
-        run: ./actionlint -color
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        if: steps.changed-files.outputs.changed_files != '[]'
+        run: just lint actions
 
   markdownlint:
     name: Markdown
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
-        with:
-          persist-credentials: false
-
       - name: Get changed files
         id: changed-files
-        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e  # v0.5.0
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
         with:
           patterns: |-
             **/*.md
-
-      - name: Run markdownlint
+      - name: Checkout
         if: steps.changed-files.outputs.changed_files != '[]'
-        uses: DavidAnson/markdownlint-cli2-action@ce4853d43830c74c1753b39f3cf40f71c2031eb9  # v23.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Install tools
+        if: steps.changed-files.outputs.changed_files != '[]'
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        if: steps.changed-files.outputs.changed_files != '[]'
+        run: just lint markdown
 
   renovatelint:
     name: Renovate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
-
-      - name: Validate Renovate config
-        run: npx --yes --package renovate@latest -- renovate-config-validator --strict
+      - name: Install tools
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - name: Lint
+        run: just lint renovate
 
   lint-success:
     name: All linters passed
