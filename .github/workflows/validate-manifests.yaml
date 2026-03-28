@@ -1,0 +1,270 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Validate Manifests
+
+on:
+  pull_request:
+    branches: [main]
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  filter-changes:
+    name: Filter changes
+    runs-on: ubuntu-latest
+    outputs:
+      changed-files: ${{ steps.changed-files.outputs.changed_files }}
+    steps:
+      - name: Get changed files
+        id: changed-files
+        uses: bjw-s-labs/action-changed-files@015416e33c709af88f84a4496f4030c1f0ef212e # v0.5.0
+        with:
+          patterns: |-
+            kubernetes/**/*
+
+  kustomize:
+    if: ${{ needs.filter-changes.outputs.changed-files != '[]' }}
+    name: Kustomize Build
+    runs-on: ubuntu-latest
+    needs:
+      - filter-changes
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Install tools
+        run: |
+          # Install kustomize
+          curl -sL "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+          # Install yq
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Validate apps kustomization
+        run: kustomize build kubernetes/apps/ > /dev/null
+
+      - name: Validate infra kustomization (without KSOPS generators)
+        run: |
+          # Strip KSOPS generators that require the age key (unavailable in CI)
+          yq -i 'del(.generators)' kubernetes/infra/kustomization.yaml
+          kustomize build kubernetes/infra/ > /dev/null
+
+      - name: Validate sub-directory kustomizations
+        run: |
+          status=0
+          # Find all kustomization.yaml files in sub-directories (skip top-level and bootstrap)
+          while IFS= read -r kust_file; do
+            dir=$(dirname "$kust_file")
+
+            # Skip top-level kustomizations (already validated above) and bootstrap
+            case "$dir" in
+              kubernetes/apps|kubernetes/infra|kubernetes/bootstrap|kubernetes/bootstrap/argocd) continue ;;
+            esac
+
+            # Strip KSOPS generators if present
+            if yq -e '.generators' "$kust_file" > /dev/null 2>&1; then
+              yq -i 'del(.generators)' "$kust_file"
+            fi
+
+            # Skip kustomizations that only had generators (no resources/configMapGenerators left)
+            has_content=$(yq '.resources // [] | length' "$kust_file" 2>/dev/null)
+            has_configmaps=$(yq '.configMapGenerator // [] | length' "$kust_file" 2>/dev/null)
+            if [ "${has_content:-0}" = "0" ] && [ "${has_configmaps:-0}" = "0" ]; then
+              continue
+            fi
+
+            echo "Validating $dir ..."
+            if ! kustomize build "$dir" > /dev/null 2>&1; then
+              echo "::error file=${kust_file}::kustomize build failed for ${dir}"
+              kustomize build "$dir" 2>&1 || true
+              status=1
+            fi
+          done < <(find kubernetes/apps kubernetes/infra -name 'kustomization.yaml' -type f)
+          exit "$status"
+
+  helm:
+    if: ${{ needs.filter-changes.outputs.changed-files != '[]' }}
+    name: Helm Template
+    runs-on: ubuntu-latest
+    needs:
+      - filter-changes
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Validate Helm charts
+        run: |
+          status=0
+          while IFS= read -r file; do
+            # Count YAML documents in file
+            doc_count=$(yq 'document_index' "$file" | tail -1)
+            doc_count=$((doc_count + 1))
+
+            for ((i=0; i<doc_count; i++)); do
+              kind=$(yq "select(document_index == $i) | .kind // \"\"" "$file")
+              chart=$(yq "select(document_index == $i) | .spec.source.chart // \"\"" "$file")
+
+              # Only process ArgoCD Applications with Helm chart sources
+              if [ "$kind" != "Application" ] || [ -z "$chart" ] || [ "$chart" = "null" ]; then
+                continue
+              fi
+
+              app_name=$(yq "select(document_index == $i) | .metadata.name // \"unknown\"" "$file")
+              repo_url=$(yq "select(document_index == $i) | .spec.source.repoURL" "$file")
+              version=$(yq "select(document_index == $i) | .spec.source.targetRevision" "$file")
+              has_values=$(yq "select(document_index == $i) | .spec.source.helm.valuesObject // \"\"" "$file")
+
+              echo "Validating Helm chart: ${app_name} (${chart}@${version}) ..."
+
+              helm_cmd=(helm template "$app_name" "$chart" --repo "$repo_url" --version "$version")
+
+              if [ -n "$has_values" ] && [ "$has_values" != "null" ]; then
+                # Explode YAML anchors/aliases before extracting values
+                yq "explode(.) | select(document_index == $i) | .spec.source.helm.valuesObject" "$file" > "/tmp/values-${app_name}.yaml"
+                helm_cmd+=(-f "/tmp/values-${app_name}.yaml")
+              fi
+
+              if ! "${helm_cmd[@]}" > /dev/null 2>"/tmp/helm-err-${app_name}.txt"; then
+                echo "::error file=${file}::Helm template failed for ${app_name} (${chart}@${version})"
+                cat "/tmp/helm-err-${app_name}.txt"
+                status=1
+              fi
+
+              rm -f "/tmp/values-${app_name}.yaml" "/tmp/helm-err-${app_name}.txt"
+            done
+          done < <(find kubernetes/ -name '*.yaml' -not -name '*.sops.yaml' -not -path '*/bootstrap/*' -type f)
+          exit "$status"
+
+  images:
+    if: ${{ needs.filter-changes.outputs.changed-files != '[]' }}
+    name: Verify Images
+    runs-on: ubuntu-latest
+    needs:
+      - filter-changes
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          path: pull
+          persist-credentials: false
+
+      - name: Checkout default branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          path: default
+          persist-credentials: false
+
+      - name: Install tools
+        run: |
+          # Install crane
+          CRANE_VERSION=$(curl -sL https://api.github.com/repos/google/go-containerregistry/releases/latest | jq -r '.tag_name')
+          curl -sL "https://github.com/google/go-containerregistry/releases/download/${CRANE_VERSION}/go-containerregistry_Linux_x86_64.tar.gz" | sudo tar xz -C /usr/local/bin crane
+          # Install yq
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Extract and compare images
+        id: compare
+        run: |
+          extract_images() {
+            local dir="$1"
+            find "$dir/kubernetes/" -name '*.yaml' -not -name '*.sops.yaml' -type f -exec \
+              yq -N '.. | select(has("repository") and has("tag")) | .repository + ":" + (.tag | tostring)' {} + 2>/dev/null \
+              | sort -u \
+              | grep -v '^:$' \
+              | grep -v '^null:' \
+              | grep -v '^\*' \
+              || true
+          }
+
+          extract_images "pull" > /tmp/images-pull.txt
+          extract_images "default" > /tmp/images-default.txt
+
+          # Find new or changed images
+          comm -23 /tmp/images-pull.txt /tmp/images-default.txt > /tmp/images-new.txt
+
+          if [ ! -s /tmp/images-new.txt ]; then
+            echo "No new images to verify."
+            echo "has_new_images=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "New/changed images to verify:"
+          cat /tmp/images-new.txt
+          echo "has_new_images=true" >> "$GITHUB_OUTPUT"
+
+      - name: Verify new images exist
+        if: steps.compare.outputs.has_new_images == 'true'
+        run: |
+          status=0
+          # Process up to 4 images in parallel
+          parallel_count=0
+          pids=()
+          images=()
+
+          while IFS= read -r image; do
+            # Strip digest if present (image:tag@sha256:...)
+            image_ref=$(echo "$image" | sed 's/@sha256:.*//')
+
+            (
+              if crane manifest "$image_ref" > /dev/null 2>&1; then
+                echo "  ✓ ${image_ref}"
+              else
+                echo "::error::Image not found: ${image_ref}"
+                exit 1
+              fi
+            ) &
+            pids+=($!)
+            images+=("$image_ref")
+            parallel_count=$((parallel_count + 1))
+
+            if [ "$parallel_count" -ge 4 ]; then
+              for idx in "${!pids[@]}"; do
+                if ! wait "${pids[$idx]}"; then
+                  status=1
+                fi
+              done
+              pids=()
+              images=()
+              parallel_count=0
+            fi
+          done < /tmp/images-new.txt
+
+          # Wait for remaining
+          for idx in "${!pids[@]}"; do
+            if ! wait "${pids[$idx]}"; then
+              status=1
+            fi
+          done
+
+          exit "$status"
+
+  validate-success:
+    name: All validations passed
+    if: ${{ !cancelled() }}
+    needs: [kustomize, helm, images]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check validation results
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: |
+          echo "::error::One or more validation jobs failed"
+          exit 1
