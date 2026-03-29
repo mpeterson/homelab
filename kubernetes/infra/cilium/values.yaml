@@ -11,8 +11,6 @@ bandwidthManager:
   bbr: true
   enabled: true
 
-upgradeCompatibility: "1.17"
-
 bgpControlPlane:
   enabled: true
 
@@ -77,8 +75,7 @@ loadBalancer:
   algorithm: maglev
   mode: dsr
 
-localRedirectPolicies:
-  enabled: true
+localRedirectPolicy: true
 
 operator:
   dashboards:
