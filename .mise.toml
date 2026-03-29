@@ -11,6 +11,7 @@ auto_install = true
 "aqua:google/yamlfmt" = "0.21.0"
 "aqua:kubernetes-sigs/kustomize" = "5.8.1"
 "aqua:helm/helm" = "3.20.1"
+"aqua:cilium/cilium-cli" = "0.19.2"
 "aqua:mikefarah/yq" = "4.52.5"
 "aqua:google/go-containerregistry" = "0.21.3"
 "aqua:rhysd/actionlint" = "1.7.11"

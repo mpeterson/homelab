@@ -52,6 +52,11 @@
       groupName: "cilium",
     },
     {
+      description: "Group Cilium CLI (mise) with Cilium deployment",
+      matchPackageNames: ["aqua:cilium/cilium-cli"],
+      groupName: "cilium",
+    },
+    {
       description: "Group Gateway API CRDs with Cilium (Cilium dependency)",
       matchPackageNames: ["kubernetes-sigs/gateway-api"],
       groupName: "gateway-api",
