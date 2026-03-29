@@ -14,6 +14,7 @@ auto_install = true
 "aqua:mikefarah/yq" = "4.52.5"
 "aqua:google/go-containerregistry" = "0.21.3"
 "aqua:rhysd/actionlint" = "1.7.11"
+"aqua:siderolabs/talos" = "1.10.4"
 "pipx:yamllint" = "1.38.0"
 "npm:markdownlint-cli2" = "0.22.0"
 "npm:json5" = "2.2.3"
