@@ -1,0 +1,54 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  packageRules: [
+    {
+      description: "Major updates: feat with breaking change indicator and version range",
+      matchUpdateTypes: ["major"],
+      semanticCommitType: "feat",
+      commitMessageTopic: "{{depName}}",
+      commitMessagePrefix: "{{semanticCommitType}}({{semanticCommitScope}})!:",
+      commitMessageExtra: "( {{currentVersion}} ➔ {{newVersion}} )",
+      commitMessageSuffix: "",
+    },
+    {
+      description: "Minor updates: feat with version range",
+      matchUpdateTypes: ["minor"],
+      semanticCommitType: "feat",
+      commitMessageTopic: "{{depName}}",
+      commitMessageExtra: "( {{currentVersion}} ➔ {{newVersion}} )",
+      commitMessageSuffix: "",
+    },
+    {
+      description: "Patch updates: fix with version range",
+      matchUpdateTypes: ["patch"],
+      semanticCommitType: "fix",
+      commitMessageTopic: "{{depName}}",
+      commitMessageExtra: "( {{currentVersion}} ➔ {{newVersion}} )",
+      commitMessageSuffix: "",
+    },
+    {
+      description: "Digest updates: chore with short digest range",
+      matchUpdateTypes: ["digest"],
+      semanticCommitType: "chore",
+      commitMessageTopic: "{{depName}}",
+      commitMessageExtra: "( {{currentDigestShort}} ➔ {{newDigestShort}} )",
+      commitMessageSuffix: "",
+    },
+    {
+      description: "Container images: use 'container' scope",
+      matchDatasources: ["docker"],
+      semanticCommitScope: "container",
+    },
+    {
+      description: "Helm charts: use 'helm' scope",
+      matchDatasources: ["helm"],
+      semanticCommitScope: "helm",
+    },
+    {
+      description: "GitHub Actions: use ci type with 'github-action' scope",
+      matchManagers: ["github-actions"],
+      semanticCommitType: "ci",
+      semanticCommitScope: "github-action",
+    },
+  ],
+}

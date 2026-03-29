@@ -5,6 +5,7 @@
     ":disableRateLimiting",
     // Local modular configs
     "github>mpeterson/homelab//.renovate/autoMerge.json5",
+    "github>mpeterson/homelab//.renovate/commitMessage.json5",
     "github>mpeterson/homelab//.renovate/groups.json5",
     "github>mpeterson/homelab//.renovate/customManagers.json5",
   ],
