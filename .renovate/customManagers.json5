@@ -19,8 +19,9 @@
         "/kubernetes/bootstrap/argocd/mod\\.just$/",
       ],
       matchStrings: [
-        "# renovate: datasource=docker depName=(?<depName>[^\\s]+)\\n_argocd_diff_preview_version := \"(?<currentValue>[^\"]+)\"",
+        "# renovate: datasource=docker depName=(?<depName>[^\\s]+)\\n_argocd_diff_preview_version := \"(?<currentValue>[^@\"]+)(?:@(?<currentDigest>sha256:[^\"]+))?\"",
       ],
+      autoReplaceStringTemplate: "# renovate: datasource=docker depName={{{depName}}}\n_argocd_diff_preview_version := \"{{{newValue}}}@{{{newDigest}}}\"",
       datasourceTemplate: "docker",
     },
     {
