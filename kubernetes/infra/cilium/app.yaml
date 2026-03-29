@@ -39,7 +39,7 @@ spec:
     - repoURL: https://helm.cilium.io
       chart: cilium
       # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
-      targetRevision: 1.17.3
+      targetRevision: 1.18.7
       helm:
         valueFiles:
           - $values/kubernetes/infra/cilium/values.yaml
