@@ -1,10 +1,9 @@
 ---
-# Cilium Helm values for bootstrap installation.
-# These values MUST match the valuesObject in app.yaml — ArgoCD takes over management
-# after bootstrap, and any drift will cause unnecessary pod restarts.
+# Cilium Helm values — single source of truth.
+# Used by both ArgoCD (via multi-source $values ref) and bootstrap (helm install -f).
 #
-# This file is only used during fresh cluster bootstrap: just bootstrap cilium
-# Source of truth for ongoing management: kubernetes/infra/cilium/app.yaml
+# ArgoCD app: kubernetes/infra/cilium/app.yaml
+# Bootstrap:  just bootstrap cilium
 
 autoDirectNodeRoutes: true
 

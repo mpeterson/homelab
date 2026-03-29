@@ -42,8 +42,13 @@
       groupName: "argocd",
     },
     {
-      description: "Group Cilium Helm chart, configs, and bootstrap values into a single PR",
+      description: "Group Cilium Helm chart, configs, and bootstrap into a single PR",
       matchFileNames: ["kubernetes/infra/cilium/**"],
+      groupName: "cilium",
+    },
+    {
+      description: "Group Cilium bootstrap chart version with Cilium deployment",
+      matchPackageNames: ["cilium"],
       groupName: "cilium",
     },
     {

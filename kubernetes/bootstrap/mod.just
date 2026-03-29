@@ -27,7 +27,7 @@ cilium: (_require "helm" "kubectl")
       --version {{ _cilium_chart_version }} \
       --namespace kube-system \
       --wait --timeout 5m \
-      --values {{ bootstrap_dir }}/../infra/cilium/bootstrap-values.yaml
+      --values {{ bootstrap_dir }}/../infra/cilium/values.yaml
     @echo "Waiting for Cilium agents to be ready..."
     kubectl wait --for=condition=ready pod \
       -l app.kubernetes.io/name=cilium-agent \

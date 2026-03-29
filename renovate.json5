@@ -46,7 +46,6 @@
       description: "Never automerge Cilium — CNI upgrade is high-risk",
       matchPackageNames: ["cilium"],
       automerge: false,
-      labels: ["manual-review", "critical-infra"],
     },
   ],
 }
