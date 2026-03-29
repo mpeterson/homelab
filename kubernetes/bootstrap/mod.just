@@ -6,6 +6,9 @@ bootstrap_dir := source_directory()
 # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
 _cilium_chart_version := "1.17.3"
 
+# renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
+_gateway_api_version := "v1.3.0"
+
 [private]
 _require *tools:
     #!/usr/bin/env bash
@@ -22,6 +25,9 @@ default: cilium argocd apps
 [doc('Install Cilium CNI via Helm (required before ArgoCD — nodes need CNI to become Ready)')]
 [private]
 cilium: (_require "helm" "kubectl")
+    @echo "Installing Gateway API CRDs..."
+    kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/{{ _gateway_api_version }}/standard-install.yaml
+    kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/{{ _gateway_api_version }}/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml
     helm repo add cilium https://helm.cilium.io --force-update
     helm install cilium cilium/cilium \
       --version {{ _cilium_chart_version }} \

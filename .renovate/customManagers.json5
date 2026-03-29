@@ -46,5 +46,28 @@
       ],
       datasourceTemplate: "helm",
     },
+    {
+      customType: "regex",
+      description: "Track Gateway API version in bootstrap mod",
+      managerFilePatterns: [
+        "/kubernetes/bootstrap/mod\\.just$/",
+      ],
+      matchStrings: [
+        "# renovate: datasource=github-releases depName=(?<depName>[^\\s]+)\\n_gateway_api_version := \"(?<currentValue>[^\"]+)\"",
+      ],
+      datasourceTemplate: "github-releases",
+    },
+    {
+      customType: "regex",
+      description: "Track Gateway API CRD versions in Cilium kustomization",
+      managerFilePatterns: [
+        "/kubernetes/infra/cilium/kustomization\\.yaml$/",
+      ],
+      matchStrings: [
+        "# renovate: datasource=github-releases depName=(?<depName>[^\\s]+)\\n\\s+- https://[^/]+/[^/]+/[^/]+/releases/download/(?<currentValue>v[^/]+)/",
+        "# renovate: datasource=github-releases depName=(?<depName>[^\\s]+)\\n\\s+- https://[^/]+/(?:[^/]+/){2}(?<currentValue>v[^/]+)/",
+      ],
+      datasourceTemplate: "github-releases",
+    },
   ],
 }
