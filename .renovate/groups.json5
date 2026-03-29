@@ -57,9 +57,19 @@
       groupName: "cilium",
     },
     {
-      description: "Group Gateway API CRDs with Cilium (Cilium dependency)",
+      description: "Group Gateway API CRDs (Cilium dependency)",
       matchPackageNames: ["kubernetes-sigs/gateway-api"],
       groupName: "gateway-api",
+    },
+    {
+      description: "Group Kustomize (mise) with ArgoCD — must match ArgoCD bundled version",
+      matchPackageNames: ["aqua:kubernetes-sigs/kustomize"],
+      groupName: "argocd",
+    },
+    {
+      description: "Group Helm (mise) with ArgoCD — should stay close to ArgoCD bundled version",
+      matchPackageNames: ["aqua:helm/helm"],
+      groupName: "argocd",
     },
     {
       description: "Group SOPS CLI (mise) with KSOPS",

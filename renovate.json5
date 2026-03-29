@@ -47,5 +47,33 @@
       matchPackageNames: ["cilium"],
       automerge: false,
     },
+    // --- Version coupling constraints ---
+    // These prevent Renovate from proposing upgrades beyond what the
+    // parent dependency supports. Update the allowedVersions when the
+    // parent is upgraded.
+    {
+      description: "Gateway API pinned to max supported by Cilium 1.18.x",
+      matchPackageNames: ["kubernetes-sigs/gateway-api"],
+      allowedVersions: "<=v1.3.0",
+    },
+    {
+      description: "kubectl pinned to K8s server version ±1 skew policy (K8s 1.32)",
+      matchPackageNames: ["aqua:kubernetes/kubectl"],
+      allowedVersions: "<=1.33",
+    },
+    {
+      description: "Remind to update gateway-api allowedVersions when Cilium upgrades",
+      matchPackageNames: ["cilium"],
+      prBodyNotes: [
+        "⚠️ **Coupled dependency**: After merging, update `allowedVersions` for `kubernetes-sigs/gateway-api` in `renovate.json5` to match the new Cilium version's supported Gateway API. See [Cilium Gateway API docs](https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api.html).",
+      ],
+    },
+    {
+      description: "Remind to update kubectl allowedVersions when Talos/K8s upgrades",
+      matchPackageNames: ["aqua:siderolabs/talos"],
+      prBodyNotes: [
+        "⚠️ **Coupled dependency**: After merging, update `allowedVersions` for `aqua:kubernetes/kubectl` in `renovate.json5` to stay within ±1 of the new K8s server version (kubectl skew policy).",
+      ],
+    },
   ],
 }
