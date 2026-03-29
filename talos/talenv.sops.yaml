@@ -1,0 +1,16 @@
+TS_AUTHKEY: ENC[AES256_GCM,data:6u8dCVjEcPdsuJDtibCGmPvrScO5cZBlgumB2qrcmuj8xe9dlJdvKXxO+T7wEiGm+zxgUmDKQ3VDm7pStHJNLx1XE7zgjbGInrmJgVeXYJQVUZVzqa+4dGcKX1QK8nXFXgkQALmEwEMk875PCtOoL107fTXazqRC/VncTEDIkuunuB/1uel2LdOvSJthGmZteN39ZSFv5r7Fg25Z535h6mJ21PbFpYpbMSgr7UF4Jw69qxrUYDfIjaNKFZkBSEaV0I4N3FBPTxHWDpkPrVLw7YirJSNg1KAZeOrlQPEYLHpvy7qpE7A4jO7u9GfvHbkJnjo213DXH5J2qL3tLQreJH6rHcgJ2D8oWGZ758XFA7FP03GcMIYClCl9QluKIqceAVBS+3BIRnHG4/uWcmwZd2d+TCwPfPtvEItl28UjeY8eEnuxUHrHr4ptD8nuo3trffN3,iv:m4laUYjrAqDe+YfbZdoOwluZoWLgpO6VsBrMZE9+fSU=,tag:AvGPYFyQAL6l1GAN5R1ecw==,type:str]
+sops:
+    age:
+        - recipient: age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBjaFMvTE92UHFESVBsMDJu
+            MlREK2U5T1piZXl4eHo4SnIvakNFR21sOFRzCnFMRzI4RFBPVFVqQXNwV2JYeXNm
+            eS9iaXI4UWZUVk1FTHVHZGNhaEw5YUEKLS0tIElJT2Fna0N2WGFpVjlydS9CRis4
+            b2hpV3g4dkp5UDZ5NmN4WHpSR1N6a3MKqcDAqUrOWXMErtQhhvkSHFu0fOsMPyIw
+            tqVKnUF60sRbgAOfuXyb+T/eW82xGZkwSTEWQCz+ICux0/flt74cgQ==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-03-29T18:29:36Z"
+    mac: ENC[AES256_GCM,data:nQeu6mK0XEwqrLLtWcM8XxyBBI/0cdTXdU0e7l46zA58yJlG5HJC0rk9P1YeqZGjIiRw0TFfjm9C3kzrNm0dJRoHoK0eba6Dsm/Hs+0+qz3qCrWmoQHO+nbX/o+XCmTsLSqzI9aZu2cfwor+TQ5ES4axxymCNwMTh1s2Y8/37Og=,iv:0u/MJLU4ZM4rPLbtrlT1Ng0K89R4VJJc7/jn0Jbjk6g=,tag:YphM89kNHDM+PQ+/NmeAYA==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
+    version: 3.12.2
