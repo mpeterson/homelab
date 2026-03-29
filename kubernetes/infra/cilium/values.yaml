@@ -51,6 +51,9 @@ gatewayAPI:
 hubble:
   relay:
     enabled: true
+  tls:
+    auto:
+      method: cronJob
   ui:
     enabled: true
 
