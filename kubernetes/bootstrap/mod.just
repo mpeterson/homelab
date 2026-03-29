@@ -21,10 +21,9 @@ default: cilium argocd apps
 
 [doc('Install Cilium CNI via Helm (required before ArgoCD — nodes need CNI to become Ready)')]
 [private]
-cilium: (_require "helm" "kubectl" "kustomize")
+cilium: (_require "helm" "kubectl")
     @echo "Installing Gateway API CRDs..."
-    kustomize build {{ bootstrap_dir }}/../infra/gateway-api \
-      | kubectl apply --server-side -f -
+    kubectl apply --server-side -k {{ bootstrap_dir }}/../infra/gateway-api
     @echo "Installing Cilium..."
     helm repo add cilium https://helm.cilium.io --force-update
     helm template cilium cilium/cilium \
