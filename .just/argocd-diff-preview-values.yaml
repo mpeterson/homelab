@@ -1,3 +1,4 @@
+---
 # Helm values for the ephemeral ArgoCD used by argocd-diff-preview.
 # Installs a fake KSOPS plugin that returns empty output, allowing
 # kustomize builds to succeed without the real SOPS decryption key.
