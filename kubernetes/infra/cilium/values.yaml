@@ -16,8 +16,6 @@ bgpControlPlane:
 
 bpf:
   datapathMode: netkit
-  distributedLRU:
-    enabled: false
   mapDynamicSizeRatio: 0.08
   masquerade: true
   preallocateMaps: true
@@ -51,7 +49,6 @@ gatewayAPI:
   enabled: true
 
 hubble:
-  enabled: true
   relay:
     enabled: true
   ui:
@@ -60,7 +57,6 @@ hubble:
 ingressController:
   default: true
   enabled: true
-  loadbalancerMode: dedicated
 
 ipam:
   mode: kubernetes
@@ -84,10 +80,8 @@ operator:
       grafana_folder: Cilium
     enabled: true
   prometheus:
-    enabled: true
     serviceMonitor:
       enabled: true
-  replicas: 2
   rollOutPods: true
 
 prometheus:
