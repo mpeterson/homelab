@@ -3,6 +3,9 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 
 bootstrap_dir := source_directory()
 
+# renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
+_cilium_chart_version := "1.17.3"
+
 [private]
 _require *tools:
     #!/usr/bin/env bash
@@ -14,7 +17,25 @@ _require *tools:
     done
 
 [private]
-default: argocd apps
+default: cilium argocd apps
+
+[doc('Install Cilium CNI via Helm (required before ArgoCD — nodes need CNI to become Ready)')]
+[private]
+cilium: (_require "helm" "kubectl")
+    @echo "Installing Gateway API CRDs..."
+    kubectl apply --server-side -k {{ bootstrap_dir }}/../infra/gateway-api
+    @echo "Installing Cilium..."
+    helm repo add cilium https://helm.cilium.io --force-update
+    helm template cilium cilium/cilium \
+      --version {{ _cilium_chart_version }} \
+      --namespace kube-system \
+      --api-versions gateway.networking.k8s.io/v1/GatewayClass \
+      -f {{ bootstrap_dir }}/../infra/cilium/values.yaml \
+      | kubectl apply --server-side -f -
+    @echo "Waiting for Cilium agents to be ready..."
+    kubectl wait --for=condition=ready pod \
+      -l app.kubernetes.io/name=cilium-agent \
+      -n kube-system --timeout=300s
 
 [doc('Create SOPS age secret for ArgoCD')]
 [private]

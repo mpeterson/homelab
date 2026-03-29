@@ -42,5 +42,10 @@
       matchPackageNames: ["app-template"],
       automerge: false,
     },
+    {
+      description: "Never automerge Cilium — CNI upgrade is high-risk",
+      matchPackageNames: ["cilium"],
+      automerge: false,
+    },
   ],
 }

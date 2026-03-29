@@ -1,4 +1,6 @@
 ---
+# Cilium CNI — Helm chart managed by ArgoCD
+# Adopts the existing Helm release after orphaning (see .local/plans/491-cilium-self-managed.md)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -6,6 +8,45 @@ metadata:
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "-6"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+
+  syncPolicy:
+    syncOptions:
+      - ServerSideApply=true
+    automated:
+      selfHeal: true
+      prune: false
+
+  sources:
+    - repoURL: https://helm.cilium.io
+      chart: cilium
+      # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
+      targetRevision: 1.17.3
+      helm:
+        valueFiles:
+          - $values/kubernetes/infra/cilium/values.yaml
+    - repoURL: https://github.com/mpeterson/homelab
+      targetRevision: main
+      ref: values
+
+---
+# Cilium supplementary configs — BGP, Gateways, LB IP Pool
+# These require Cilium CRDs (installed by the Helm chart above), hence the later sync wave.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cilium-configs
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 

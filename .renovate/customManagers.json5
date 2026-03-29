@@ -35,5 +35,28 @@
       ],
       datasourceTemplate: "helm",
     },
+    {
+      customType: "regex",
+      description: "Track Cilium Helm chart version in bootstrap mod",
+      managerFilePatterns: [
+        "/kubernetes/bootstrap/mod\\.just$/",
+      ],
+      matchStrings: [
+        "# renovate: datasource=helm registryUrl=(?<registryUrl>[^\\s]+) depName=(?<depName>[^\\s]+)\\n_cilium_chart_version := \"(?<currentValue>[^\"]+)\"",
+      ],
+      datasourceTemplate: "helm",
+    },
+    {
+      customType: "regex",
+      description: "Track Gateway API CRD versions in kustomization",
+      managerFilePatterns: [
+        "/kubernetes/infra/gateway-api/kustomization\\.yaml$/",
+      ],
+      matchStrings: [
+        "# renovate: datasource=github-releases depName=(?<depName>[^\\s]+)\\n\\s+- https://[^/]+/[^/]+/[^/]+/releases/download/(?<currentValue>v[^/]+)/",
+        "# renovate: datasource=github-releases depName=(?<depName>[^\\s]+)\\n\\s+- https://[^/]+/(?:[^/]+/){2}(?<currentValue>v[^/]+)/",
+      ],
+      datasourceTemplate: "github-releases",
+    },
   ],
 }
