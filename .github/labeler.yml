@@ -11,6 +11,10 @@
   - changed-files:
       - any-glob-to-any-file: "ansible/**"
 
+"area/talos":
+  - changed-files:
+      - any-glob-to-any-file: "talos/**"
+
 "area/docs":
   - changed-files:
       - any-glob-to-any-file:
@@ -23,3 +27,4 @@
           - "kubernetes/infra/cilium/**"
           - "kubernetes/infra/gateway-api/**"
           - "hack/talos/**"
+          - "talos/**"
