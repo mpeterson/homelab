@@ -1,6 +1,13 @@
 set quiet := true
 set shell := ['bash', '-euo', 'pipefail', '-c']
 
+repo_root := source_directory() / "../../.."
+
+# renovate: datasource=docker depName=dagandersen/argocd-diff-preview
+_argocd_diff_preview_version := "v0.2.2"
+# renovate: datasource=helm registryUrl=https://argoproj.github.io/argo-helm depName=argo-cd
+_argocd_chart_version := "9.4.17"
+
 [private]
 default:
     @just --unstable --list argocd
@@ -60,3 +67,66 @@ prune app="argocd": (_require "kubectl" "argocd")
 
     echo ""
     argocd app sync {{app}} --prune --core --kube-context "$KCTX"
+
+[doc('Preview rendered manifest diff (ArgoCD) against base branch')]
+diff base_branch="main" dry_run="false": (_require "docker" "git")
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{ repo_root }}"
+
+    target_branch="${TARGET_BRANCH:-$(git rev-parse --abbrev-ref HEAD)}"
+    repo="${REPO:-$(git remote get-url origin | sed 's|.*github.com[:/]||;s|\.git$||')}"
+    config_dir="kubernetes/bootstrap/argocd"
+    output_dir=".local/argocd-diff/$(date +%Y%m%d-%H%M%S)"
+
+    base_dir=$(mktemp -d)
+    target_dir=$(mktemp -d)
+    argocd_config_dir=$(mktemp -d)
+    trap 'rm -rf "$base_dir" "$target_dir" "$argocd_config_dir"' EXIT
+
+    mkdir -p "$output_dir"
+
+    echo "==> Preparing branches..."
+    git archive "{{ base_branch }}" | tar -x -C "$base_dir"
+    git archive HEAD | tar -x -C "$target_dir"
+    cp "$config_dir/diff-preview-values.yaml" "$argocd_config_dir/values.yaml"
+
+    dry_run_env=""
+    if [ "{{ dry_run }}" = "true" ]; then
+      echo "==> Running ArgoCD diff preview (dry-run)..."
+      dry_run_env="-e DRY_RUN=true"
+    else
+      echo "==> Running ArgoCD diff preview..."
+      echo "    repo:           $repo"
+      echo "    base branch:    {{ base_branch }}"
+      echo "    target branch:  $target_branch"
+      echo "    chart version:  {{ _argocd_chart_version }}"
+      echo "    output:         $output_dir/"
+      echo ""
+    fi
+
+    # Allow partial failure: SOPS-encrypted apps can't render without the age key
+    rc=0
+    docker run --rm \
+      --network=host \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      -v "$base_dir:/base-branch" \
+      -v "$target_dir:/target-branch" \
+      -v "$(pwd)/$output_dir:/output" \
+      -v "$argocd_config_dir:/argocd-config" \
+      -e TARGET_BRANCH="$target_branch" \
+      -e REPO="$repo" \
+      -e ARGOCD_CHART_NAME=argo-cd \
+      -e ARGOCD_CHART_VERSION="{{ _argocd_chart_version }}" \
+      $dry_run_env \
+      "dagandersen/argocd-diff-preview:{{ _argocd_diff_preview_version }}" || rc=$?
+
+    if [ -f "$output_dir/diff.md" ]; then
+      echo ""
+      echo "==> Diff written to $output_dir/diff.md"
+    elif [ "$rc" -ne 0 ]; then
+      echo ""
+      echo "==> argocd-diff-preview exited with code $rc"
+      echo "    SOPS-encrypted apps cannot render without the age key."
+      exit "$rc"
+    fi
