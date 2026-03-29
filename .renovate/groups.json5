@@ -72,6 +72,16 @@
       groupName: "argocd",
     },
     {
+      description: "Group kubectl (mise) with Talos — kubectl version tied to K8s version from Talos",
+      matchPackageNames: ["aqua:kubernetes/kubectl"],
+      groupName: "talos",
+    },
+    {
+      description: "Group Talos CLI (mise) into talos group",
+      matchPackageNames: ["aqua:siderolabs/talos"],
+      groupName: "talos",
+    },
+    {
       description: "Group SOPS CLI (mise) with KSOPS",
       matchPackageNames: ["aqua:getsops/sops", "viaduct-ai/kustomize-sops"],
       groupName: "sops",

@@ -77,14 +77,14 @@
       description: "Remind to update kubectl allowedVersions when Talos/K8s upgrades",
       matchPackageNames: ["aqua:siderolabs/talos"],
       prBodyNotes: [
-        "⚠️ **Coupled dependency**: After merging, update `allowedVersions` for `aqua:kubernetes/kubectl` in `renovate.json5` to stay within ±1 of the new K8s server version (kubectl skew policy).",
+        "⚠️ **Coupled dependency**: kubectl is grouped with this PR. Before merging, update `allowedVersions` for `aqua:kubernetes/kubectl` in `renovate.json5` to stay within ±1 of the new K8s server version (kubectl skew policy), then let Renovate rebase to include the kubectl update.",
       ],
     },
     {
       description: "Remind to check Helm/Kustomize bundled versions when ArgoCD upgrades",
       matchPackageNames: ["aqua:argoproj/argo-cd"],
       prBodyNotes: [
-        "⚠️ **Coupled dependency**: After merging, verify ArgoCD's bundled Helm and Kustomize versions (`kubectl -n argocd exec deploy/argocd-repo-server -- helm version --short` / `kustomize version`) and update `allowedVersions` for `aqua:helm/helm` in `renovate.json5` if needed.",
+        "⚠️ **Coupled dependency**: Kustomize and Helm are grouped with this PR. Before merging, verify ArgoCD's bundled Helm and Kustomize versions (`kubectl -n argocd exec deploy/argocd-repo-server -- helm version --short` / `kustomize version`) and update `allowedVersions` for `aqua:helm/helm` in `renovate.json5` if needed, then let Renovate rebase.",
       ],
     },
   ],
