@@ -1,0 +1,38 @@
+---
+# Helm values for the ephemeral ArgoCD used by argocd-diff-preview.
+# Installs a fake KSOPS plugin that returns empty output, allowing
+# kustomize builds to succeed without the real SOPS decryption key.
+# Secret resources are omitted from both branches equally, so the diff
+# accurately reflects changes to all non-secret resources.
+
+configs:
+  cm:
+    kustomize.buildOptions: "--enable-alpha-plugins --enable-exec"
+
+repoServer:
+  volumes:
+    - name: custom-tools
+      emptyDir: {}
+  volumeMounts:
+    - mountPath: /usr/local/bin/ksops
+      name: custom-tools
+      subPath: ksops
+  initContainers:
+    - name: install-fake-ksops
+      image: alpine:3.23
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          cat > /custom-tools/ksops << 'SCRIPT'
+          #!/bin/sh
+          # Stub KSOPS: returns an empty resource list so kustomize builds
+          # succeed without real SOPS decryption keys.
+          echo '{"apiVersion":"config.kubernetes.io/v1","kind":"ResourceList","items":[]}'
+          SCRIPT
+          chmod +x /custom-tools/ksops
+      volumeMounts:
+        - mountPath: /custom-tools
+          name: custom-tools
+  env:
+    - name: XDG_CONFIG_HOME
+      value: /.config

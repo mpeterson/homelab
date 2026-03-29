@@ -12,5 +12,27 @@
       ],
       datasourceTemplate: "github-releases",
     },
+    {
+      customType: "regex",
+      description: "Track argocd-diff-preview Docker image in ArgoCD mod",
+      managerFilePatterns: [
+        "/kubernetes/bootstrap/argocd/mod\\.just$/",
+      ],
+      matchStrings: [
+        "# renovate: datasource=docker depName=(?<depName>[^\\s]+)\\n_argocd_diff_preview_version := \"(?<currentValue>[^\"]+)\"",
+      ],
+      datasourceTemplate: "docker",
+    },
+    {
+      customType: "regex",
+      description: "Track ArgoCD Helm chart version for diff preview",
+      managerFilePatterns: [
+        "/kubernetes/bootstrap/argocd/mod\\.just$/",
+      ],
+      matchStrings: [
+        "# renovate: datasource=helm registryUrl=(?<registryUrl>[^\\s]+) depName=(?<depName>[^\\s]+)\\n_argocd_chart_version := \"(?<currentValue>[^\"]+)\"",
+      ],
+      datasourceTemplate: "helm",
+    },
   ],
 }
