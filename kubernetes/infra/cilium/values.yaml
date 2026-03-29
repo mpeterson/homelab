@@ -11,6 +11,8 @@ bandwidthManager:
   bbr: true
   enabled: true
 
+upgradeCompatibility: "1.17"
+
 bgpControlPlane:
   enabled: true
 
