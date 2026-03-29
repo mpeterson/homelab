@@ -5,6 +5,8 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 mod bootstrap "kubernetes/bootstrap"
 mod argocd "kubernetes/bootstrap/argocd"
 mod velero "kubernetes/infra/velero"
+[doc('Manage Talos cluster configs (generate, diff, apply, validate)')]
+mod talos "talos"
 [doc('Validate Kubernetes manifests (Kustomize, Helm, images)')]
 mod validate ".just/validate.just"
 [doc('Lint code (YAML, JSON, Actions, Markdown, Renovate)')]

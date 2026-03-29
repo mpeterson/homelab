@@ -1,0 +1,146 @@
+---
+clusterName: talos-proxmox-cluster
+talosVersion: v1.10.4
+kubernetesVersion: v1.32.4
+endpoint: https://10.3.0.30:6443
+
+clusterPodNets:
+  - 10.244.0.0/16
+clusterSvcNets:
+  - 10.96.0.0/12
+
+cniConfig:
+  name: none
+
+# Global patches applied to all nodes
+patches:
+  - |-
+    cluster:
+      proxy:
+        disabled: true
+  - |-
+    machine:
+      kubelet:
+        extraArgs:
+          rotate-server-certificates: "true"
+      features:
+        hostDNS:
+          enabled: true
+          resolveMemberNames: true
+          forwardKubeDNSToHost: false
+      files:
+        - op: overwrite
+          path: /etc/nfsmount.conf
+          permissions: 0o644
+          content: |
+            [ NFSMount_Global_Options ]
+            nfsvers=4.2
+            hard=True
+            noatime=True
+            nconnect=16
+      udev:
+        rules:
+          # Coral Edge M.2 TPU
+          - SUBSYSTEM=="apex", KERNEL=="apex*", GROUP="44", MODE="0660"
+  - |-
+    apiVersion: v1alpha1
+    kind: ExtensionServiceConfig
+    name: tailscale
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_AUTH_ONCE=true
+
+controlPlane:
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/iscsi-tools
+          - siderolabs/qemu-guest-agent
+          - siderolabs/tailscale
+  patches:
+    - |-
+      machine:
+        features:
+          kubernetesTalosAPIAccess:
+            enabled: true
+            allowedRoles:
+              - os:admin
+            allowedKubernetesNamespaces:
+              - actions-runner-system
+              - system-upgrade
+        network:
+          interfaces:
+            - deviceSelector:
+                driver: virtio_net
+              dhcp: true
+              vip:
+                ip: 10.3.0.30
+        nodeLabels:
+          node.kubernetes.io/exclude-from-external-load-balancers: ""
+
+worker:
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/gasket-driver
+          - siderolabs/iscsi-tools
+          - siderolabs/nonfree-kmod-nvidia-production
+          - siderolabs/nvidia-container-toolkit-production
+          - siderolabs/qemu-guest-agent
+          - siderolabs/tailscale
+  patches:
+    - |-
+      machine:
+        sysctls:
+          net.core.bpf_jit_harden: 1
+
+nodes:
+  - hostname: talos-cp-01
+    ipAddress: 10.3.0.31
+    controlPlane: true
+    installDisk: /dev/sda
+
+  - hostname: talos-cp-02
+    ipAddress: 10.3.0.32
+    controlPlane: true
+    installDisk: /dev/sda
+
+  - hostname: talos-cp-03
+    ipAddress: 10.3.0.33
+    controlPlane: true
+    installDisk: /dev/sda
+
+  - hostname: talos-01
+    ipAddress: 10.3.0.34
+    controlPlane: false
+    installDisk: /dev/sda
+    kernelModules:
+      - name: nvidia
+      - name: nvidia_uvm
+      - name: nvidia_drm
+      - name: nvidia_modeset
+
+  - hostname: talos-02
+    ipAddress: 10.3.0.35
+    controlPlane: false
+    installDisk: /dev/sda
+    kernelModules:
+      - name: nvidia
+      - name: nvidia_uvm
+      - name: nvidia_drm
+      - name: nvidia_modeset
+
+  # talos-03 does not have GPU/TPU hardware — uses the standard schematic
+  - hostname: talos-03
+    ipAddress: 10.3.0.36
+    controlPlane: false
+    installDisk: /dev/sda
+    schematic:
+      customization:
+        systemExtensions:
+          officialExtensions:
+            - siderolabs/iscsi-tools
+            - siderolabs/qemu-guest-agent
+            - siderolabs/tailscale
