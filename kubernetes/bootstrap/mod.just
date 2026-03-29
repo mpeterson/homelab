@@ -6,9 +6,6 @@ bootstrap_dir := source_directory()
 # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
 _cilium_chart_version := "1.17.3"
 
-# renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
-_gateway_api_version := "v1.3.0"
-
 [private]
 _require *tools:
     #!/usr/bin/env bash
@@ -24,16 +21,18 @@ default: cilium argocd apps
 
 [doc('Install Cilium CNI via Helm (required before ArgoCD — nodes need CNI to become Ready)')]
 [private]
-cilium: (_require "helm" "kubectl")
+cilium: (_require "helm" "kubectl" "kustomize")
     @echo "Installing Gateway API CRDs..."
-    kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/{{ _gateway_api_version }}/standard-install.yaml
-    kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/{{ _gateway_api_version }}/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml
+    kustomize build {{ bootstrap_dir }}/../infra/gateway-api \
+      | kubectl apply --server-side -f -
+    @echo "Installing Cilium..."
     helm repo add cilium https://helm.cilium.io --force-update
-    helm install cilium cilium/cilium \
+    helm template cilium cilium/cilium \
       --version {{ _cilium_chart_version }} \
       --namespace kube-system \
-      --wait --timeout 5m \
-      --values {{ bootstrap_dir }}/../infra/cilium/values.yaml
+      --api-versions gateway.networking.k8s.io/v1/GatewayClass \
+      -f {{ bootstrap_dir }}/../infra/cilium/values.yaml \
+      | kubectl apply --server-side -f -
     @echo "Waiting for Cilium agents to be ready..."
     kubectl wait --for=condition=ready pod \
       -l app.kubernetes.io/name=cilium-agent \

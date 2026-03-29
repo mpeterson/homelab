@@ -48,17 +48,6 @@
     },
     {
       customType: "regex",
-      description: "Track Gateway API version in bootstrap mod",
-      managerFilePatterns: [
-        "/kubernetes/bootstrap/mod\\.just$/",
-      ],
-      matchStrings: [
-        "# renovate: datasource=github-releases depName=(?<depName>[^\\s]+)\\n_gateway_api_version := \"(?<currentValue>[^\"]+)\"",
-      ],
-      datasourceTemplate: "github-releases",
-    },
-    {
-      customType: "regex",
       description: "Track Gateway API CRD versions in kustomization",
       managerFilePatterns: [
         "/kubernetes/infra/gateway-api/kustomization\\.yaml$/",
