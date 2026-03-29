@@ -6,6 +6,13 @@ metadata:
 data:
   application.resourceTrackingMethod: annotation+label
   kustomize.buildOptions: "--enable-alpha-plugins --enable-exec"
+  # Prometheus Operator defaults `action: replace` on ServiceMonitor relabelings.
+  # Helm templates often omit it (since replace is the default), causing a
+  # perpetual diff between rendered and live state.
+  resource.customizations.ignoreDifferences.monitoring.coreos.com_ServiceMonitor: |
+    jqPathExpressions:
+    - .spec.endpoints[]?.relabelings[]?.action
+    - .spec.endpoints[]?.metricRelabelings[]?.action
   resource.exclusions: |
     ### Network resources created by the Kubernetes control plane
     - apiGroups:
