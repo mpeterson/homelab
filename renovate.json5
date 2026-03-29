@@ -70,7 +70,7 @@
       description: "Remind to update gateway-api allowedVersions when Cilium upgrades",
       matchPackageNames: ["cilium"],
       prBodyNotes: [
-        "⚠️ **Coupled dependency**: After merging, update `allowedVersions` for `kubernetes-sigs/gateway-api` in `renovate.json5` to match the new Cilium version's supported Gateway API. See [Cilium Gateway API docs](https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api.html).",
+        "⚠️ **Coupled dependency**: Gateway API CRDs are grouped with this PR. Before merging, update `allowedVersions` for `kubernetes-sigs/gateway-api` in `renovate.json5` to match the new Cilium version's supported Gateway API, then let Renovate rebase to include the CRD update. See [Cilium Gateway API docs](https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api.html).",
       ],
     },
     {

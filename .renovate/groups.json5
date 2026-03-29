@@ -57,9 +57,9 @@
       groupName: "cilium",
     },
     {
-      description: "Group Gateway API CRDs (Cilium dependency)",
+      description: "Group Gateway API CRDs with Cilium — CRDs must be updated before or with Cilium",
       matchPackageNames: ["kubernetes-sigs/gateway-api"],
-      groupName: "gateway-api",
+      groupName: "cilium",
     },
     {
       description: "Group Kustomize (mise) with ArgoCD — must match ArgoCD bundled version",
