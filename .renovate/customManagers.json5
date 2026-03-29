@@ -59,9 +59,9 @@
     },
     {
       customType: "regex",
-      description: "Track Gateway API CRD versions in Cilium kustomization",
+      description: "Track Gateway API CRD versions in kustomization",
       managerFilePatterns: [
-        "/kubernetes/infra/cilium/kustomization\\.yaml$/",
+        "/kubernetes/infra/gateway-api/kustomization\\.yaml$/",
       ],
       matchStrings: [
         "# renovate: datasource=github-releases depName=(?<depName>[^\\s]+)\\n\\s+- https://[^/]+/[^/]+/[^/]+/releases/download/(?<currentValue>v[^/]+)/",

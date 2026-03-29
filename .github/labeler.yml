@@ -21,3 +21,4 @@
   - changed-files:
       - any-glob-to-any-file:
           - "kubernetes/infra/cilium/**"
+          - "kubernetes/infra/gateway-api/**"
