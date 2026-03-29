@@ -35,5 +35,16 @@
       ],
       datasourceTemplate: "helm",
     },
+    {
+      customType: "regex",
+      description: "Track Cilium Helm chart version in bootstrap mod",
+      managerFilePatterns: [
+        "/kubernetes/bootstrap/mod\\.just$/",
+      ],
+      matchStrings: [
+        "# renovate: datasource=helm registryUrl=(?<registryUrl>[^\\s]+) depName=(?<depName>[^\\s]+)\\n_cilium_chart_version := \"(?<currentValue>[^\"]+)\"",
+      ],
+      datasourceTemplate: "helm",
+    },
   ],
 }

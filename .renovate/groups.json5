@@ -42,6 +42,11 @@
       groupName: "argocd",
     },
     {
+      description: "Group Cilium Helm chart, configs, and bootstrap values into a single PR",
+      matchFileNames: ["kubernetes/infra/cilium/**"],
+      groupName: "cilium",
+    },
+    {
       description: "Group SOPS CLI (mise) with KSOPS",
       matchPackageNames: ["aqua:getsops/sops", "viaduct-ai/kustomize-sops"],
       groupName: "sops",
