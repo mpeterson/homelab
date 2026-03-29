@@ -8,7 +8,7 @@
     },
     {
       description: "Group Velero CLI (mise) with Velero deployment",
-      matchPackageNames: ["aqua:vmware-tanzu/velero"],
+      matchDepNames: ["aqua:vmware-tanzu/velero"],
       groupName: "velero",
     },
     {
@@ -38,7 +38,7 @@
     },
     {
       description: "Group ArgoCD CLI (mise) with ArgoCD deployment",
-      matchPackageNames: ["aqua:argoproj/argo-cd"],
+      matchDepNames: ["aqua:argoproj/argo-cd"],
       groupName: "argocd",
     },
     {
@@ -53,7 +53,7 @@
     },
     {
       description: "Group Cilium CLI (mise) with Cilium deployment",
-      matchPackageNames: ["aqua:cilium/cilium-cli"],
+      matchDepNames: ["aqua:cilium/cilium-cli"],
       groupName: "cilium",
     },
     {
@@ -63,27 +63,32 @@
     },
     {
       description: "Group Kustomize (mise) with ArgoCD — must match ArgoCD bundled version",
-      matchPackageNames: ["aqua:kubernetes-sigs/kustomize"],
+      matchDepNames: ["aqua:kubernetes-sigs/kustomize"],
       groupName: "argocd",
     },
     {
       description: "Group Helm (mise) with ArgoCD — should stay close to ArgoCD bundled version",
-      matchPackageNames: ["aqua:helm/helm"],
+      matchDepNames: ["aqua:helm/helm"],
       groupName: "argocd",
     },
     {
       description: "Group kubectl (mise) with Talos — kubectl version tied to K8s version from Talos",
-      matchPackageNames: ["aqua:kubernetes/kubectl"],
+      matchDepNames: ["aqua:kubernetes/kubectl"],
       groupName: "talos",
     },
     {
       description: "Group Talos CLI (mise) into talos group",
-      matchPackageNames: ["aqua:siderolabs/talos"],
+      matchDepNames: ["aqua:siderolabs/talos"],
       groupName: "talos",
     },
     {
       description: "Group SOPS CLI (mise) with KSOPS",
-      matchPackageNames: ["aqua:getsops/sops", "viaduct-ai/kustomize-sops"],
+      matchDepNames: ["aqua:getsops/sops"],
+      groupName: "sops",
+    },
+    {
+      description: "Group KSOPS with SOPS",
+      matchPackageNames: ["viaduct-ai/kustomize-sops"],
       groupName: "sops",
     },
   ],
