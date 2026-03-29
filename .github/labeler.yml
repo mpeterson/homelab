@@ -26,5 +26,4 @@
       - any-glob-to-any-file:
           - "kubernetes/infra/cilium/**"
           - "kubernetes/infra/gateway-api/**"
-          - "hack/talos/**"
           - "talos/**"
