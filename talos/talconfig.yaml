@@ -1,6 +1,6 @@
 ---
 clusterName: talos-proxmox-cluster
-talosVersion: v1.10.4
+talosVersion: v1.12.5
 kubernetesVersion: v1.32.4
 endpoint: https://10.3.0.30:6443
 
@@ -58,6 +58,14 @@ controlPlane:
           - siderolabs/iscsi-tools
           - siderolabs/qemu-guest-agent
           - siderolabs/tailscale
+  networkInterfaces:
+    - deviceSelector:
+        driver: virtio_net
+      dhcp: true
+      vip:
+        ip: 10.3.0.30
+  nodeLabels:
+    node.kubernetes.io/exclude-from-external-load-balancers: ""
   patches:
     - |-
       machine:
@@ -69,15 +77,6 @@ controlPlane:
             allowedKubernetesNamespaces:
               - actions-runner-system
               - system-upgrade
-        network:
-          interfaces:
-            - deviceSelector:
-                driver: virtio_net
-              dhcp: true
-              vip:
-                ip: 10.3.0.30
-        nodeLabels:
-          node.kubernetes.io/exclude-from-external-load-balancers: ""
 
 worker:
   schematic:
