@@ -257,8 +257,24 @@ reprovision-node node:
 
     echo "Node: {{ node }} ($([ "$is_cp" = "true" ] && echo "controlplane" || echo "worker"))"
     echo "ISO:  $iso_file (schematic: ${short_id}...)"
-    echo ""
 
+    # Ensure ISO exists on all Proxmox nodes
+    pve_hosts=("pve-01.lan.peterson.com.ar" "pve-02.lan.peterson.com.ar")
+    iso_path="/var/lib/vz/template/iso/${iso_file}"
+    for pve in "${pve_hosts[@]}"; do
+      if ssh -o ConnectTimeout=5 "root@${pve}" "test -f ${iso_path}" 2>/dev/null; then
+        echo "ISO exists on ${pve} ✓"
+      else
+        echo "ISO missing on ${pve} — downloading..."
+        ssh "root@${pve}" "curl -sfL --retry 3 --retry-delay 5 \
+          -o '${iso_path}' \
+          'https://factory.talos.dev/image/${schematic_id}/${version}/metal-amd64.iso'" \
+          && echo "Downloaded to ${pve} ✓" \
+          || { echo "Error: failed to download ISO to ${pve}" >&2; exit 1; }
+      fi
+    done
+
+    echo ""
     read -r -p "Reprovision {{ node }}? This will wipe and recreate the VM disk. [y/N] " confirm
     if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
       echo "Aborted."
@@ -267,4 +283,4 @@ reprovision-node node:
 
     cd "{{ talos_dir }}/.."
     mise x -- ansible-playbook ansible/playbooks/utilities/reprovision-talos-vm.yaml \
-      -e "target_vms=['{{ node }}']" -e "convert_uefi=true" -e "iso_file=$iso_file"
+      -e "target_vms=['{{ node }}']" -e "iso_file=$iso_file"
