@@ -38,7 +38,8 @@
     storage: "workloads"
     disk_options: "iothread=1"
     convert_uefi: false  # Set to true to convert VM to UEFI/Q35
-    iso_file: ""  # ISO filename to attach (e.g. talos-v1.7.0-metal-amd64.iso)
+    iso_file: ""  # ISO filename to attach (e.g. talos-v1.12.5-standard.iso)
+    iso_storage: "local"  # Storage for ISO files (typically 'local')
     dry_run: false  # Set to true for dry-run mode
 
   tasks:
@@ -141,7 +142,7 @@
                 - Create EFI disk: {{ storage }}:1,efitype=4m,pre-enrolled-keys=0
               {% endif %}
               {% if iso_file | default('', true) | length > 0 %}
-                - Attach ISO: {{ storage }}:iso/{{ iso_file }},media=cdrom
+                - Attach ISO: {{ iso_storage }}:iso/{{ iso_file }},media=cdrom
               {% endif %}
                 - Set boot order: scsi0;ide2;net0
                 - Start VM {{ vm.id }}
@@ -242,7 +243,7 @@
 
         - name: Attach ISO
           ansible.builtin.command:
-            cmd: "qm set {{ item.id }} --ide2 {{ storage }}:iso/{{ iso_file }},media=cdrom"
+            cmd: "qm set {{ item.id }} --ide2 {{ iso_storage }}:iso/{{ iso_file }},media=cdrom"
           register: iso_result
           with_items: "{{ found_vms }}"
           when: iso_file | default('', true) | length > 0

@@ -76,3 +76,169 @@ validate: genconfig
       fi
     done
     exit "$status"
+
+[doc('Upgrade Talos on a node in-place')]
+upgrade-node node:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{ talos_dir }}"
+
+    ip=$(mise x -- yq '.nodes[] | select(.hostname == "{{ node }}") | .ipAddress' talconfig.yaml)
+    if [ -z "$ip" ]; then
+      echo "Error: node '{{ node }}' not found in talconfig.yaml" >&2
+      exit 1
+    fi
+
+    ep=$(mise x -- yq '.nodes[] | select(.controlPlane == true) | .ipAddress' talconfig.yaml | head -1)
+
+    image=$(mise x -- talosctl --talosconfig clusterconfig/talosconfig \
+      -e "$ep" -n "$ip" \
+      get machineconfig -o yaml | mise x -- yq '.spec.machine.install.image')
+
+    echo "Upgrading {{ node }} ($ip) with image: $image"
+    mise x -- talosctl --talosconfig clusterconfig/talosconfig \
+      -e "$ep" -n "$ip" \
+      upgrade -i "$image" -m powercycle --timeout=10m
+
+[doc('Upgrade Kubernetes version on the cluster')]
+upgrade-k8s version:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{ talos_dir }}"
+
+    ep=$(mise x -- yq '.nodes[] | select(.controlPlane == true) | .ipAddress' talconfig.yaml | head -1)
+
+    echo "Upgrading Kubernetes to {{ version }} via $ep..."
+    mise x -- talosctl --talosconfig clusterconfig/talosconfig \
+      -e "$ep" -n "$ep" \
+      upgrade-k8s --to {{ version }}
+
+[doc('Reset a node (wipe STATE + EPHEMERAL)')]
+reset-node node mode="reboot":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{ talos_dir }}"
+
+    ip=$(mise x -- yq '.nodes[] | select(.hostname == "{{ node }}") | .ipAddress' talconfig.yaml)
+    if [ -z "$ip" ]; then
+      echo "Error: node '{{ node }}' not found in talconfig.yaml" >&2
+      exit 1
+    fi
+
+    ep=$(mise x -- yq '.nodes[] | select(.controlPlane == true) | .ipAddress' talconfig.yaml | head -1)
+
+    read -r -p "Reset node {{ node }} ($ip)? This will wipe STATE and EPHEMERAL. [y/N] " confirm
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+      echo "Aborted."
+      exit 0
+    fi
+
+    reboot_flag=""
+    if [ "{{ mode }}" = "reboot" ]; then
+      reboot_flag="--reboot"
+    fi
+
+    mise x -- talosctl --talosconfig clusterconfig/talosconfig \
+      -e "$ep" -n "$ip" \
+      reset --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL \
+      --graceful=false $reboot_flag
+
+[doc('Reboot a node')]
+reboot-node node:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{ talos_dir }}"
+
+    ip=$(mise x -- yq '.nodes[] | select(.hostname == "{{ node }}") | .ipAddress' talconfig.yaml)
+    if [ -z "$ip" ]; then
+      echo "Error: node '{{ node }}' not found in talconfig.yaml" >&2
+      exit 1
+    fi
+
+    ep=$(mise x -- yq '.nodes[] | select(.controlPlane == true) | .ipAddress' talconfig.yaml | head -1)
+
+    read -r -p "Reboot node {{ node }} ($ip)? [y/N] " confirm
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+      echo "Aborted."
+      exit 0
+    fi
+
+    mise x -- talosctl --talosconfig clusterconfig/talosconfig \
+      -e "$ep" -n "$ip" \
+      reboot -m powercycle
+
+[doc('Download factory ISOs for all unique schematics in talconfig.yaml')]
+download-iso:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{ talos_dir }}"
+
+    version=$(mise x -- yq '.talosVersion' talconfig.yaml)
+
+    # Collect unique schematics: controlPlane, worker, and per-node overrides
+    declare -A schematics
+
+    cp_schematic=$(mise x -- yq '.controlPlane.schematic' talconfig.yaml -o json 2>/dev/null || echo "null")
+    if [ "$cp_schematic" != "null" ]; then
+      schematics["controlPlane"]="$cp_schematic"
+    fi
+
+    worker_schematic=$(mise x -- yq '.worker.schematic' talconfig.yaml -o json 2>/dev/null || echo "null")
+    if [ "$worker_schematic" != "null" ]; then
+      schematics["worker"]="$worker_schematic"
+    fi
+
+    for node in $(mise x -- yq '.nodes[].hostname' talconfig.yaml); do
+      node_schematic=$(mise x -- yq ".nodes[] | select(.hostname == \"$node\") | .schematic" talconfig.yaml -o json 2>/dev/null || echo "null")
+      if [ "$node_schematic" != "null" ] && [ "$node_schematic" != "{}" ]; then
+        schematics["$node"]="$node_schematic"
+      fi
+    done
+
+    if [ ${#schematics[@]} -eq 0 ]; then
+      echo "No schematics found in talconfig.yaml"
+      exit 1
+    fi
+
+    # Deduplicate by schematic ID and download ISOs
+    declare -A seen_ids
+    for label in "${!schematics[@]}"; do
+      schematic_json="${schematics[$label]}"
+      schematic_yaml=$(echo "$schematic_json" | mise x -- yq -P)
+
+      schematic_id=$(echo "$schematic_yaml" | curl -sX POST --data-binary @- "https://factory.talos.dev/schematics" | mise x -- yq '.id')
+      if [ -z "$schematic_id" ] || [ "$schematic_id" = "null" ]; then
+        echo "Error: failed to get schematic ID for $label" >&2
+        continue
+      fi
+
+      if [ -n "${seen_ids[$schematic_id]+x}" ]; then
+        echo "Skipping $label (same schematic as ${seen_ids[$schematic_id]})"
+        continue
+      fi
+      seen_ids["$schematic_id"]="$label"
+
+      short_id="${schematic_id:0:8}"
+      iso_file="talos-${version}-${short_id}.iso"
+
+      echo "Downloading ISO for $label (schematic: ${short_id}...)..."
+      curl -sfL --retry 5 --retry-delay 5 --retry-all-errors \
+        -o "$iso_file" \
+        "https://factory.talos.dev/image/${schematic_id}/${version}/metal-amd64.iso"
+      printf "  \033[32m✓\033[0m %s\n" "$iso_file"
+    done
+
+[doc('Reprovision a Talos VM via ansible')]
+reprovision-node node:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    read -r -p "Reprovision node {{ node }}? This will wipe and recreate the VM disk. [y/N] " confirm
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+      echo "Aborted."
+      exit 0
+    fi
+
+    cd "{{ talos_dir }}/.."
+    mise x -- ansible-playbook ansible/playbooks/utilities/reprovision-talos-vm.yaml \
+      -e "target_vms=['{{ node }}']" -e "convert_uefi=true"
