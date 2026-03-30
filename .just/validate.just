@@ -113,7 +113,12 @@ helm:
 
         echo "  ${app_name} (${chart}@${version}) ..."
 
-        helm_cmd=(helm template "$app_name" "$chart" --repo "$repo_url" --version "$version" --namespace "$namespace")
+        # OCI registries (no https:// prefix) need oci:// and pull before template
+        if [[ "$repo_url" != https://* ]]; then
+          helm_cmd=(helm template "$app_name" "oci://${repo_url}/${chart}" --version "$version" --namespace "$namespace")
+        else
+          helm_cmd=(helm template "$app_name" "$chart" --repo "$repo_url" --version "$version" --namespace "$namespace")
+        fi
 
         values_file=$(mktemp)
         if [ -n "$has_values" ] && [ "$has_values" != "null" ]; then

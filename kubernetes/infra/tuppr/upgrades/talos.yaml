@@ -1,0 +1,92 @@
+---
+apiVersion: tuppr.home-operations.com/v1alpha1
+kind: TalosUpgrade
+metadata:
+  name: talos
+spec:
+  talos:
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+    version: v1.12.5
+  policy:
+    rebootMode: default
+  healthChecks:
+    # --- Node readiness ---
+    - apiVersion: v1
+      kind: Node
+      expr: |-
+        status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
+      timeout: 10m
+
+    # --- CNI: Cilium agent DaemonSet fully rolled out and available ---
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: cilium-agent
+      namespace: kube-system
+      expr: |-
+        status.desiredNumberScheduled > 0 &&
+        status.numberReady == status.desiredNumberScheduled &&
+        status.numberUnavailable == 0 &&
+        status.updatedNumberScheduled == status.desiredNumberScheduled
+      timeout: 10m
+
+    # --- CNI: Cilium operator healthy ---
+    # The operator restarts during etcd leader changes (expected when
+    # upgrading CP nodes). The Deployment check only cares that it
+    # recovered — readyReplicas == replicas after the restart.
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: cilium-operator
+      namespace: kube-system
+      expr: |-
+        status.readyReplicas == status.replicas &&
+        status.updatedReplicas == status.replicas
+      timeout: 5m
+
+    # --- CNI: Cilium agent pods not crash-looping ---
+    # Scoped to agent pods only (k8s-app=cilium), NOT the operator.
+    # Agents may restart once if the API server is briefly unreachable
+    # during a CP node upgrade. Threshold of 2 tolerates one such
+    # restart while catching true crash-loops (10+ restarts in minutes).
+    - apiVersion: v1
+      kind: Pod
+      namespace: kube-system
+      expr: |-
+        !("k8s-app" in metadata.labels) ||
+        metadata.labels["k8s-app"] != "cilium" ||
+        (
+          status.containerStatuses.all(cs, cs.restartCount < 2 && cs.ready == true) &&
+          status.phase == "Running"
+        )
+      timeout: 10m
+
+    # --- CNI: Envoy proxy healthy (used for Gateway API + Ingress) ---
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: cilium-envoy
+      namespace: kube-system
+      expr: |-
+        status.desiredNumberScheduled > 0 &&
+        status.numberReady == status.desiredNumberScheduled &&
+        status.numberUnavailable == 0
+      timeout: 5m
+
+    # --- CSI: democratic-csi node DaemonSets healthy (per-node driver check) ---
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      namespace: infra
+      expr: |-
+        status.desiredNumberScheduled > 0 &&
+        status.numberReady == status.desiredNumberScheduled &&
+        status.numberUnavailable == 0
+      timeout: 10m
+
+    # --- CSI: per-node iSCSI data-path probe (see health-check.yaml) ---
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: iscsi-health-check
+      namespace: system-upgrade
+      expr: |-
+        status.desiredNumberScheduled > 0 &&
+        status.numberReady == status.desiredNumberScheduled &&
+        status.numberUnavailable == 0
+      timeout: 10m

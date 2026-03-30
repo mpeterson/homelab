@@ -62,6 +62,11 @@
       allowedVersions: "<=1.33",
     },
     {
+      description: "K8s version pinned to Talos v1.12 supported range (1.30–1.35)",
+      matchPackageNames: ["ghcr.io/siderolabs/kubelet"],
+      allowedVersions: ">=1.30 <1.36",
+    },
+    {
       description: "Helm pinned to 3.x — ArgoCD bundles Helm 3.19.4, Helm 4 is incompatible",
       matchDepNames: ["aqua:helm/helm"],
       allowedVersions: "<4",
@@ -77,7 +82,7 @@
       description: "Remind to update kubectl allowedVersions when Talos/K8s upgrades",
       matchDepNames: ["aqua:siderolabs/talos"],
       prBodyNotes: [
-        "⚠️ **Coupled dependency**: kubectl is grouped with this PR. Before merging, update `allowedVersions` for `aqua:kubernetes/kubectl` in `renovate.json5` to stay within ±1 of the new K8s server version (kubectl skew policy), then let Renovate rebase to include the kubectl update.",
+        "⚠️ **Coupled dependencies**: Before merging, check the [Talos support matrix](https://docs.siderolabs.com/talos/latest/getting-started/support-matrix/) for the new version's supported K8s range and update `allowedVersions` for `ghcr.io/siderolabs/kubelet` in `renovate.json5`. Also update `allowedVersions` for `aqua:kubernetes/kubectl` to stay within ±1 of the new K8s version.",
       ],
     },
     {
@@ -85,6 +90,25 @@
       matchDepNames: ["aqua:argoproj/argo-cd"],
       prBodyNotes: [
         "⚠️ **Coupled dependency**: Kustomize and Helm are grouped with this PR. Before merging, verify ArgoCD's bundled Helm and Kustomize versions (`kubectl -n argocd exec deploy/argocd-repo-server -- helm version --short` / `kustomize version`) and update `allowedVersions` for `aqua:helm/helm` in `renovate.json5` if needed, then let Renovate rebase.",
+      ],
+    },
+    {
+      description: "Separate Talos minor/patch PRs for safe sequential upgrade paths",
+      matchPackageNames: ["ghcr.io/siderolabs/installer"],
+      separateMajorMinor: true,
+      separateMinorPatch: true,
+    },
+    {
+      description: "Never automerge Talos or Kubernetes upgrades — require manual review",
+      matchPackageNames: ["ghcr.io/siderolabs/installer", "ghcr.io/siderolabs/kubelet"],
+      automerge: false,
+      labels: ["manual-review"],
+    },
+    {
+      description: "Remind to update kubectl allowedVersions when K8s upgrades",
+      matchPackageNames: ["ghcr.io/siderolabs/kubelet"],
+      prBodyNotes: [
+        "⚠️ **Coupled dependency**: kubectl is grouped with this PR. Before merging, update `allowedVersions` for `aqua:kubernetes/kubectl` in `renovate.json5` to stay within ±1 of the new K8s server version (kubectl skew policy), then let Renovate rebase.",
       ],
     },
   ],

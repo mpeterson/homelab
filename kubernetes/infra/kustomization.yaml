@@ -19,4 +19,5 @@ resources:
   - nvidia-device-plugin/configs.yaml
   - prometheus-operator/app.yaml
   - tailscale-operator/app.yaml
+  - tuppr/app.yaml
   - velero/app.yaml
