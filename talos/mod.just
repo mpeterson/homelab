@@ -100,18 +100,6 @@ upgrade-node node:
       -e "$ep" -n "$ip" \
       upgrade -i "$image" -m powercycle --timeout=10m
 
-[doc('Upgrade Kubernetes version on the cluster')]
-upgrade-k8s version:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd "{{ talos_dir }}"
-
-    ep=$(mise x -- yq '.nodes[] | select(.controlPlane == true) | .ipAddress' talconfig.yaml | head -1)
-
-    echo "Upgrading Kubernetes to {{ version }} via $ep..."
-    mise x -- talosctl --talosconfig clusterconfig/talosconfig \
-      -e "$ep" -n "$ep" \
-      upgrade-k8s --to {{ version }}
 
 [doc('Reset a node (wipe STATE + EPHEMERAL)')]
 reset-node node mode="reboot":
