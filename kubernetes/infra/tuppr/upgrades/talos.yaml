@@ -25,7 +25,7 @@ spec:
       expr: |-
         status.desiredNumberScheduled > 0 &&
         status.numberReady == status.desiredNumberScheduled &&
-        status.numberUnavailable == 0 &&
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0) &&
         status.updatedNumberScheduled == status.desiredNumberScheduled
       timeout: 10m
 
@@ -50,7 +50,7 @@ spec:
       expr: |-
         status.desiredNumberScheduled > 0 &&
         status.numberReady == status.desiredNumberScheduled &&
-        status.numberUnavailable == 0
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0)
       timeout: 5m
 
     # --- CSI: democratic-csi iSCSI node driver healthy ---
@@ -61,7 +61,7 @@ spec:
       expr: |-
         status.desiredNumberScheduled > 0 &&
         status.numberReady == status.desiredNumberScheduled &&
-        status.numberUnavailable == 0
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0)
       timeout: 10m
 
     # --- CSI: democratic-csi NFS node driver healthy ---
@@ -72,7 +72,7 @@ spec:
       expr: |-
         status.desiredNumberScheduled > 0 &&
         status.numberReady == status.desiredNumberScheduled &&
-        status.numberUnavailable == 0
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0)
       timeout: 10m
 
     # --- CSI: per-node iSCSI data-path probe (see health-check.yaml) ---
@@ -83,5 +83,5 @@ spec:
       expr: |-
         status.desiredNumberScheduled > 0 &&
         status.numberReady == status.desiredNumberScheduled &&
-        status.numberUnavailable == 0
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0)
       timeout: 10m
