@@ -4,7 +4,7 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 bootstrap_dir := source_directory()
 
 # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
-_cilium_chart_version := "1.18.7"
+_cilium_chart_version := "1.19.2"
 
 [private]
 _require *tools:
