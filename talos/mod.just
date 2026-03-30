@@ -80,7 +80,7 @@ validate: genconfig
 
 
 [doc('Reset a node (wipe STATE + EPHEMERAL)')]
-reset-node node mode="reboot":
+reset-node node mode="reboot": genconfig
     #!/usr/bin/env bash
     set -euo pipefail
     cd "{{ talos_dir }}"
@@ -110,7 +110,7 @@ reset-node node mode="reboot":
       --graceful=false $reboot_flag
 
 [doc('Reboot a node')]
-reboot-node node:
+reboot-node node: genconfig
     #!/usr/bin/env bash
     set -euo pipefail
     cd "{{ talos_dir }}"
