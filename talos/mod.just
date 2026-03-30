@@ -77,28 +77,6 @@ validate: genconfig
     done
     exit "$status"
 
-[doc('Upgrade Talos on a node in-place')]
-upgrade-node node:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd "{{ talos_dir }}"
-
-    ip=$(mise x -- yq '.nodes[] | select(.hostname == "{{ node }}") | .ipAddress' talconfig.yaml)
-    if [ -z "$ip" ]; then
-      echo "Error: node '{{ node }}' not found in talconfig.yaml" >&2
-      exit 1
-    fi
-
-    ep=$(mise x -- yq '.nodes[] | select(.controlPlane == true) | .ipAddress' talconfig.yaml | head -1)
-
-    image=$(mise x -- talosctl --talosconfig clusterconfig/talosconfig \
-      -e "$ep" -n "$ip" \
-      get machineconfig -o yaml | mise x -- yq '.spec.machine.install.image')
-
-    echo "Upgrading {{ node }} ($ip) with image: $image"
-    mise x -- talosctl --talosconfig clusterconfig/talosconfig \
-      -e "$ep" -n "$ip" \
-      upgrade -i "$image" -m powercycle --timeout=10m
 
 
 [doc('Reset a node (wipe STATE + EPHEMERAL)')]
