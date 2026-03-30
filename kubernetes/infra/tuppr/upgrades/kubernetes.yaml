@@ -8,25 +8,75 @@ spec:
     # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
     version: v1.32.13
   healthChecks:
+    # --- Node readiness ---
     - apiVersion: v1
       kind: Node
       expr: |-
         status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
       timeout: 10m
+
+    # --- CNI: Cilium agent DaemonSet fully rolled out and available ---
     - apiVersion: apps/v1
       kind: DaemonSet
-      name: cilium-agent
+      name: cilium
       namespace: kube-system
       expr: |-
         status.desiredNumberScheduled > 0 &&
         status.numberReady == status.desiredNumberScheduled &&
-        status.numberUnavailable == 0
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0) &&
+        status.updatedNumberScheduled == status.desiredNumberScheduled
       timeout: 10m
+
+    # --- CNI: Cilium operator healthy ---
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: cilium-operator
+      namespace: kube-system
+      expr: |-
+        status.readyReplicas == status.replicas &&
+        status.updatedReplicas == status.replicas
+      timeout: 5m
+
+    # --- CNI: Envoy proxy healthy (used for Gateway API + Ingress) ---
     - apiVersion: apps/v1
       kind: DaemonSet
+      name: cilium-envoy
+      namespace: kube-system
+      expr: |-
+        status.desiredNumberScheduled > 0 &&
+        status.numberReady == status.desiredNumberScheduled &&
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0)
+      timeout: 5m
+
+    # --- CSI: democratic-csi iSCSI node driver healthy ---
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: democratic-csi-iscsi-node
       namespace: infra
       expr: |-
         status.desiredNumberScheduled > 0 &&
         status.numberReady == status.desiredNumberScheduled &&
-        status.numberUnavailable == 0
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0)
+      timeout: 10m
+
+    # --- CSI: democratic-csi NFS node driver healthy ---
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: democratic-csi-nfs-node
+      namespace: infra
+      expr: |-
+        status.desiredNumberScheduled > 0 &&
+        status.numberReady == status.desiredNumberScheduled &&
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0)
+      timeout: 10m
+
+    # --- CSI: per-node iSCSI data-path probe (see health-check.yaml) ---
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: iscsi-health-check
+      namespace: system-upgrade
+      expr: |-
+        status.desiredNumberScheduled > 0 &&
+        status.numberReady == status.desiredNumberScheduled &&
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0)
       timeout: 10m
