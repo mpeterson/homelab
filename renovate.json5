@@ -108,6 +108,7 @@
       description: "Never automerge Talos or Kubernetes upgrades — require manual review",
       matchPackageNames: ["ghcr.io/siderolabs/installer", "ghcr.io/siderolabs/kubelet"],
       automerge: false,
+      pinDigests: false,
       labels: ["manual-review"],
     },
     {
