@@ -271,3 +271,30 @@ reprovision-node node dry_run="false": genconfig
     cd "{{ talos_dir }}/../ansible"
     mise x -- ansible-playbook playbooks/utilities/reprovision-talos-vm.yaml \
       -e '{"target_vms":["{{ node }}"]}' -e "iso_file=$iso_file" -e "iso_url=$iso_url" -e "dry_run={{ dry_run }}"
+
+[doc('Reprovision ALL Talos VMs (discovers nodes from talconfig.yaml)')]
+reprovision-cluster dry_run="false":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{ talos_dir }}"
+
+    nodes=$(mise x -- yq '.nodes[].hostname' talconfig.yaml)
+    echo "Nodes to reprovision:"
+    echo "$nodes" | sed 's/^/  - /'
+    echo ""
+
+    if [ "{{ dry_run }}" != "true" ]; then
+      read -r -p "Reprovision ALL nodes listed above? This is destructive! [y/N] " confirm
+      if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        echo "Aborted."
+        exit 0
+      fi
+    fi
+
+    for node in $nodes; do
+      echo ""
+      echo "========================================="
+      echo "Reprovisioning $node..."
+      echo "========================================="
+      just talos reprovision-node "$node" "{{ dry_run }}"
+    done
