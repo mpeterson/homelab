@@ -48,42 +48,29 @@
       automerge: false,
     },
     // --- Version coupling constraints ---
-    // These prevent Renovate from proposing upgrades beyond what the
-    // parent dependency supports. Update the allowedVersions when the
-    // parent is upgraded.
-    {
-      description: "Gateway API pinned to max supported by Cilium 1.18.x",
-      matchPackageNames: ["kubernetes-sigs/gateway-api"],
-      allowedVersions: "<=v1.3.0",
-    },
-    {
-      description: "kubectl pinned to K8s server version ±1 skew policy (K8s 1.32)",
-      matchDepNames: ["aqua:kubernetes/kubectl"],
-      allowedVersions: "<=1.33",
-    },
-    {
-      description: "K8s version pinned to Talos v1.12 supported range (1.30–1.35)",
-      matchPackageNames: ["ghcr.io/siderolabs/kubelet"],
-      allowedVersions: ">=1.30 <1.36",
-    },
+    // Only hard constraints that rarely change. For version-coupled
+    // dependencies, we use prBodyNotes reminders instead of
+    // allowedVersions to avoid stale caps.
     {
       description: "Helm pinned to 3.x — ArgoCD bundles Helm 3.19.4, Helm 4 is incompatible",
       matchDepNames: ["aqua:helm/helm"],
       allowedVersions: "<4",
     },
     {
-      description: "Remind to update gateway-api allowedVersions when Cilium upgrades",
+      description: "Warn and block: Gateway API must match Cilium's supported version",
       matchPackageNames: ["cilium"],
       prBodyNotes: [
-        "⚠️ **Coupled dependency**: Gateway API CRDs are grouped with this PR. Before merging, update `allowedVersions` for `kubernetes-sigs/gateway-api` in `renovate.json5` to match the new Cilium version's supported Gateway API, then let Renovate rebase to include the CRD update. See [Cilium Gateway API docs](https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api.html).",
+        "⚠️ **Coupled dependency**: Gateway API CRDs are grouped with this PR. Before merging, verify the new Cilium version's supported Gateway API version at the [Cilium Gateway API docs](https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api.html). Remove the `do-not-merge` label once verified.",
       ],
+      labels: ["do-not-merge", "manual-review"],
     },
     {
-      description: "Remind to update kubectl allowedVersions when Talos/K8s upgrades",
+      description: "Warn and block: check Talos support matrix for K8s and kubectl compatibility",
       matchDepNames: ["aqua:siderolabs/talos"],
       prBodyNotes: [
-        "⚠️ **Coupled dependencies**: Before merging, check the [Talos support matrix](https://docs.siderolabs.com/talos/latest/getting-started/support-matrix/) for the new version's supported K8s range and update `allowedVersions` for `ghcr.io/siderolabs/kubelet` in `renovate.json5`. Also update `allowedVersions` for `aqua:kubernetes/kubectl` to stay within ±1 of the new K8s version.",
+        "⚠️ **Coupled dependencies**: Before merging, check the [Talos support matrix](https://docs.siderolabs.com/talos/latest/getting-started/support-matrix/) for the new version's supported K8s range. Tuppr will also validate at runtime. Remove the `do-not-merge` label once verified.",
       ],
+      labels: ["do-not-merge", "manual-review"],
     },
     {
       description: "Remind to check Helm/Kustomize bundled versions when ArgoCD upgrades",
@@ -124,11 +111,12 @@
       labels: ["manual-review"],
     },
     {
-      description: "Remind to update kubectl allowedVersions when K8s upgrades",
+      description: "Warn and block: K8s upgrades need verification against Talos support matrix",
       matchPackageNames: ["ghcr.io/siderolabs/kubelet"],
       prBodyNotes: [
-        "⚠️ **Coupled dependency**: kubectl is grouped with this PR. Before merging, update `allowedVersions` for `aqua:kubernetes/kubectl` in `renovate.json5` to stay within ±1 of the new K8s server version (kubectl skew policy), then let Renovate rebase.",
+        "⚠️ **Coupled dependency**: Verify this K8s version is supported by the current Talos version at the [Talos support matrix](https://docs.siderolabs.com/talos/latest/getting-started/support-matrix/). Tuppr will also validate at runtime. Remove the `do-not-merge` label once verified.",
       ],
+      labels: ["do-not-merge", "manual-review"],
     },
   ],
 }
