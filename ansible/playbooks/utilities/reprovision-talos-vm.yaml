@@ -39,6 +39,7 @@
     disk_options: "iothread=1"
     convert_uefi: true  # Set to false to skip UEFI/Q35 conversion
     iso_file: ""  # ISO filename to attach (e.g. talos-v1.12.5-standard.iso)
+    iso_url: ""  # URL to download ISO from (e.g. https://factory.talos.dev/image/...)
     iso_storage: "local"  # Storage for ISO files (typically 'local')
     dry_run: false  # Set to true for dry-run mode
 
@@ -48,6 +49,30 @@
         msg: "Running in DRY-RUN mode. No changes will be made to the VMs."
       when: dry_run | bool
       run_once: true
+
+    - name: Ensure ISO is available on Proxmox nodes
+      when:
+        - iso_url | default('', true) | length > 0
+        - iso_file | default('', true) | length > 0
+        - not dry_run | bool
+      block:
+        - name: Check for existing ISO
+          ansible.builtin.command:
+            cmd: >-
+              pvesh get /nodes/{{ inventory_hostname | regex_replace('\..*$', '') }}/storage/{{ iso_storage }}/content
+              --content iso
+              --output-format json
+          changed_when: false
+          register: existing_isos
+
+        - name: Download ISO if missing
+          ansible.builtin.command: >-
+            pvesh create /nodes/{{ inventory_hostname | regex_replace('\..*$', '') }}/storage/{{ iso_storage }}/download-url
+            --content iso
+            --filename {{ iso_file }}
+            --url {{ iso_url }}
+          when: iso_file not in (existing_isos.stdout | from_json | json_query('[].volid') | map('basename'))
+          changed_when: true
 
     - name: Display configuration
       ansible.builtin.debug:
