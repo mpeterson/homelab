@@ -72,11 +72,6 @@
       groupName: "argocd",
     },
     {
-      description: "Group kubectl (mise) with Talos — kubectl version tied to K8s version from Talos",
-      matchDepNames: ["aqua:kubernetes/kubectl"],
-      groupName: "talos",
-    },
-    {
       description: "Group Talos CLI (mise) into talos group",
       matchDepNames: ["aqua:siderolabs/talos"],
       groupName: "talos",
@@ -90,6 +85,26 @@
       description: "Group KSOPS with SOPS",
       matchPackageNames: ["viaduct-ai/kustomize-sops"],
       groupName: "sops",
+    },
+    {
+      description: "Group Talos installer versions (Tuppr CRD + talconfig) with talosctl CLI",
+      matchPackageNames: ["ghcr.io/siderolabs/installer"],
+      groupName: "talos",
+    },
+    {
+      description: "Group Kubernetes kubelet versions (Tuppr CRD + talconfig) with kubectl CLI",
+      matchPackageNames: ["ghcr.io/siderolabs/kubelet"],
+      groupName: "kubernetes-version",
+    },
+    {
+      description: "Group kubectl CLI (mise) with Kubernetes version",
+      matchDepNames: ["aqua:kubernetes/kubectl"],
+      groupName: "kubernetes-version",
+    },
+    {
+      description: "Group Tuppr Helm chart updates",
+      matchFileNames: ["kubernetes/infra/tuppr/app.yaml"],
+      groupName: "tuppr",
     },
   ],
 }

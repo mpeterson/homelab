@@ -58,5 +58,21 @@
       ],
       datasourceTemplate: "github-releases",
     },
+    {
+      customType: "regex",
+      description: "Track Talos and Kubernetes versions in talconfig.yaml",
+      managerFilePatterns: ["/talos/talconfig\\.yaml$/"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)\\n\\w+:\\s*(?<currentValue>v\\S+)",
+      ],
+    },
+    {
+      customType: "regex",
+      description: "Track Talos and Kubernetes versions in Tuppr upgrade CRDs",
+      managerFilePatterns: ["/kubernetes/infra/tuppr/upgrades/.*\\.ya?ml$/"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)\\n\\s+version:\\s*(?<currentValue>v\\S+)",
+      ],
+    },
   ],
 }

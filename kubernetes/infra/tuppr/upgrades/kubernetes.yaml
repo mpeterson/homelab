@@ -1,0 +1,32 @@
+---
+apiVersion: tuppr.home-operations.com/v1alpha1
+kind: KubernetesUpgrade
+metadata:
+  name: kubernetes
+spec:
+  kubernetes:
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+    version: v1.32.4
+  healthChecks:
+    - apiVersion: v1
+      kind: Node
+      expr: |-
+        status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
+      timeout: 10m
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: cilium-agent
+      namespace: kube-system
+      expr: |-
+        status.desiredNumberScheduled > 0 &&
+        status.numberReady == status.desiredNumberScheduled &&
+        status.numberUnavailable == 0
+      timeout: 10m
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      namespace: infra
+      expr: |-
+        status.desiredNumberScheduled > 0 &&
+        status.numberReady == status.desiredNumberScheduled &&
+        status.numberUnavailable == 0
+      timeout: 10m

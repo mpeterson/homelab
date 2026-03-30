@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: iscsi-health-check
+spec:
+  selector:
+    matchLabels:
+      app: iscsi-health-check
+  template:
+    metadata:
+      labels:
+        app: iscsi-health-check
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: probe
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              while true; do
+                date > /data/health && cat /data/health > /dev/null
+                sleep 30
+              done
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "cat /data/health"]
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 1m
+              memory: 8Mi
+            limits:
+              memory: 16Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          ephemeral:
+            volumeClaimTemplate:
+              spec:
+                accessModes: [ReadWriteOnce]
+                storageClassName: zfs-generic-iscsi-csi-xfs
+                resources:
+                  requests:
+                    storage: 128Mi
