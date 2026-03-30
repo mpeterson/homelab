@@ -105,6 +105,18 @@
       separateMinorPatch: true,
     },
     {
+      description: "Separate K8s kubelet minor/patch PRs for safe sequential upgrade paths",
+      matchPackageNames: ["ghcr.io/siderolabs/kubelet"],
+      separateMajorMinor: true,
+      separateMinorPatch: true,
+    },
+    {
+      description: "Separate kubectl minor/patch PRs to match kubelet branch naming",
+      matchDepNames: ["aqua:kubernetes/kubectl"],
+      separateMajorMinor: true,
+      separateMinorPatch: true,
+    },
+    {
       description: "Never automerge Talos or Kubernetes upgrades — require manual review",
       matchPackageNames: ["ghcr.io/siderolabs/installer", "ghcr.io/siderolabs/kubelet"],
       automerge: false,
