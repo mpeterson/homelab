@@ -92,14 +92,14 @@
       groupName: "talos",
     },
     {
-      description: "Group Kubernetes kubelet versions (Tuppr CRD + talconfig) with kubectl CLI",
+      description: "Group Kubernetes kubelet versions (Tuppr CRD + talconfig) with Talos — versions are coupled",
       matchPackageNames: ["ghcr.io/siderolabs/kubelet"],
-      groupName: "kubernetes-version",
+      groupName: "talos",
     },
     {
-      description: "Group kubectl CLI (mise) with Kubernetes version",
+      description: "Group kubectl CLI (mise) with Talos — kubectl version tied to K8s version from Talos",
       matchDepNames: ["aqua:kubernetes/kubectl"],
-      groupName: "kubernetes-version",
+      groupName: "talos",
     },
     {
       description: "Group Tuppr Helm chart updates",
