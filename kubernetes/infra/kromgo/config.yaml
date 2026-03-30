@@ -61,7 +61,7 @@ data:
             max: 9999
 
       - name: cluster_age_days
-        query: round((time() - min(kube_node_created)) / 86400)
+        query: round((time() - min(kube_node_created{node=~"talos-cp-.*"})) / 86400)
         title: Age
         suffix: "d"
         colors:
