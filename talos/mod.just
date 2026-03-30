@@ -270,4 +270,4 @@ reprovision-node node dry_run="false": genconfig
 
     cd "{{ talos_dir }}/../ansible"
     mise x -- ansible-playbook playbooks/utilities/reprovision-talos-vm.yaml \
-      -e "target_vms=['{{ node }}']" -e "iso_file=$iso_file" -e "iso_url=$iso_url" -e "dry_run={{ dry_run }}"
+      -e '{"target_vms":["{{ node }}"]}' -e "iso_file=$iso_file" -e "iso_url=$iso_url" -e "dry_run={{ dry_run }}"
