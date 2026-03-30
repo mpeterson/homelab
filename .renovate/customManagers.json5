@@ -60,11 +60,21 @@
     },
     {
       customType: "regex",
-      description: "Track Talos and Kubernetes versions in talconfig.yaml",
+      description: "Track Talos version in talconfig.yaml",
       managerFilePatterns: ["/talos/talconfig\\.yaml$/"],
       matchStrings: [
-        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)\\n\\w+:\\s*(?<currentValue>v\\S+)",
+        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>ghcr\\.io/siderolabs/installer)\\ntalosVersion:\\s*(?<currentValue>v\\S+)",
       ],
+      autoReplaceStringTemplate: "# renovate: datasource={{{datasource}}} depName={{{depName}}}\ntalosVersion: {{{newValue}}}",
+    },
+    {
+      customType: "regex",
+      description: "Track Kubernetes version in talconfig.yaml",
+      managerFilePatterns: ["/talos/talconfig\\.yaml$/"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>ghcr\\.io/siderolabs/kubelet)\\nkubernetesVersion:\\s*(?<currentValue>v\\S+)",
+      ],
+      autoReplaceStringTemplate: "# renovate: datasource={{{datasource}}} depName={{{depName}}}\nkubernetesVersion: {{{newValue}}}",
     },
     {
       customType: "regex",
@@ -73,6 +83,7 @@
       matchStrings: [
         "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)\\n\\s+version:\\s*(?<currentValue>v\\S+)",
       ],
+      autoReplaceStringTemplate: "# renovate: datasource={{{datasource}}} depName={{{depName}}}\n    version: {{{newValue}}}",
     },
   ],
 }

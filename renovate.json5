@@ -93,8 +93,14 @@
       ],
     },
     {
-      description: "Separate Talos minor/patch PRs for safe sequential upgrade paths",
+      description: "Separate Talos installer minor/patch PRs for safe sequential upgrade paths",
       matchPackageNames: ["ghcr.io/siderolabs/installer"],
+      separateMajorMinor: true,
+      separateMinorPatch: true,
+    },
+    {
+      description: "Separate talosctl minor/patch PRs to match installer branch naming",
+      matchDepNames: ["aqua:siderolabs/talos"],
       separateMajorMinor: true,
       separateMinorPatch: true,
     },
