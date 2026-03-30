@@ -229,7 +229,7 @@ download-iso:
     done
 
 [doc('Reprovision a Talos VM via ansible (resolves correct ISO from schematic)')]
-reprovision-node node dry_run="false":
+reprovision-node node dry_run="false": genconfig
     #!/usr/bin/env bash
     set -euo pipefail
     cd "{{ talos_dir }}"
@@ -268,6 +268,6 @@ reprovision-node node dry_run="false":
       fi
     fi
 
-    cd "{{ talos_dir }}/.."
-    mise x -- ansible-playbook ansible/playbooks/utilities/reprovision-talos-vm.yaml \
+    cd "{{ talos_dir }}/../ansible"
+    mise x -- ansible-playbook playbooks/utilities/reprovision-talos-vm.yaml \
       -e "target_vms=['{{ node }}']" -e "iso_file=$iso_file" -e "iso_url=$iso_url" -e "dry_run={{ dry_run }}"
