@@ -27,13 +27,7 @@
   hosts: pve
   gather_facts: false
   vars:
-    target_vms:
-      - talos-cp-01
-      - talos-cp-02
-      - talos-cp-03
-      - talos-01
-      - talos-02
-      - talos-03
+    target_vms: []  # Required — pass via -e '{"target_vms":["talos-03"]}'
     disk_size: "100"  # in GB
     storage: "workloads"
     disk_options: "iothread=1"
@@ -44,6 +38,12 @@
     dry_run: false  # Set to true for dry-run mode
 
   tasks:
+    - name: Fail if no target VMs specified
+      ansible.builtin.fail:
+        msg: "No target VMs specified. Pass via -e '{\"target_vms\":[\"talos-03\"]}'"
+      when: target_vms | length == 0
+      run_once: true
+
     - name: Notify about dry-run mode
       ansible.builtin.debug:
         msg: "Running in DRY-RUN mode. No changes will be made to the VMs."
