@@ -100,8 +100,8 @@
       labels: ["manual-review"],
     },
     {
-      description: "Remind to update kubectl allowedVersions when Talos/K8s upgrades",
-      matchPackageNames: ["ghcr.io/siderolabs/installer", "ghcr.io/siderolabs/kubelet"],
+      description: "Remind to update kubectl allowedVersions when K8s upgrades",
+      matchPackageNames: ["ghcr.io/siderolabs/kubelet"],
       prBodyNotes: [
         "⚠️ **Coupled dependency**: kubectl is grouped with this PR. Before merging, update `allowedVersions` for `aqua:kubernetes/kubectl` in `renovate.json5` to stay within ±1 of the new K8s server version (kubectl skew policy), then let Renovate rebase.",
       ],
