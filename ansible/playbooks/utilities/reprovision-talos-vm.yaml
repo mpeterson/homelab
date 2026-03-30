@@ -54,7 +54,6 @@
       when:
         - iso_url | default('', true) | length > 0
         - iso_file | default('', true) | length > 0
-        - not dry_run | bool
       block:
         - name: Check for existing ISO
           ansible.builtin.command:
