@@ -229,7 +229,7 @@ download-iso:
     done
 
 [doc('Reprovision a Talos VM via ansible (resolves correct ISO from schematic)')]
-reprovision-node node:
+reprovision-node node dry_run="false":
     #!/usr/bin/env bash
     set -euo pipefail
     cd "{{ talos_dir }}"
@@ -260,12 +260,14 @@ reprovision-node node:
     echo "ISO:  $iso_file (schematic: ${short_id}...)"
     echo ""
 
-    read -r -p "Reprovision {{ node }}? This will wipe and recreate the VM disk. [y/N] " confirm
-    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-      echo "Aborted."
-      exit 0
+    if [ "{{ dry_run }}" != "true" ]; then
+      read -r -p "Reprovision {{ node }}? This will wipe and recreate the VM disk. [y/N] " confirm
+      if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        echo "Aborted."
+        exit 0
+      fi
     fi
 
     cd "{{ talos_dir }}/.."
     mise x -- ansible-playbook ansible/playbooks/utilities/reprovision-talos-vm.yaml \
-      -e "target_vms=['{{ node }}']" -e "iso_file=$iso_file" -e "iso_url=$iso_url"
+      -e "target_vms=['{{ node }}']" -e "iso_file=$iso_file" -e "iso_url=$iso_url" -e "dry_run={{ dry_run }}"
