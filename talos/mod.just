@@ -77,8 +77,6 @@ validate: genconfig
     done
     exit "$status"
 
-
-
 [doc('Reset a node (wipe STATE + EPHEMERAL)')]
 reset-node node mode="reboot": genconfig
     #!/usr/bin/env bash
