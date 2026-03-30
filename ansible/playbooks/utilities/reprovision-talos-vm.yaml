@@ -37,7 +37,7 @@
     disk_size: "100"  # in GB
     storage: "workloads"
     disk_options: "iothread=1"
-    convert_uefi: false  # Set to true to convert VM to UEFI/Q35
+    convert_uefi: true  # Set to false to skip UEFI/Q35 conversion
     iso_file: ""  # ISO filename to attach (e.g. talos-v1.12.5-standard.iso)
     iso_storage: "local"  # Storage for ISO files (typically 'local')
     dry_run: false  # Set to true for dry-run mode

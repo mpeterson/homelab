@@ -228,12 +228,38 @@ download-iso:
       printf "  \033[32m✓\033[0m %s\n" "$iso_file"
     done
 
-[doc('Reprovision a Talos VM via ansible')]
+[doc('Reprovision a Talos VM via ansible (resolves correct ISO from schematic)')]
 reprovision-node node:
     #!/usr/bin/env bash
     set -euo pipefail
+    cd "{{ talos_dir }}"
 
-    read -r -p "Reprovision node {{ node }}? This will wipe and recreate the VM disk. [y/N] " confirm
+    version=$(mise x -- yq '.talosVersion' talconfig.yaml)
+    is_cp=$(mise x -- yq ".nodes[] | select(.hostname == \"{{ node }}\") | .controlPlane" talconfig.yaml)
+    if [ -z "$is_cp" ]; then
+      echo "Error: node '{{ node }}' not found in talconfig.yaml" >&2
+      exit 1
+    fi
+
+    # Resolve schematic: per-node override > group default
+    node_schematic=$(mise x -- yq ".nodes[] | select(.hostname == \"{{ node }}\") | .schematic" talconfig.yaml -o json 2>/dev/null)
+    if [ "$node_schematic" != "null" ] && [ -n "$node_schematic" ]; then
+      schematic_yaml=$(echo "$node_schematic" | mise x -- yq -P)
+    elif [ "$is_cp" = "true" ]; then
+      schematic_yaml=$(mise x -- yq '.controlPlane.schematic' talconfig.yaml -o json | mise x -- yq -P)
+    else
+      schematic_yaml=$(mise x -- yq '.worker.schematic' talconfig.yaml -o json | mise x -- yq -P)
+    fi
+
+    schematic_id=$(echo "$schematic_yaml" | curl -sX POST --data-binary @- "https://factory.talos.dev/schematics" | mise x -- yq '.id')
+    short_id="${schematic_id:0:8}"
+    iso_file="talos-${version}-${short_id}.iso"
+
+    echo "Node: {{ node }} ($([ "$is_cp" = "true" ] && echo "controlplane" || echo "worker"))"
+    echo "ISO:  $iso_file (schematic: ${short_id}...)"
+    echo ""
+
+    read -r -p "Reprovision {{ node }}? This will wipe and recreate the VM disk. [y/N] " confirm
     if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
       echo "Aborted."
       exit 0
@@ -241,4 +267,4 @@ reprovision-node node:
 
     cd "{{ talos_dir }}/.."
     mise x -- ansible-playbook ansible/playbooks/utilities/reprovision-talos-vm.yaml \
-      -e "target_vms=['{{ node }}']" -e "convert_uefi=true"
+      -e "target_vms=['{{ node }}']" -e "convert_uefi=true" -e "iso_file=$iso_file"
