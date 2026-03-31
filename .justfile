@@ -41,24 +41,27 @@ verify:
 [doc('Restart all deployments that use PVCs (e.g. after PCS failover)')]
 restart-deployments-with-pvc: (_require "kubectl" "jq")
     #!/usr/bin/env bash
-    set -euo pipefail
+    set -uo pipefail
 
     echo "==> Finding deployments with PersistentVolumeClaims..."
-    PODS=$(kubectl get deploy -A -o json | \
-      jq -r '.items[] | select(.spec.template.spec.volumes[]? | has("persistentVolumeClaim")) | "\(.metadata.namespace) \(.metadata.name)"')
+    DEPLOYS=$(kubectl get deploy -A -o json | \
+      jq -r '.items[] | select(.spec.template.spec.volumes[]? | has("persistentVolumeClaim")) | "\(.metadata.namespace) \(.metadata.name)"' | \
+      sort -u)
 
-    if [ -z "$PODS" ]; then
+    if [ -z "$DEPLOYS" ]; then
       echo "No deployments with PVCs found."
       exit 0
     fi
 
-    echo "$PODS" | while read ns name; do
+    FAILED=0
+    echo "$DEPLOYS" | while read ns name; do
       echo "  Restarting $ns/$name..."
-      kubectl rollout restart deployment "$name" -n "$ns"
+      kubectl rollout restart deployment "$name" -n "$ns" || \
+        { echo "  WARNING: failed to restart $ns/$name"; FAILED=1; }
     done
 
     echo "==> Waiting for rollouts to complete..."
-    echo "$PODS" | while read ns name; do
+    echo "$DEPLOYS" | while read ns name; do
       kubectl rollout status deployment "$name" -n "$ns" --timeout=120s || \
         echo "  WARNING: $ns/$name rollout did not complete within 120s"
     done
