@@ -27,9 +27,17 @@ spec:
         targetRevision: 0.15.1
         helm:
             valuesObject:
+                controller:
+                    driver:
+                        image:
+                            registry: ghcr.io/mpeterson/democratic-csi
+                            tag: 85eec75
                 node:
                     hostPID: ENC[AES256_GCM,data:Bx62Rg==,iv:ZwXiG+Rp6lZuZXNNj+BKuLkcvMsEIlJ0CGLQCYYwv4E=,tag:P3JGKtQybotnwvicI/3FaQ==,type:bool]
                     driver:
+                        image:
+                            registry: ghcr.io/mpeterson/democratic-csi
+                            tag: 85eec75
                         extraEnv:
                             - name: ENC[AES256_GCM,data:ju8+mQXRpOsBCcA6jBU57xiBrahvjg==,iv:nWcVWPtulZD5bkRC3+SpohnfzQK2l4hi/SEO076MbtU=,tag:7faJY7/hdnlbiO0P3qy7LQ==,type:str]
                               value: ENC[AES256_GCM,data:Tq3jYT0YEQ==,iv:brLb9HhtuxZrUpK9S+eOtyVOBrY6vnQ8+Dtwl9g0Tug=,tag:OsIXZ8hX4zO2VXhX/WuQeg==,type:str]
@@ -68,9 +76,9 @@ spec:
                             #ENC[AES256_GCM,data:ozqTXjtsnzrBttzvxz8H7gRWD9VOYoM3IYCJfMShVwz4jnCQBZl9DSz/EK8WTCA=,iv:Oe6ddLK9n9fXTVeD8kScOc/BtfPjibWlfoZAENLFFB8=,tag:ZvyVyq9LNRmXvaHBJM69xQ==,type:comment]
                             node-db.node.session.timeo.replacement_timeout: ENC[AES256_GCM,data:3lFS,iv:Lnls8YO4tDMVaCVJGHlZ5CVKfrr7VMSbBn+B/5RLPZg=,tag:XSnra3eWbj5bTvairldEqA==,type:str]
                             #
-                            #ENC[AES256_GCM,data:Q9ub4L6uuyG+wKBJ/5AiI9NOVGiZV6IM/bBFsA==,iv:mSfgb7i44LV87IQ0Ind95w8jgtZbd7LRqFYj7qVYyec=,tag:YzhOvquVgd97be6WFUuVKA==,type:comment]
-                            #ENC[AES256_GCM,data:x46rqaAFNnNy0vH1Lcc2/dAjne5gz1ZvGFGhmIXutwZX3pMTFLyFPmOtUHmY/yAe,iv:9OajGCDq0jnrsRxdQTjq3NVmhpqNaxvjRLQ9uYzd0Vs=,tag:xJ4KImHQUbc7y7GXjHG5Kw==,type:comment]
-                            #ENC[AES256_GCM,data:pV2bM8Mm55sjgBDIaBFhLAXcNlYx/LehaGD0UeURH0zCy5bSmvpUdg890PE9QfLM,iv:0pHehjBizm2wLdo+JxwJ8U3da/nnKh1KaarQIcvQUpQ=,tag:9gY4YaDiqPP21FWv/fi8Ww==,type:comment]
+                            #ENC[AES256_GCM,data:9flsw+onFAqYUwc5V0L4uEk9DnsJo/DQU82WVg==,iv:LQlDaArzL09lZj4Ar3pc1EYNNUMBVM6BUVhRWEn0QHo=,tag:xL0STBwZSNwU40mrX+kv3g==,type:comment]
+                            #ENC[AES256_GCM,data:We//RqGxKEbrwnZdluqv4AZQInpIJx25OnrLcZ2wvEyBKSGJghgfxS5VpqAtM2Kv,iv:s0a2cunAbwfptDkZP8OpMyA44X3cmurCZedBudsBPIE=,tag:hNa4IwXScIcdkHbxwu5zOg==,type:comment]
+                            #ENC[AES256_GCM,data:v7NVeUwJg7r4VRJ0Fw3ZgvkTsbkWcVZsBuayvC9rE696y02xp++14JvBzAJ/BsF/,iv:HXXLIBOaouh+tOD+CEeYa72UW3+xx2SfYJXZWtHV5Cs=,tag:f6zysqDz595LuhSf4tH6cg==,type:comment]
                     - name: ENC[AES256_GCM,data:430vvzGNLvJ1FoTuPji45htY0Nv4U3lLBvY=,iv:vqKaWixJlg6MiU6naJgJzTYX9C0wUUAYmXsyxQ2pkk0=,tag:NbnYzgm++N6dENGMn/Ws7w==,type:str]
                       defaultClass: ENC[AES256_GCM,data:7TBs1MM=,iv:Bpg47VI2Fj+bWzwfPjjfmS5Mi1VluXJl2mcqPi7LIFY=,tag:U1p3dWpGjG5CX/jPMcusTA==,type:bool]
                       reclaimPolicy: ENC[AES256_GCM,data:/ox2/NU2,iv:RYYqSMt9UALG69V9lJYRWx3k0n0+yU+1pT9STqkLkMI=,tag:fg4OODrc7614+pBPFLz/0w==,type:str]
@@ -149,7 +157,7 @@ sops:
             S0lWSlkreXcyQ2pZVVZsZHZYVXAyMjAK6/b+t9wtQduPuFNBrm9eKBjDBG47co2m
             M/Yc5hrb9DC84vn7lreUBk4cwpwIxd3rnQYyiWf8YnjNV98EnuWKWQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-03-26T05:44:19Z"
-    mac: ENC[AES256_GCM,data:3W3LZ83Ki4yfb22WSS2MXCfThxr0+PRU/pTH8BWo+HwHXVDbASDvsMOZnEIrgo+kmlTS08By3jxKnJSDkR2qqfewT/Ou5PFYaXJpp0zkQgEqX5d98ypokiM0BogZpt9oXrHVb27fpy4Dus2pzaAM31A8NASQguF+1mohMqCHfOQ=,iv:J+GmvgB/iWdlcubZH4ZetOMbDW0pNMYW1kvFEAkBsUI=,tag:+7ItE8OYsdOf7UQUigHhvA==,type:str]
+    lastmodified: "2026-04-01T11:40:59Z"
+    mac: ENC[AES256_GCM,data:PZMX9sYTjS8r9izgMCblMKauGJ02Rz1vxcrllONliF72ajLzdNGkW97ybsXJIbENgqcDRvdw0eFPG1N9GJD4r3s6z9NOSA0UgiC7EXUI3/2M9JgDzxvMy3YmW06+66LF+xrmu5fiAtbUgfDe8i2OuR4jbp/QOcmO7BBXMhAMiJ0=,iv:0QKpXkAsjkHF5e1wuWL9qn2xLzig/QhA5fVw9TOl3Kg=,tag:BJjQ9VL2W9ofh2NVYbDgJg==,type:str]
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
     version: 3.12.1
