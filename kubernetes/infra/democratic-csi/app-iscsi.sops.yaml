@@ -157,7 +157,7 @@ sops:
             S0lWSlkreXcyQ2pZVVZsZHZYVXAyMjAK6/b+t9wtQduPuFNBrm9eKBjDBG47co2m
             M/Yc5hrb9DC84vn7lreUBk4cwpwIxd3rnQYyiWf8YnjNV98EnuWKWQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-04-01T12:12:49Z"
-    mac: ENC[AES256_GCM,data:szMNVOZgXwNZNYEKJQOih8tzMPbOGzZ5AMrGfAtZ7M3cVkGfuzy3zhqAzgQQe0quNa7likgtnZLw3vrC3sushJf1udgOivv4QC5BlYAhXktxN46+ZYvYDCKdo4G4c6L60+M32NCs5+rrmm1ZK/Uo4m9+nQ0AoQxewrBt19hwnK8=,iv:miNopfeTAHdzHEleUK4YS+cJv81fkyyYiwKH+aFs++k=,tag:VrQ/akRt9wjhEbzA8+DElg==,type:str]
+    lastmodified: "2026-04-01T11:40:59Z"
+    mac: ENC[AES256_GCM,data:PZMX9sYTjS8r9izgMCblMKauGJ02Rz1vxcrllONliF72ajLzdNGkW97ybsXJIbENgqcDRvdw0eFPG1N9GJD4r3s6z9NOSA0UgiC7EXUI3/2M9JgDzxvMy3YmW06+66LF+xrmu5fiAtbUgfDe8i2OuR4jbp/QOcmO7BBXMhAMiJ0=,iv:0QKpXkAsjkHF5e1wuWL9qn2xLzig/QhA5fVw9TOl3Kg=,tag:BJjQ9VL2W9ofh2NVYbDgJg==,type:str]
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
-    version: 3.12.2
+    version: 3.12.1
