@@ -31,13 +31,13 @@ spec:
                     driver:
                         image:
                             registry: ghcr.io/mpeterson/democratic-csi
-                            tag: test-sops-fix
+                            tag: 85eec75
                 node:
                     hostPID: ENC[AES256_GCM,data:Bx62Rg==,iv:ZwXiG+Rp6lZuZXNNj+BKuLkcvMsEIlJ0CGLQCYYwv4E=,tag:P3JGKtQybotnwvicI/3FaQ==,type:bool]
                     driver:
                         image:
                             registry: ghcr.io/mpeterson/democratic-csi
-                            tag: test-sops-fix
+                            tag: 85eec75
                         extraEnv:
                             - name: ENC[AES256_GCM,data:ju8+mQXRpOsBCcA6jBU57xiBrahvjg==,iv:nWcVWPtulZD5bkRC3+SpohnfzQK2l4hi/SEO076MbtU=,tag:7faJY7/hdnlbiO0P3qy7LQ==,type:str]
                               value: ENC[AES256_GCM,data:Tq3jYT0YEQ==,iv:brLb9HhtuxZrUpK9S+eOtyVOBrY6vnQ8+Dtwl9g0Tug=,tag:OsIXZ8hX4zO2VXhX/WuQeg==,type:str]
@@ -157,7 +157,7 @@ sops:
             S0lWSlkreXcyQ2pZVVZsZHZYVXAyMjAK6/b+t9wtQduPuFNBrm9eKBjDBG47co2m
             M/Yc5hrb9DC84vn7lreUBk4cwpwIxd3rnQYyiWf8YnjNV98EnuWKWQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-04-01T12:07:56Z"
-    mac: ENC[AES256_GCM,data:YdJPJdXEGZ6J0UqEz+toPE89vadeGLuVD7UM71QgOn8u/M7544tYCF12lihs5sfmcKXVw8An5hGMUJ+DFTTx0RVxItdwbP9suZo/rktaAzyAZHfrL6vhonrfqHfex1zMCcFtnCh8ynPFW6lEVUNNyCd/BXasBUQajuXTe+rof5A=,iv:OD3rev3MCFLVmZLx4bWzj6HlNjUK49DRThHnTpmXpww=,tag:cKbgU+ZbMu4sYZSupl7G0g==,type:str]
+    lastmodified: "2026-04-01T12:12:49Z"
+    mac: ENC[AES256_GCM,data:szMNVOZgXwNZNYEKJQOih8tzMPbOGzZ5AMrGfAtZ7M3cVkGfuzy3zhqAzgQQe0quNa7likgtnZLw3vrC3sushJf1udgOivv4QC5BlYAhXktxN46+ZYvYDCKdo4G4c6L60+M32NCs5+rrmm1ZK/Uo4m9+nQ0AoQxewrBt19hwnK8=,iv:miNopfeTAHdzHEleUK4YS+cJv81fkyyYiwKH+aFs++k=,tag:VrQ/akRt9wjhEbzA8+DElg==,type:str]
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
     version: 3.12.2
