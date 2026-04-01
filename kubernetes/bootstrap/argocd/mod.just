@@ -89,6 +89,12 @@ diff base_branch="main": (_require "docker" "git")
     echo "==> Preparing branches..."
     git archive "{{ base_branch }}" | tar -x -C "$base_dir"
     git archive HEAD | tar -x -C "$target_dir"
+    # Strip .sops metadata from encrypted manifests so the top-level field
+    # doesn't break Application CRD schema validation in argocd-diff-preview.
+    # Files are kept intact (kustomize/KSOPS generators still find them).
+    find "$base_dir" "$target_dir" -name '*.sops.yaml' | while IFS= read -r f; do
+      sed '/^sops:$/,$d' "$f" > "${f}.tmp" && mv "${f}.tmp" "$f"
+    done
     cp "$config_dir/argocd-diff-preview-values.yaml" "$argocd_config_dir/values.yaml"
 
     echo "==> Running ArgoCD diff preview..."
