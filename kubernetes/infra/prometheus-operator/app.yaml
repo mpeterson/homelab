@@ -97,6 +97,10 @@ spec:
           enabled: false
         cleanPrometheusOperatorObjectNames: true
 
+        defaultRules:
+          disabled:
+            InfoInhibitor: true
+
         ###
         ### Component values
         ###
