@@ -18,7 +18,7 @@ spec:
 
   info:
     - name: Chart
-      # renovate: datasource=helm registryUrl=oci://ghcr.io/spegel-org/helm-charts depName=spegel
+      # renovate: datasource=docker depName=ghcr.io/spegel-org/helm-charts/spegel
       value: spegel@0.6.0
 
   syncPolicy:

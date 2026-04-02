@@ -16,7 +16,7 @@ spec:
 
   info:
     - name: Chart
-      # renovate: datasource=helm registryUrl=ghcr.io/home-operations/charts depName=tuppr
+      # renovate: datasource=docker depName=ghcr.io/home-operations/charts/tuppr
       value: tuppr@0.1.3
 
   syncPolicy:

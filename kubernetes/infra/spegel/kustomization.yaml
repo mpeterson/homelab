@@ -8,7 +8,7 @@ namespace: &ns infra
 helmCharts:
   - name: spegel
     repo: oci://ghcr.io/spegel-org/helm-charts
-    # renovate: datasource=helm registryUrl=oci://ghcr.io/spegel-org/helm-charts depName=spegel
+    # renovate: datasource=docker depName=ghcr.io/spegel-org/helm-charts/spegel
     version: 0.6.0
     releaseName: spegel
     namespace: *ns

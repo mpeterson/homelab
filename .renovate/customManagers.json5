@@ -105,5 +105,14 @@
       ],
       datasourceTemplate: "helm",
     },
+    {
+      customType: "regex",
+      description: "Track OCI Helm chart versions in ArgoCD Application spec.info fields",
+      managerFilePatterns: ["/kubernetes/.+/app\\.yaml$/"],
+      matchStrings: [
+        "# renovate: datasource=docker depName=(?<depName>[^\\s]+)\\n\\s+value:\\s*[^:@\\s]+@(?<currentValue>[^\\s]+)",
+      ],
+      datasourceTemplate: "docker",
+    },
   ],
 }
