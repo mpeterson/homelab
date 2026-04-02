@@ -117,3 +117,6 @@ spec:
               snapshotMoveData: true
               includedNamespaces:
                 - '*'
+              excludedNamespaces:
+                - ai          # Ollama models (100GB) are reproducible
+                - monitoring  # Prometheus TSDB (55GB) is reconstructable
