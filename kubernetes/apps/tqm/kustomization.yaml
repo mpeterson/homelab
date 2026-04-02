@@ -5,17 +5,14 @@ kind: Kustomization
 
 namespace: &ns media
 
-configMapGenerator:
-  - name: qbittorrent-scripts
-    files:
-      - scripts/xseed.sh
-
+generators:
+  - secret-generator.yaml
 
 helmCharts:
   - name: app-template
     repo: https://bjw-s-labs.github.io/helm-charts
     # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
     version: 4.6.2
-    releaseName: qbittorrent
+    releaseName: tqm
     namespace: *ns
     valuesFile: values.yaml
