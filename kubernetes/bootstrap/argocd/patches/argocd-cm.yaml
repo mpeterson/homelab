@@ -5,7 +5,7 @@ metadata:
   name: argocd-cm
 data:
   application.resourceTrackingMethod: annotation+label
-  kustomize.buildOptions: "--enable-alpha-plugins --enable-exec"
+  kustomize.buildOptions: "--enable-alpha-plugins --enable-exec --enable-helm"
   # Prometheus Operator defaults `action: replace` on ServiceMonitor relabelings.
   # Helm templates often omit it (since replace is the default), causing a
   # perpetual diff between rendered and live state.

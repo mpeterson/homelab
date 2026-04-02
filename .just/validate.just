@@ -42,14 +42,14 @@ kustomize:
     cp -a kubernetes/ "$workdir/kubernetes/"
 
     echo "Apps..."
-    if ! kustomize build "$workdir/kubernetes/apps/" > /dev/null; then
+    if ! kustomize build --enable-helm "$workdir/kubernetes/apps/" > /dev/null; then
       _error "kubernetes/apps/kustomization.yaml" "kustomize build failed for kubernetes/apps"
       status=1
     fi
 
     echo "Infra..."
     yq -i 'del(.generators)' "$workdir/kubernetes/infra/kustomization.yaml"
-    if ! kustomize build "$workdir/kubernetes/infra/" > /dev/null; then
+    if ! kustomize build --enable-helm "$workdir/kubernetes/infra/" > /dev/null; then
       _error "kubernetes/infra/kustomization.yaml" "kustomize build failed for kubernetes/infra"
       status=1
     fi
@@ -70,14 +70,15 @@ kustomize:
       # Skip kustomizations that only had generators
       has_content=$(yq '.resources // [] | length' "$kust_file" 2>/dev/null)
       has_configmaps=$(yq '.configMapGenerator // [] | length' "$kust_file" 2>/dev/null)
-      if [ "${has_content:-0}" = "0" ] && [ "${has_configmaps:-0}" = "0" ]; then
+      has_helmcharts=$(yq '.helmCharts // [] | length' "$kust_file" 2>/dev/null)
+      if [ "${has_content:-0}" = "0" ] && [ "${has_configmaps:-0}" = "0" ] && [ "${has_helmcharts:-0}" = "0" ]; then
         continue
       fi
 
       echo "  $rel_dir ..."
-      if ! kustomize build "$dir" > /dev/null 2>&1; then
+      if ! kustomize build --enable-helm "$dir" > /dev/null 2>&1; then
         _error "$rel_dir/kustomization.yaml" "kustomize build failed for $rel_dir"
-        kustomize build "$dir" 2>&1 || true
+        kustomize build --enable-helm "$dir" 2>&1 || true
         status=1
       fi
     done < <(find "$workdir/kubernetes/apps" "$workdir/kubernetes/infra" -name 'kustomization.yaml' -type f)

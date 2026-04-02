@@ -85,5 +85,25 @@
       ],
       autoReplaceStringTemplate: "# renovate: datasource={{{datasource}}} depName={{{depName}}}\n    version: {{{newValue}}}",
     },
+    {
+      customType: "regex",
+      description: "Track container images in ArgoCD Application spec.info fields",
+      managerFilePatterns: ["/kubernetes/.+/app\\.yaml$/"],
+      matchStrings: [
+        "# renovate: datasource=docker depName=(?<depName>[^\\s]+)\\n\\s+value:\\s*\\S+:(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[^\\s]+))?",
+      ],
+      autoReplaceStringTemplate:
+        "# renovate: datasource=docker depName={{{depName}}}\n      value: {{{depName}}}:{{{newValue}}}@{{{newDigest}}}",
+      datasourceTemplate: "docker",
+    },
+    {
+      customType: "regex",
+      description: "Track Helm chart versions in ArgoCD Application spec.info fields",
+      managerFilePatterns: ["/kubernetes/.+/app\\.yaml$/"],
+      matchStrings: [
+        "# renovate: datasource=helm registryUrl=(?<registryUrl>[^\\s]+) depName=(?<depName>[^\\s]+)\\n\\s+value:\\s*\\S+@(?<currentValue>[^\\s]+)",
+      ],
+      datasourceTemplate: "helm",
+    },
   ],
 }
