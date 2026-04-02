@@ -112,7 +112,7 @@ spec:
             schedule: "0 3 * * 0"  # every Sunday at 3 AM UTC
             useOwnerReferencesInBackup: false
             template:
-              ttl: "168h"
+              ttl: "336h"
               storageLocation: cloud
               snapshotMoveData: true
               includedNamespaces:
