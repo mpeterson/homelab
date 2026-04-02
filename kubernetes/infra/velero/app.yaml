@@ -71,6 +71,9 @@ spec:
               - mountPath: /target
                 name: plugins
 
+        nodeAgent:
+          enabled: true
+
         configuration:
           backupStorageLocation:
             - name: cloud
@@ -104,3 +107,16 @@ spec:
               storageLocation: cloud
               includedNamespaces:
                 - '*'
+          weekly-offsite:
+            disabled: false
+            schedule: "0 3 * * 0"  # every Sunday at 3 AM UTC
+            useOwnerReferencesInBackup: false
+            template:
+              ttl: "360h"
+              storageLocation: cloud
+              snapshotMoveData: true
+              includedNamespaces:
+                - '*'
+              excludedNamespaces:
+                - ai          # Ollama models (100GB) are reproducible
+                - monitoring  # Prometheus TSDB (55GB) is reconstructable
