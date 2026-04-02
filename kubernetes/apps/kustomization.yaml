@@ -18,7 +18,6 @@ resources:
   - plex-auto-languages/app.yaml
   - prowlarr/app.yaml
   - qbittorrent/app.yaml
-  - qbittorrent/tqm.yaml
   - qbittorrent/qbrr.yaml
   - radarr/app.yaml
   - recyclarr/app.yaml
@@ -27,3 +26,4 @@ resources:
   - sabnzbd/app.yaml
   - sonarr/app.yaml
   - tautulli/app.yaml
+  - tqm/app.yaml
