@@ -25,7 +25,7 @@ spec:
       - ServerSideApply=true
     automated:
       selfHeal: true
-      prune: true
+      prune: false
 
   ignoreDifferences:
     - group: ""
