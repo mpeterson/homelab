@@ -27,6 +27,7 @@
         "kubernetes/infra/metrics-server/**",
         "kubernetes/infra/prometheus-operator/**",
         "kubernetes/infra/kromgo/**",
+        "kubernetes/infra/spegel/**",
         "kubernetes/infra/tailscale-operator/**",
       ],
       matchUpdateTypes: ["minor", "patch", "digest", "pin", "pinDigest"],

@@ -40,6 +40,11 @@ patches:
             hard=True
             noatime=True
             nconnect=16
+        - op: create
+          path: /etc/cri/conf.d/20-customization.part
+          content: |
+            [plugins."io.containerd.cri.v1.images"]
+              discard_unpacked_layers = false
       udev:
         rules:
           # Coral Edge M.2 TPU
