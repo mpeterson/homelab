@@ -11,7 +11,53 @@ defaultRules:
 ### Component values
 ###
 alertmanager:
-  enabled: false
+  enabled: true
+
+  route:
+    main:
+      enabled: true
+      hostnames:
+        - alertmanager.lan.peterson.com.ar
+      parentRefs:
+        - name: internal-gateway
+          namespace: network
+          sectionName: https
+
+  alertmanagerSpec:
+    externalUrl: "https://alertmanager.lan.peterson.com.ar"
+    alertmanagerConfigSelector: {}
+    alertmanagerConfigNamespaceSelector: {}
+    alertmanagerConfigMatcherStrategy:
+      type: None
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: zfs-generic-iscsi-csi-xfs
+          resources:
+            requests:
+              storage: 300Mi
+    resources:
+      requests:
+        cpu: 11m
+        memory: 50M
+      limits:
+        memory: 99M
+
+  config:
+    inhibit_rules:
+      - source_matchers:
+          - severity = "critical"
+        target_matchers:
+          - severity = "warning"
+        equal: ["alertname", "namespace"]
+    route:
+      receiver: "null"
+      group_by: ["alertname", "job"]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 6h
+    receivers:
+      - name: "null"
 
 kubeApiServer:
   enabled: true
@@ -89,11 +135,6 @@ prometheusOperator:
 ###
 prometheus:
   prometheusSpec:
-    alertingEndpoints:
-      - namespace: monitoring
-        name: alertmanager
-        port: 9093
-        apiVersion: v2
     enableAdminAPI: true
     enableFeatures:
       - auto-gomaxprocs
