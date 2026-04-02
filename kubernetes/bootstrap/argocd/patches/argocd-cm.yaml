@@ -13,6 +13,23 @@ data:
     jqPathExpressions:
     - .spec.endpoints[]?.relabelings[]?.action
     - .spec.endpoints[]?.metricRelabelings[]?.action
+  # ServerSideApply strips default group/kind fields from Gateway API references.
+  # Helm charts render them explicitly, causing perpetual diffs.
+  resource.customizations.ignoreDifferences.gateway.networking.k8s.io_HTTPRoute: |
+    jqPathExpressions:
+    - .spec.parentRefs[]?.group
+    - .spec.parentRefs[]?.kind
+    - .spec.rules[]?.backendRefs[]?.group
+    - .spec.rules[]?.backendRefs[]?.kind
+  resource.customizations.ignoreDifferences.gateway.networking.k8s.io_Gateway: |
+    jqPathExpressions:
+    - .spec.listeners[]?.tls?.certificateRefs[]?.group
+    - .spec.listeners[]?.tls?.certificateRefs[]?.kind
+    - .spec.listeners[]?.allowedRoutes?.namespaces?.from
+  resource.customizations.ignoreDifferences.cert-manager.io_ClusterIssuer: |
+    jqPathExpressions:
+    - .spec.acme.solvers[]?.http01?.gatewayHTTPRoute?.parentRefs[]?.group
+    - .spec.acme.solvers[]?.http01?.gatewayHTTPRoute?.parentRefs[]?.kind
   resource.exclusions: |
     ### Network resources created by the Kubernetes control plane
     - apiGroups:
