@@ -3,13 +3,21 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: &ns monitoring
+
 configMapGenerator:
   - name: alertmanager
     files:
       - alertmanager.yml=./config/alertmanager.yml
 
-generatorOptions:
-  disableNameSuffixHash: true
-
 generators:
   - secret-generator.yaml
+
+helmCharts:
+  - name: app-template
+    repo: https://bjw-s-labs.github.io/helm-charts
+    # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
+    version: 4.6.2
+    releaseName: alertmanager
+    namespace: *ns
+    valuesFile: values.yaml

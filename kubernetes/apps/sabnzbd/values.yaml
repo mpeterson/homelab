@@ -1,0 +1,120 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+---
+strategy: RollingUpdate
+
+controllers:
+  sabnzbd:
+    replicas: 1
+    pod:
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 100
+        fsGroup: 65534
+        fsGroupChangePolicy: "OnRootMismatch"
+
+    containers:
+      app:
+        image:
+          repository: &image ghcr.io/home-operations/sabnzbd
+          tag: &tag 4.5.5@sha256:f5570c0a370596ab656db6d3baa830b90a6fd9952b71ae805d022a2dcb3db12f
+        env:
+          SABNZBD__PORT: &port 8080
+          SABNZBD__HOST_WHITELIST_ENTRIES: >-
+            sabnzbd,
+            sabnzbd.media,
+            sabnzbd.media.svc,
+            sabnzbd.media.svc.cluster,
+            sabnzbd.media.svc.cluster.local,
+            sabnzbd.lan.peterson.com.ar
+          XSEED_HOST: cross-seed.media.svc.cluster.local
+          XSEED_PORT: 2468
+          XSEED_APIKEY:
+            valueFrom:
+              secretKeyRef:
+                name: cross-seed-secret
+                key: xseed_api_key
+        probes:
+          liveness: &probes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api?mode=version
+                port: *port
+              initialDelaySeconds: 0
+              periodSeconds: 10
+              timeoutSeconds: 1
+              failureThreshold: 3
+          readiness: *probes
+        resources:
+          requests:
+            cpu: 5m
+            memory: 1024Mi
+          limits:
+            memory: 2048Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+
+service:
+  app:
+    controller: sabnzbd
+    ports:
+      http:
+        port: *port
+
+route:
+  app:
+    enabled: true
+    kind: HTTPRoute
+    hostnames:
+      - sabnzbd.lan.peterson.com.ar
+    parentRefs:
+      - kind: Gateway
+        name: internal-gateway
+        namespace: network
+        sectionName: https
+    rules:
+      - backendRefs:
+          - name: sabnzbd
+            port: *port
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+persistence:
+  config:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 500Mi
+    advancedMounts:
+      sabnzbd:
+        app:
+          - path: /config
+  downloads:
+    type: nfs
+    server: nas.lan.peterson.com.ar
+    path: /nibbler/media/library/
+    globalMounts:
+      - path: /data/downloads/usenet/complete
+        subPath: downloads/usenet/complete
+      - path: /data/incomplete-downloads/usenet
+        subPath: incomplete-downloads/usenet
+  temp:
+    type: emptyDir
+    advancedMounts:
+      sabnzbd:
+        app:
+          - path: /tmp
+  scripts:
+    type: configMap
+    name: sabnzbd-scripts
+    defaultMode: 0775
+    advancedMounts:
+      sabnzbd:
+        app:
+          - path: /config/scripts

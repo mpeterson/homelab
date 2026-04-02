@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mosquitto-configs
+  name: &app mosquitto
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -13,6 +13,15 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: smarthome
+
+  info:
+    - name: Chart
+      # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
+      value: app-template@4.6.2
+    - name: Image
+      # renovate: datasource=docker depName=docker.io/library/eclipse-mosquitto
+      value: docker.io/library/eclipse-mosquitto:2.0.22@sha256:6852da90a65dfff7aa3a1c8b249e92bb83c17ea8bbcce56bedff8707332a1a29
+
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -27,177 +36,3 @@ spec:
     repoURL: https://github.com/mpeterson/homelab
     path: kubernetes/apps/mosquitto/
     targetRevision: main
-
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: &app mosquitto
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-
-spec:
-  project: default
-
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: smarthome
-
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
-    managedNamespaceMetadata:
-      labels:
-        pod-security.kubernetes.io/enforce: privileged
-    automated:
-      selfHeal: true
-      prune: true
-
-  source:
-    repoURL: https://bjw-s-labs.github.io/helm-charts
-    chart: app-template
-    targetRevision: 4.6.2
-    helm:
-      valuesObject:
-        strategy: RollingUpdate
-
-        controllers:
-          mosquitto:
-            initContainers:
-              init-config:
-                image:
-                  repository: &image docker.io/library/eclipse-mosquitto
-                  tag: &tag 2.0.22@sha256:6852da90a65dfff7aa3a1c8b249e92bb83c17ea8bbcce56bedff8707332a1a29
-                command: ["/bin/sh", "-c"]
-                args:
-                  - |
-                    cp /tmp/passwd /mosquitto/external_config/passwd;
-                    chmod 0700 /mosquitto/external_config/passwd;
-                    mosquitto_passwd -U /mosquitto/external_config/passwd
-            containers:
-              app:
-                image:
-                  repository: *image
-                  tag: *tag
-                probes:
-                  liveness:
-                    enabled: true
-                  readiness:
-                    enabled: true
-                securityContext:
-                  allowPrivilegeEscalation: false
-                  readOnlyRootFilesystem: true
-                  capabilities: {drop: ["ALL"]}
-                resources:
-                  limits:
-                    memory: 64Mi
-                  requests:
-                    cpu: 10m
-                    memory: 20Mi
-
-        defaultPodOptions:
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 568
-            runAsGroup: 568
-            fsGroup: 568
-            fsGroupChangePolicy: OnRootMismatch
-            seccompProfile: {type: RuntimeDefault}
-
-        service:
-          app:
-            controller: *app
-            # TODO(michelp): Temporary until Cilium supports TCPRoute for Gateway API
-            type: LoadBalancer
-            annotations:
-              io.cilium/lb-ipam-ips: 10.3.1.7
-            ##
-            ports:
-              mqtt:
-                port: &mqtt-port 1883
-              websocket:
-                port: &websocket-port 9001
-
-        # route:
-        #   tcp:
-        #     enabled: true
-        #     kind: TCPRoute
-        #     parentRefs:
-        #       - kind: Gateway
-        #         name: internal-gateway
-        #         namespace: network
-        #         sectionName: mqtt
-        #     rules:
-        #       - backendRefs:
-        #           - name: *app
-        #             port: *mqtt-port
-        #         matches:
-        #           - path:
-        #               type: PathPrefix
-        #               value: /
-
-        #   tls:
-        #     enabled: true
-        #     kind: TCPRoute
-        #     parentRefs:
-        #       - kind: Gateway
-        #         name: external-gateway
-        #         namespace: network
-        #         sectionName: mqtts
-        #     rules:
-        #       - backendRefs:
-        #           - name: *app
-        #             port: *mqtt-port
-        #         matches:
-        #           - path:
-        #               type: PathPrefix
-        #               value: /
-
-        persistence:
-          data:
-            storageClass: zfs-generic-iscsi-csi-xfs
-            accessMode: ReadWriteOnce
-            size: 500Mi
-            advancedMounts:
-              mosquitto:
-                app:
-                  - path: /mosquitto/data
-          config:
-            type: configMap
-            name: mosquitto-configmap
-            advancedMounts:
-              mosquitto:
-                app:
-                  - path: /mosquitto/config/mosquitto.conf
-                    subPath: mosquitto.conf
-                    readOnly: true
-          acl:
-            type: configMap
-            name: mosquitto-acl
-            advancedMounts:
-              mosquitto:
-                app:
-                  - path: /mosquitto/external_config/acl
-                    subPath: acl
-                    readOnly: true
-          logs:
-            type: emptyDir
-            advancedMounts:
-              mosquitto:
-                app:
-                  - path: /mosquitto/log
-          passwd:
-            type: secret
-            name: mosquitto-secret
-            advancedMounts:
-              mosquitto:
-                init-config:
-                  - path: /tmp/passwd
-                    subPath: passwd
-                    readOnly: true
-          external-config:
-            type: emptyDir
-            globalMounts:
-              - path: /mosquitto/external_config

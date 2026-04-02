@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+---
+strategy: RollingUpdate
+
+controllers:
+  cross-seed:
+    replicas: 1
+    pod:
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 100
+        fsGroup: 65534
+        fsGroupChangePolicy: "OnRootMismatch"
+
+    containers:
+      app:
+        image:
+          repository: ghcr.io/cross-seed/cross-seed
+          tag: 6.13.6@sha256:e2bf5b593e4e7d699e6242423ad7966190cd52ba8eefafdfdbb0cb5b0b609b96
+        args:
+          - daemon
+          - -v
+        probes:
+          liveness:
+            enabled: true
+          readiness:
+            enabled: true
+          startup:
+            enabled: true
+            spec:
+              failureThreshold: 30
+              periodSeconds: 5
+        resources:
+          requests:
+            cpu: 10m
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+
+service:
+  app:
+    controller: cross-seed
+    ports:
+      http:
+        port: &port 2468
+
+persistence:
+  config:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 500Mi
+    advancedMounts:
+      cross-seed:
+        app:
+          - path: /config
+  config-file:
+    type: secret
+    name: cross-seed-secret
+    globalMounts:
+      - path: /config/config.js
+        subPath: config.js
+        readOnly: true
+  media:
+    type: nfs
+    server: nas.lan.peterson.com.ar
+    path: /nibbler/media/library/
+    globalMounts:
+      - path: /data/streaming
+        subPath: streaming
+      - path: /data/downloads
+        subPath: downloads

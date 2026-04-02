@@ -1,0 +1,3 @@
+---
+apiServerProxyConfig:
+  mode: "true"

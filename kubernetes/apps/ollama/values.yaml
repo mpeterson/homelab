@@ -1,0 +1,31 @@
+---
+autoscaling:
+  enabled: true
+
+runtimeClassName: nvidia
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 16Gi
+
+ollama:
+  gpu:
+    enabled: true
+    type: 'nvidia'
+    number: 1
+
+  models:
+    pull:
+      - llama3.2:1b
+      - qwen3.5:0.8b
+      - qwen2.5:3b
+    load:
+      - qwen2.5:3b
+
+persistentVolume:
+  enabled: true
+  storageClass: zfs-generic-iscsi-csi-xfs
+  size: 100Gi

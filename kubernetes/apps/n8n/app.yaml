@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: n8n-configs
+  name: &app n8n
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -13,6 +13,15 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: selfhosted
+
+  info:
+    - name: Chart
+      # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
+      value: app-template@4.6.2
+    - name: Image
+      # renovate: datasource=docker depName=ghcr.io/n8n-io/n8n
+      value: ghcr.io/n8n-io/n8n:2.15.0@sha256:5ff0ad333090d1901005cd764399b1be2c2a29b816704107f08c340d0d223043
+
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -27,119 +36,3 @@ spec:
     repoURL: https://github.com/mpeterson/homelab
     path: kubernetes/apps/n8n/
     targetRevision: main
-
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: &app n8n
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-
-spec:
-  project: default
-
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: selfhosted
-
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
-    managedNamespaceMetadata:
-      labels:
-        pod-security.kubernetes.io/enforce: privileged
-    automated:
-      selfHeal: true
-      prune: true
-
-  source:
-    repoURL: https://bjw-s-labs.github.io/helm-charts
-    chart: app-template
-    targetRevision: 4.6.2
-    helm:
-      valuesObject:
-        strategy: RollingUpdate
-
-        controllers:
-          n8n:
-            # annotations:
-            #   reloader.stakater.com/auto: "true"
-
-            pod:
-              securityContext:
-                runAsUser: 1000
-                runAsGroup: 1000
-                fsGroup: 1000
-                fsGroupChangePolicy: "OnRootMismatch"
-
-            containers:
-              app:
-                image:
-                  repository: ghcr.io/n8n-io/n8n
-                  tag: 2.15.0@sha256:5ff0ad333090d1901005cd764399b1be2c2a29b816704107f08c340d0d223043
-                env:
-                  DB_SQLITE_VACUUM_ON_STARTUP: true
-                  EXECUTIONS_DATA_PRUNE: true
-                  EXECUTIONS_DATA_MAX_AGE: 7
-                  EXECUTIONS_DATA_PRUNE_MAX_COUNT: 50000
-                  GENERIC_TIMEZONE: "Asia/Jerusalem"
-                  N8N_EDITOR_BASE_URL: "https://n8n.lan.peterson.com.ar/"
-                  N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: false
-                  N8N_PROTOCOL: "https"
-                  N8N_PORT: &port 8080
-                  N8N_HOST: &hostName n8n.lan.peterson.com.ar
-                  N8N_LOG_LEVEL: info
-                  N8N_LOG_OUTPUT: console
-                  N8N_ENCRYPTION_KEY:
-                    valueFrom:
-                      secretKeyRef:
-                        name: n8n-secret
-                        key: N8N_ENCRYPTION_KEY
-                  WEBHOOK_URL: "https://n8n-webhook.peterson.com.ar/"
-                resources:
-                  requests:
-                    cpu: 5m
-                    memory: 128Mi
-                  limits:
-                    memory: 2Gi
-
-        service:
-          app:
-            ports:
-              http:
-                port: *port
-
-        persistence:
-          data:
-            storageClass: zfs-generic-iscsi-csi-xfs
-            accessMode: ReadWriteOnce
-            size: 5Gi
-            advancedMounts:
-              n8n:
-                app:
-                  - path: /home/node/.n8n
-
-        route:
-          app:
-            hostnames:
-              - *hostName
-            parentRefs:
-              - name: internal-gateway
-                namespace: network
-                sectionName: https
-
-          webhooks:
-            hostnames:
-              - n8n-webhook.peterson.com.ar
-            parentRefs:
-              - name: public-gateway
-                namespace: network
-                sectionName: https
-            rules:
-              - matches:
-                  - path:
-                      value: /webhook
-                backendRefs: [{}]

@@ -1,0 +1,113 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+---
+strategy: RollingUpdate
+
+controllers:
+  recyclarr:
+    type: cronjob
+
+    cronjob:
+      schedule: "@daily"
+      backoffLimit: 0
+      concurrencyPolicy: Forbid
+      failedJobsHistory: 3
+      successfulJobsHistory: 3
+
+    pod:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+
+    initContainers:
+      init-config:
+        image:
+          repository: docker.io/library/alpine
+          tag: 3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
+        env:
+          RADARR_URL:
+            valueFrom:
+              secretKeyRef:
+                name: recyclarr-secret
+                key: radarr_url
+          RADARR_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: recyclarr-secret
+                key: radarr_apikey
+          SONARR_URL:
+            valueFrom:
+              secretKeyRef:
+                name: recyclarr-secret
+                key: sonarr_url
+          SONARR_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: recyclarr-secret
+                key: sonarr_apikey
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            apk add --no-progress --quiet --no-cache bash curl jq &&
+            bash /config/scripts/cleanup_unused_quality_profiles.sh
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+          capabilities:
+            drop:
+              - ALL
+
+    containers:
+      app:
+        image:
+          repository: ghcr.io/recyclarr/recyclarr
+          tag: 8.5.1@sha256:734cecf44ae9be7cf0cb05b2c1bc7da0abef9d938cc11b605e58b3146205e5c0
+        args:
+          - sync
+        resources:
+          requests:
+            cpu: 5m
+            memory: 36M
+          limits:
+            memory: 128M
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+
+persistence:
+  config:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 500Mi
+    advancedMounts:
+      recyclarr:
+        app:
+          - path: /config
+  config-file:
+    type: configMap
+    name: recyclarr-configmap
+    globalMounts:
+      - path: /config/recyclarr.yml
+        subPath: recyclarr.yml
+        readOnly: true
+  secret-file:
+    type: secret
+    name: recyclarr-secret
+    globalMounts:
+      - path: /config/secrets.yml
+        subPath: secrets.yml
+        readOnly: true
+  scripts:
+    type: configMap
+    name: arr-scripts
+    defaultMode: 0775
+    globalMounts:
+      - path: /config/scripts
