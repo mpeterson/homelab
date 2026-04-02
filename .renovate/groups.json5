@@ -107,8 +107,12 @@
       groupName: "spegel",
     },
     {
-      description: "Group Tuppr Helm chart updates",
-      matchFileNames: ["kubernetes/infra/tuppr/app.yaml"],
+      description: "Group Tuppr Helm chart and container image updates",
+      matchFileNames: [
+        "kubernetes/infra/tuppr/app.yaml",
+        "kubernetes/infra/tuppr/kustomization.yaml",
+        "kubernetes/infra/tuppr/values.yaml",
+      ],
       groupName: "tuppr",
     },
   ],
