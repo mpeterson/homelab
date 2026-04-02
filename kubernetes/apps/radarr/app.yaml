@@ -1,5 +1,4 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -15,6 +14,14 @@ spec:
     server: https://kubernetes.default.svc
     namespace: media
 
+  info:
+    - name: Chart
+      # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
+      value: app-template@4.6.2
+    - name: Image
+      # renovate: datasource=docker depName=ghcr.io/home-operations/radarr
+      value: ghcr.io/home-operations/radarr:6.1.2.10359@sha256:9967e56263a3c67eeaede5824103ee4c1c1f1511abd5965ac1e294bfd9b76dbb
+
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -26,114 +33,6 @@ spec:
       prune: true
 
   source:
-    repoURL: https://bjw-s-labs.github.io/helm-charts
-    chart: app-template
-    targetRevision: 4.6.2
-    helm:
-      valuesObject:
-        strategy: RollingUpdate
-
-        controllers:
-          radarr:
-            replicas: 1
-            pod:
-              securityContext:
-                runAsUser: 65534
-                runAsGroup: 100
-                fsGroup: 65534
-                fsGroupChangePolicy: "OnRootMismatch"
-
-            containers:
-              app:
-                image:
-                  repository: &image ghcr.io/home-operations/radarr
-                  tag: &tag 6.1.2.10359@sha256:9967e56263a3c67eeaede5824103ee4c1c1f1511abd5965ac1e294bfd9b76dbb
-                env:
-                  TORRENT_CLIENTS: qBittorrent
-                  USENET_CLIENTS: SABnzbd
-                  XSEED_HOST: cross-seed.media.svc.cluster.local
-                  XSEED_PORT: 2468
-                  XSEED_APIKEY:
-                    valueFrom:
-                      secretKeyRef:
-                        name: cross-seed-secret
-                        key: xseed_api_key
-                probes:
-                  liveness: &probes
-                    enabled: true
-                    custom: true
-                    spec:
-                      httpGet:
-                        path: /ping
-                        port: &port 7878
-                      initialDelaySeconds: 0
-                      periodSeconds: 10
-                      timeoutSeconds: 1
-                      failureThreshold: 3
-                  readiness: *probes
-                resources:
-                  requests:
-                    cpu: 20m
-                    memory: 384Mi
-                  limits:
-                    memory: 2Gi
-                securityContext:
-                  allowPrivilegeEscalation: false
-                  readOnlyRootFilesystem: true
-                  capabilities:
-                    drop:
-                      - ALL
-
-        service:
-          app:
-            controller: *app
-            ports:
-              http:
-                port: *port
-
-        route:
-          app:
-            enabled: true
-            kind: HTTPRoute
-            hostnames:
-              - radarr.lan.peterson.com.ar
-            parentRefs:
-              - kind: Gateway
-                name: internal-gateway
-                namespace: network
-                sectionName: https
-            rules:
-              - backendRefs:
-                  - name: *app
-                    port: *port
-                matches:
-                  - path:
-                      type: PathPrefix
-                      value: /
-
-        persistence:
-          config:
-            storageClass: zfs-generic-iscsi-csi-xfs
-            accessMode: ReadWriteOnce
-            size: 3Gi
-            globalMounts:
-              - path: /config
-          temp:
-            type: emptyDir
-            globalMounts:
-              - path: /tmp
-          nfs-nas-media:
-            type: nfs
-            server: nas.lan.peterson.com.ar
-            path: /nibbler/media/library/
-            globalMounts:
-              - path: /data/streaming
-                subPath: streaming
-              - path: /data/downloads
-                subPath: downloads
-          scripts:
-            type: configMap
-            name: arr-scripts
-            defaultMode: 0775
-            globalMounts:
-              - path: /config/scripts
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/apps/radarr/
+    targetRevision: main

@@ -1,0 +1,85 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+---
+strategy: RollingUpdate
+
+controllers:
+  rotki:
+    # pod:
+    #   securityContext:
+    #     runAsUser: 65534
+    #     runAsGroup: 100
+    #     fsGroup: 65534
+    #     fsGroupChangePolicy: "OnRootMismatch"
+
+    containers:
+      app:
+        image:
+          repository: rotki/rotki
+          tag: v1.42.1@sha256:c088bdd6fec5bfe92f6e1a93829d844fa8076040d1754683e07348a97677d4d0
+        env:
+          TZ: Asia/Jerusalem
+          ROTKI_ACCEPT_DOCKER_RISK: "1"
+        probes:
+          liveness: &probes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/1/ping
+                port: &port 80
+              initialDelaySeconds: 0
+              periodSeconds: 10
+              timeoutSeconds: 1
+              failureThreshold: 3
+          readiness: *probes
+        resources:
+          requests:
+            cpu: 10m
+            memory: 256Mi
+          limits:
+            memory: 512Mi
+        # securityContext:
+        #   allowPrivilegeEscalation: false
+        #   readOnlyRootFilesystem: true
+        #   capabilities:
+        #     drop:
+        #       - ALL
+
+service:
+  app:
+    controller: rotki
+    ports:
+      http:
+        port: *port
+
+route:
+  app:
+    enabled: true
+    kind: HTTPRoute
+    hostnames:
+      - rotki.lan.peterson.com.ar
+    parentRefs:
+      - kind: Gateway
+        name: internal-gateway
+        namespace: network
+        sectionName: https
+    rules:
+      - backendRefs:
+          - name: rotki
+            port: *port
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+persistence:
+  config:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 700Mi
+    globalMounts:
+      - path: /data
+  logs:
+    type: emptyDir
+    globalMounts:
+      - path: /logs

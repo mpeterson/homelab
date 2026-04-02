@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+---
+strategy: RollingUpdate
+
+controllers:
+  tautulli:
+    replicas: 1
+    pod:
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        fsGroupChangePolicy: "OnRootMismatch"
+
+    containers:
+      app:
+        image:
+          repository: ghcr.io/home-operations/tautulli
+          tag: 2.17.0@sha256:b90b30e15d1b6d12fc726fac1ef9778ad92f405ac8f8ccb30a34d7f6673c113d
+        probes:
+          liveness: &probes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /status
+                port: 8181
+              initialDelaySeconds: 0
+              periodSeconds: 10
+              timeoutSeconds: 1
+              failureThreshold: 3
+          readiness: *probes
+        resources:
+          requests:
+            cpu: 5m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+
+service:
+  app:
+    controller: tautulli
+    ports:
+      http:
+        port: &port 8181
+
+route:
+  app:
+    enabled: true
+    kind: HTTPRoute
+    hostnames:
+      - stats-plex.peterson.com.ar
+    parentRefs:
+      - kind: Gateway
+        name: public-gateway
+        namespace: network
+        sectionName: https
+    rules:
+      - backendRefs:
+          - name: tautulli
+            port: *port
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+persistence:
+  config:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 5Gi
+    globalMounts:
+      - path: /config

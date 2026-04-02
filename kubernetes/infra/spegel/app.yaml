@@ -15,6 +15,12 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: infra
+
+  info:
+    - name: Chart
+      # renovate: datasource=helm registryUrl=oci://ghcr.io/spegel-org/helm-charts depName=spegel
+      value: spegel@0.6.0
+
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -27,10 +33,6 @@ spec:
       prune: true
 
   source:
-    repoURL: ghcr.io/spegel-org/helm-charts
-    chart: spegel
-    targetRevision: 0.6.0
-    helm:
-      valuesObject:
-        spegel:
-          containerdRegistryConfigPath: /etc/cri/conf.d/hosts
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/infra/spegel/
+    targetRevision: main

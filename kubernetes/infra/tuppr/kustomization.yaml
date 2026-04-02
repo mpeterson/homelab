@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: &ns system-upgrade
+
+resources:
+  - upgrades/health-check.yaml
+  - upgrades/talos.yaml
+  - upgrades/kubernetes.yaml
+
+helmCharts:
+  - name: tuppr
+    repo: oci://ghcr.io/home-operations/charts
+    # renovate: datasource=helm registryUrl=ghcr.io/home-operations/charts depName=tuppr
+    version: 0.1.3
+    releaseName: tuppr
+    namespace: *ns
+    valuesFile: values.yaml
