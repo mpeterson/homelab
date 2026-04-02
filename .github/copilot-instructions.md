@@ -87,25 +87,36 @@ Secrets in `talos/talsecret.sops.yaml` and `talos/talenv.sops.yaml`. Upgrades ma
 
 ### Kubernetes app structure
 
-Every app follows this pattern:
+Every app follows the **single-app Kustomize+Helm pattern**:
 
 ```text
 kubernetes/{apps,infra}/{name}/
-├── app.yaml                # ArgoCD Application CRD
-├── kustomization.yaml      # Kustomize manifest (references generators/resources)
+├── app.yaml                # ArgoCD Application (single, git source)
+├── kustomization.yaml      # helmCharts + configMapGenerator + KSOPS generators
+├── values.yaml             # Helm values (extracted from app.yaml)
 ├── secret-generator.yaml   # KSOPS generator (if secrets needed)
 ├── secret.sops.yaml        # SOPS-encrypted Secret (if secrets needed)
 └── config/                 # App-specific config files (if any)
 ```
 
-When adding a new app, follow an existing app in the same tier as a template. Look at a few `app.yaml` files to see the current conventions for sync policies, routing, and Helm values.
+When adding a new app, follow an existing app in the same tier as a template. Look at a few `app.yaml` and `kustomization.yaml` files to see the current conventions.
 
-**Key patterns (check existing apps to confirm current usage):**
+**Key patterns:**
 
-- Most apps use the bjw-s app-template Helm chart with `valuesObject` inline in `app.yaml`
+- Each app has ONE ArgoCD Application pointing to its git directory
+- `kustomization.yaml` renders the Helm chart via `helmCharts:` directive AND generates ConfigMaps/Secrets
+- Helm values live in `values.yaml` (not inline in app.yaml)
+- `namespace: &ns <namespace>` at the top of `kustomization.yaml` with `namespace: *ns` in helmCharts (required for Kustomize nameReference rewriting)
+- `disableNameSuffixHash` is NOT used — hash suffixes enable automatic rolling updates on config changes
+- `spec.info` in app.yaml shows Chart and Image versions with `# renovate:` comments for automatic tracking
 - Routing uses Gateway API `HTTPRoute` (Cilium), not Ingress
 - Container images are pinned with digest: `repository/image:tag@sha256:...`
 - New apps must be added to the tier's root `kustomization.yaml`
+- Most apps use the bjw-s `app-template` chart; some infra apps use dedicated charts
+
+**Exceptions to single-app pattern:**
+
+Some apps keep a two-app (or multi-app) pattern when sync-wave ordering is required — e.g., when CRDs must be installed before CRs, or an operator must be running before its custom resources are applied. Check existing apps in the same tier to see which pattern applies.
 
 ### Secrets (SOPS + KSOPS)
 
@@ -113,6 +124,8 @@ When adding a new app, follow an existing app in the same tier as a template. Lo
 - `.sops.yaml` defines which fields stay unencrypted (check that file for the current list)
 - KSOPS generator in each app's `kustomization.yaml` decrypts at ArgoCD sync time
 - **Never commit unencrypted secrets** — CI gate validates SOPS integrity on every PR
+- Add `kustomize.config.k8s.io/needs-hash: "true"` annotation to Secret manifests inside SOPS files for hash-based rolling updates
+- **Do NOT use `needs-hash`** on secrets referenced by CRDs or by OTHER ArgoCD Applications (cross-app refs) — Kustomize can only rewrite references within the same kustomization
 
 ### Renovate automation
 
@@ -120,7 +133,7 @@ Configured in `renovate.json5` + `.renovate/` modules. Check those files for cur
 
 - **Version groups** (`.renovate/groups.json5`): Which components must update together
 - **Automerge tiers** (`.renovate/autoMerge.json5`): Which apps automerge vs. require manual review
-- **Custom managers** (`.renovate/customManagers.json5`): Version tracking in non-standard locations
+- **Custom managers** (`.renovate/customManagers.json5`): Version tracking in non-standard locations (including `spec.info` image/chart versions in `app.yaml` files)
 - **Commit messages** (`.renovate/commitMessage.json5`): Conventional commit format by update type
 
 ### YAML style
