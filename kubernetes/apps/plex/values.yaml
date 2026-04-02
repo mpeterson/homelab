@@ -1,0 +1,140 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+---
+strategy: RollingUpdate
+
+controllers:
+  plex:
+    pod:
+      runtimeClassName: nvidia
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 100
+        fsGroup: 100
+        fsGroupChangePolicy: "OnRootMismatch"
+        supplementalGroups:
+          - 44
+
+    containers:
+      app:
+        image:
+          repository: ghcr.io/home-operations/plex
+          tag: 1.43.0.10492@sha256:8cb062f2b0660bd7811387e6c799da0ce5f18112078fe21485c11adcc83a9c1c
+        env:
+          PLEX_ADVERTISE_URL: "https://plex.peterson.com.ar:443,http://10.3.1.5:32400"
+          PLEX_NO_AUTH_NETWORKS: 10.2.1.0/24
+        probes:
+          liveness: &probes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /identity
+                port: 32400
+              initialDelaySeconds: 0
+              periodSeconds: 10
+              timeoutSeconds: 1
+              failureThreshold: 3
+          readiness: *probes
+          startup:
+            enabled: true
+            spec:
+              failureThreshold: 30
+              periodSeconds: 10
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          requests:
+            cpu: 100m
+            memory: 2Gi
+          limits:
+            nvidia.com/gpu: 1
+            memory: 9248M
+
+service:
+  app:
+    controller: plex
+    type: LoadBalancer
+    annotations:
+      io.cilium/lb-ipam-ips: 10.3.1.5
+    ports:
+      http:
+        port: &port 32400
+        primary: true
+      dnla-tcp:
+        port: 32469
+        protocol: TCP
+      dnla-udp:
+        port: 1900
+        protocol: UDP
+      bonjour-udp:
+        port: 5353
+        protocol: UDP
+      gdm-1:
+        port: 32410
+        protocol: UDP
+      gdm-2:
+        port: 32412
+        protocol: UDP
+      gdm-3:
+        port: 32413
+        protocol: UDP
+      gdm-4:
+        port: 32414
+        protocol: UDP
+
+route:
+  app:
+    enabled: true
+    kind: HTTPRoute
+    hostnames:
+      - plex.peterson.com.ar
+    parentRefs:
+      - kind: Gateway
+        name: public-gateway
+        namespace: network
+        sectionName: https
+    rules:
+      - backendRefs:
+          - name: plex
+            port: *port
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+persistence:
+  config:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 50Gi
+    globalMounts:
+      - path: /config
+  cache:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    globalMounts:
+      - path: /config/Library/Application Support/Plex Media Server/Cache
+  logs:
+    type: emptyDir
+    globalMounts:
+      - path: /config/Library/Application Support/Plex Media Server/Logs
+  nfs-nas-media:
+    type: nfs
+    server: nas.lan.peterson.com.ar
+    path: /nibbler/media/library/
+    advancedMounts:
+      plex:
+        app:
+          - path: /data/streaming
+            subPath: streaming
+  transcode:
+    type: emptyDir
+    advancedMounts:
+      plex:
+        app:
+          - path: /transcode

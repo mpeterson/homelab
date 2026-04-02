@@ -3,21 +3,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: &ns media
-
-generators:
-  - secret-generator.yaml
-
-configMapGenerator:
-  - name: recyclarr-configmap
-    files:
-      - recyclarr.yml=./config/recyclarr.yml
+namespace: &ns selfhosted
 
 helmCharts:
   - name: app-template
     repo: https://bjw-s-labs.github.io/helm-charts
     # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
     version: 4.6.2
-    releaseName: recyclarr
+    releaseName: rotki
     namespace: *ns
     valuesFile: values.yaml

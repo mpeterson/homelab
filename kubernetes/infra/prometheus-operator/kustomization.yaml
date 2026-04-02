@@ -9,6 +9,12 @@ resources:
   - scrapeconfigs/node-exporter.yaml
 
 helmCharts:
+  - name: prometheus-operator-crds
+    repo: https://prometheus-community.github.io/helm-charts
+    # renovate: datasource=helm registryUrl=https://prometheus-community.github.io/helm-charts depName=prometheus-operator-crds
+    version: 28.0.1
+    releaseName: prometheus-operator-crds
+    namespace: *ns
   - name: kube-prometheus-stack
     repo: https://prometheus-community.github.io/helm-charts
     # renovate: datasource=helm registryUrl=https://prometheus-community.github.io/helm-charts depName=kube-prometheus-stack

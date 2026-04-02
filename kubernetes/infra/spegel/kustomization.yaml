@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: &ns infra
+
+helmCharts:
+  - name: spegel
+    repo: oci://ghcr.io/spegel-org/helm-charts
+    # renovate: datasource=helm registryUrl=oci://ghcr.io/spegel-org/helm-charts depName=spegel
+    version: 0.6.0
+    releaseName: spegel
+    namespace: *ns
+    valuesFile: values.yaml

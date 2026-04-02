@@ -114,10 +114,6 @@ When adding a new app, follow an existing app in the same tier as a template. Lo
 - New apps must be added to the tier's root `kustomization.yaml`
 - Most apps use the bjw-s `app-template` chart; some infra apps use dedicated charts
 
-**Exceptions to single-app pattern:**
-
-Some apps keep a two-app (or multi-app) pattern when sync-wave ordering is required — e.g., when CRDs must be installed before CRs, or an operator must be running before its custom resources are applied. Check existing apps in the same tier to see which pattern applies.
-
 ### Secrets (SOPS + KSOPS)
 
 - Encrypted with Age. Key at `~/.config/sops/age/keys.txt`

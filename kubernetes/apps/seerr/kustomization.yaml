@@ -5,19 +5,11 @@ kind: Kustomization
 
 namespace: &ns media
 
-generators:
-  - secret-generator.yaml
-
-configMapGenerator:
-  - name: recyclarr-configmap
-    files:
-      - recyclarr.yml=./config/recyclarr.yml
-
 helmCharts:
   - name: app-template
     repo: https://bjw-s-labs.github.io/helm-charts
     # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
     version: 4.6.2
-    releaseName: recyclarr
+    releaseName: overseerr
     namespace: *ns
     valuesFile: values.yaml

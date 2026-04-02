@@ -1,0 +1,18 @@
+---
+runtimeClassName: nvidia
+
+gfd:
+  enabled: true
+
+nfd:
+  enabled: false
+
+config:
+  map:
+    config: |
+      version: v1
+      sharing:
+        timeSlicing:
+          resources:
+            - name: nvidia.com/gpu
+              replicas: 8

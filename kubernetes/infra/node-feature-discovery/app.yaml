@@ -8,12 +8,19 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
   annotations:
     argocd.argoproj.io/sync-wave: "-4"
+
 spec:
   project: default
 
   destination:
     server: https://kubernetes.default.svc
     namespace: infra
+
+  info:
+    - name: Chart
+      # renovate: datasource=helm registryUrl=https://kubernetes-sigs.github.io/node-feature-discovery/charts depName=node-feature-discovery
+      value: node-feature-discovery@0.18.3
+
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -26,22 +33,6 @@ spec:
       prune: true
 
   source:
-    repoURL: https://kubernetes-sigs.github.io/node-feature-discovery/charts
-    chart: node-feature-discovery
-    targetRevision: 0.18.3
-    helm:
-      valuesObject:
-        master:
-          config:
-            extraLabelNs:
-              - nvidia.com
-
-        worker:
-          config:
-            sources:
-              pci:
-                deviceClassWhitelist:
-                  - "02"
-                  - "03"
-                deviceLabelFields:
-                  - vendor
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/infra/node-feature-discovery/
+    targetRevision: main
