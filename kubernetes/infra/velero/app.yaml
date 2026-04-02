@@ -71,6 +71,9 @@ spec:
               - mountPath: /target
                 name: plugins
 
+        nodeAgent:
+          enabled: true
+
         configuration:
           backupStorageLocation:
             - name: cloud
@@ -102,5 +105,15 @@ spec:
             template:
               ttl: "240h"
               storageLocation: cloud
+              includedNamespaces:
+                - '*'
+          weekly-offsite:
+            disabled: false
+            schedule: "0 3 * * 0"  # every Sunday at 3 AM UTC
+            useOwnerReferencesInBackup: false
+            template:
+              ttl: "168h"
+              storageLocation: cloud
+              snapshotMoveData: true
               includedNamespaces:
                 - '*'
