@@ -47,6 +47,14 @@
       matchPackageNames: ["cilium"],
       automerge: false,
     },
+    {
+      description: "OCI Helm charts: disable digest pinning — version fields don't support digest format",
+      matchPackageNames: [
+        "ghcr.io/spegel-org/helm-charts/spegel",
+        "ghcr.io/home-operations/charts/tuppr",
+      ],
+      pinDigests: false,
+    },
     // --- Version coupling constraints ---
     // Only hard constraints that rarely change. For version-coupled
     // dependencies, we use prBodyNotes reminders instead of
