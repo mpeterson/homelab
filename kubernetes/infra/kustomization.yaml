@@ -10,7 +10,7 @@ resources:
   - alertmanager/app.yaml
   - cilium/app.yaml
   - cert-manager/app.yaml
-  - democratic-csi/app-snapshotter.yaml
+  - snapshot-controller/app.yaml
   - gateway-api/app.yaml
   - kromgo/app.yaml
   - metrics-server/app.yaml
