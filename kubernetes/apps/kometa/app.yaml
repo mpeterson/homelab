@@ -15,8 +15,8 @@ spec:
     namespace: media
 
   info:
-    - name: Chart
-      value: app-template@4.6.2
+    - name: Image
+      value: kometateam/kometa:v2.3.1
 
   syncPolicy:
     syncOptions:
