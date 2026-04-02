@@ -3,6 +3,17 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: &ns kube-system
+
 resources:
   - bgp-control-plane.yaml
   - gateway.yaml
+
+helmCharts:
+  - name: cilium
+    repo: https://helm.cilium.io
+    # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
+    version: 1.18.7
+    releaseName: cilium
+    namespace: *ns
+    valuesFile: values.yaml
