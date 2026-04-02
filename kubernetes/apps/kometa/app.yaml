@@ -2,12 +2,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kometa-configs
+  name: &app kometa
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 
 spec:
   project: default
@@ -15,6 +13,11 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: media
+
+  info:
+    - name: Chart
+      value: app-template@4.6.2
+
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -29,105 +32,3 @@ spec:
     repoURL: https://github.com/mpeterson/homelab
     path: kubernetes/apps/kometa/
     targetRevision: main
-
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: &app kometa
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-
-spec:
-  project: default
-
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: media
-
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
-    managedNamespaceMetadata:
-      labels:
-        pod-security.kubernetes.io/enforce: privileged
-    automated:
-      selfHeal: true
-      prune: true
-
-  source:
-    repoURL: https://bjw-s-labs.github.io/helm-charts
-    chart: app-template
-    targetRevision: 4.6.2
-    helm:
-      valuesObject:
-        strategy: RollingUpdate
-
-        controllers:
-          kometa:
-            type: cronjob
-
-            cronjob:
-              schedule: "@daily"
-              backoffLimit: 0
-              timeZone: &tz Asia/Jerusalem
-              concurrencyPolicy: Forbid
-              failedJobsHistory: 3
-              successfulJobsHistory: 3
-
-            pod:
-              securityContext:
-                runAsUser: 65534
-                runAsGroup: 100
-                runAsNonRoot: true
-                fsGroup: 100
-                fsGroupChangePolicy: OnRootMismatch
-
-            containers:
-              app:
-                image:
-                  repository: kometateam/kometa
-                  tag: v2.3.1@sha256:683c04827ef3fecf1cc5cb178f75f91f968aef6c6d89d34bc9c70966fd1d7259
-                command:
-                  - /bin/sh
-                  - -c
-                args:
-                  - |
-                    mkdir /config/assets 2>/dev/null || true;
-                    python3 kometa.py --run --read-only-config
-                env:
-                  TZ: *tz
-                envFrom:
-                  - secretRef:
-                      name: kometa-secret
-                resources:
-                  requests:
-                    cpu: 10m
-                    memory: 1Gi
-                  limits:
-                    memory: 3Gi
-                securityContext:
-                  allowPrivilegeEscalation: false
-                  readOnlyRootFilesystem: true
-                  capabilities: {drop: ["ALL"]}
-
-        persistence:
-          config:
-            storageClass: zfs-generic-iscsi-csi-xfs
-            accessMode: ReadWriteOnce
-            size: 2Gi
-            globalMounts:
-              - path: /config
-          config-file:
-            type: configMap
-            name: kometa-configmap
-            globalMounts:
-              - path: /config/config.yml
-                subPath: config.yml
-                readOnly: true
-          logs:
-            type: emptyDir
-            globalMounts:
-              - path: /config/logs
