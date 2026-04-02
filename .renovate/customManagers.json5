@@ -90,7 +90,7 @@
       description: "Track container images in ArgoCD Application spec.info fields",
       managerFilePatterns: ["/kubernetes/.+/app\\.yaml$/"],
       matchStrings: [
-        "# renovate: datasource=docker depName=(?<depName>[^\\s]+)\\n\\s+value:\\s*\\S+:(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[^\\s]+))?",
+        "# renovate: datasource=docker depName=(?<depName>[^\\s]+)\\n\\s+value:\\s*[^@\\s]+:(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[^\\s]+))?",
       ],
       autoReplaceStringTemplate:
         "# renovate: datasource=docker depName={{{depName}}}\n      value: {{{depName}}}:{{{newValue}}}@{{{newDigest}}}",
