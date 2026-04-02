@@ -27,12 +27,15 @@ spec:
       selfHeal: true
       prune: false
 
+  # Cilium's Helm template renders nodePort as empty on cilium-ingress Service
+  # ports, letting Kubernetes auto-assign values. This creates a perpetual diff
+  # between the rendered (empty) and live (assigned) state.
   ignoreDifferences:
     - group: ""
       kind: Service
       name: cilium-ingress
-      jsonPointers:
-        - /spec/ports
+      jqPathExpressions:
+        - .spec.ports[]?.nodePort
 
   source:
     repoURL: https://github.com/mpeterson/homelab
