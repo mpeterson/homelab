@@ -3,5 +3,16 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: &ns velero
+
 generators:
   - secret-generator.yaml
+
+helmCharts:
+  - name: velero
+    repo: https://vmware-tanzu.github.io/helm-charts
+    # renovate: datasource=helm registryUrl=https://vmware-tanzu.github.io/helm-charts depName=velero
+    version: 12.0.0
+    releaseName: velero
+    namespace: *ns
+    valuesFile: values.yaml

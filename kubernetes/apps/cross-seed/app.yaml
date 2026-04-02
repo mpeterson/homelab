@@ -2,12 +2,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cross-seed-configs
+  name: &app cross-seed
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 
 spec:
   project: default
@@ -15,6 +13,15 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: media
+
+  info:
+    - name: Chart
+      # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
+      value: app-template@4.6.2
+    - name: Image
+      # renovate: datasource=docker depName=ghcr.io/cross-seed/cross-seed
+      value: ghcr.io/cross-seed/cross-seed:6.13.6@sha256:e2bf5b593e4e7d699e6242423ad7966190cd52ba8eefafdfdbb0cb5b0b609b96
+
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -29,111 +36,3 @@ spec:
     repoURL: https://github.com/mpeterson/homelab
     path: kubernetes/apps/cross-seed/
     targetRevision: main
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: &app cross-seed
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-
-spec:
-  project: default
-
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: media
-
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
-    managedNamespaceMetadata:
-      labels:
-        pod-security.kubernetes.io/enforce: privileged
-    automated:
-      selfHeal: true
-      prune: true
-
-  source:
-    repoURL: https://bjw-s-labs.github.io/helm-charts
-    chart: app-template
-    targetRevision: 4.6.2
-    helm:
-      valuesObject:
-        strategy: RollingUpdate
-
-        controllers:
-          cross-seed:
-            replicas: 1
-            pod:
-              securityContext:
-                runAsUser: 65534
-                runAsGroup: 100
-                fsGroup: 65534
-                fsGroupChangePolicy: "OnRootMismatch"
-
-            containers:
-              app:
-                image:
-                  repository: ghcr.io/cross-seed/cross-seed
-                  tag: 6.13.6@sha256:e2bf5b593e4e7d699e6242423ad7966190cd52ba8eefafdfdbb0cb5b0b609b96
-                args:
-                  - daemon
-                  - -v
-                probes:
-                  liveness:
-                    enabled: true
-                  readiness:
-                    enabled: true
-                  startup:
-                    enabled: true
-                    spec:
-                      failureThreshold: 30
-                      periodSeconds: 5
-                resources:
-                  requests:
-                    cpu: 10m
-                    memory: 128Mi
-                  limits:
-                    memory: 256Mi
-                securityContext:
-                  allowPrivilegeEscalation: false
-                  readOnlyRootFilesystem: true
-                  capabilities:
-                    drop:
-                      - ALL
-
-        service:
-          app:
-            controller: *app
-            ports:
-              http:
-                port: &port 2468
-
-        persistence:
-          config:
-            storageClass: zfs-generic-iscsi-csi-xfs
-            accessMode: ReadWriteOnce
-            size: 500Mi
-            advancedMounts:
-              cross-seed:
-                app:
-                  - path: /config
-          config-file:
-            type: secret
-            name: cross-seed-secret
-            globalMounts:
-              - path: /config/config.js
-                subPath: config.js
-                readOnly: true
-          media:
-            type: nfs
-            server: nas.lan.peterson.com.ar
-            path: /nibbler/media/library/
-            globalMounts:
-              - path: /data/streaming
-                subPath: streaming
-              - path: /data/downloads
-                subPath: downloads

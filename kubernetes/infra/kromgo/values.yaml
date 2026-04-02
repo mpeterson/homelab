@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+---
+controllers:
+  kromgo:
+    replicas: 1
+    strategy: RollingUpdate
+    containers:
+      app:
+        image:
+          repository: ghcr.io/kashalls/kromgo
+          tag: v0.8.2@sha256:bd2213c7e471ada38bfec5600f17ede76177815d560d2d6b9a0f433054c93080
+        env:
+          PROMETHEUS_URL: http://prometheus-operated.monitoring.svc.cluster.local:9090
+          SERVER_HOST: 0.0.0.0
+          SERVER_PORT: &port 8080
+          HEALTH_HOST: 0.0.0.0
+          HEALTH_PORT: &hport 8888
+        probes:
+          liveness: &probes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /readyz
+                port: *hport
+              initialDelaySeconds: 0
+              periodSeconds: 10
+              timeoutSeconds: 1
+              failureThreshold: 3
+          readiness: *probes
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - "ALL"
+        resources:
+          requests:
+            cpu: 5m
+            memory: 10M
+          limits:
+            memory: 64M
+
+service:
+  app:
+    controller: kromgo
+    ports:
+      http:
+        primary: true
+        port: *port
+
+route:
+  app:
+    enabled: true
+    kind: HTTPRoute
+    hostnames:
+      - stats-k8s.peterson.com.ar
+    parentRefs:
+      - kind: Gateway
+        name: public-gateway
+        namespace: network
+        sectionName: https
+    rules:
+      - backendRefs:
+          - name: kromgo
+            port: *port
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+persistence:
+  config-file:
+    type: configMap
+    name: kromgo-config
+    globalMounts:
+      - path: /kromgo/config.yaml
+        subPath: config.yaml

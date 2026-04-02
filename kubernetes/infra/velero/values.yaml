@@ -1,0 +1,58 @@
+---
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.14.0@sha256:7e82f717f44e89671212e0dfce7e061321c386ea84a33bca64a671670ca6c278
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+nodeAgent:
+  enabled: true
+
+configuration:
+  backupStorageLocation:
+    - name: cloud
+      provider: aws
+      bucket: backup-talos-proxmox-cluster
+      default: true
+      accessMode: ReadWrite
+      credential:
+        name: velero-credentials
+        key: cloud
+      config:
+        region: us-west-001
+        s3Url: "https://s3.us-west-001.backblazeb2.com"
+        checksumAlgorithm: ""  # required for Backblaze B2
+
+  volumeSnapshotLocation:
+    - name: democratic-csi
+      provider: csi
+      config: {}
+
+  features: EnableCSI
+  defaultVolumeSnapshotLocations: csi:democratic-csi
+
+schedules:
+  daily-backups:
+    disabled: false
+    schedule: "0 1 * * *"  # once a day, at midnight
+    useOwnerReferencesInBackup: false
+    template:
+      ttl: "240h"
+      storageLocation: cloud
+      includedNamespaces:
+        - '*'
+  weekly-offsite:
+    disabled: false
+    schedule: "0 3 * * 0"  # every Sunday at 3 AM UTC
+    useOwnerReferencesInBackup: false
+    template:
+      ttl: "360h"
+      storageLocation: cloud
+      snapshotMoveData: true
+      includedNamespaces:
+        - '*'
+      excludedNamespaces:
+        - ai          # Ollama models (100GB) are reproducible
+        - monitoring  # Prometheus TSDB (55GB) is reconstructable

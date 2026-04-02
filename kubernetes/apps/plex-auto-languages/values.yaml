@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+---
+strategy: RollingUpdate
+
+controllers:
+  plex-auto-languages:
+    pod:
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 100
+        fsGroup: 100
+        fsGroupChangePolicy: "OnRootMismatch"
+
+    containers:
+      app:
+        image:
+          repository: ghcr.io/journeydocker/plex-auto-languages
+          tag: 1.5.0@sha256:018caee713a6695aa7b6b2b8c19d277593cd0da50a3c72ec95af6cbe81a3d2a3
+        env:
+          TZ: Asia/Jerusalem
+        envFrom:
+          - secretRef:
+              name: plex-auto-languages-secret
+        probes:
+          liveness: &probes
+            enabled: true
+            custom: true
+            spec: &probes_spec
+              httpGet:
+                path: /ready
+                port: 9880
+              initialDelaySeconds: 0
+              periodSeconds: 10
+              timeoutSeconds: 1
+              failureThreshold: 3
+          readiness:
+            <<: *probes
+            spec:
+              <<: *probes_spec
+              initialDelaySeconds: 0
+          startup:
+            <<: *probes
+            spec:
+              <<: *probes_spec
+              initialDelaySeconds: 0
+              failureThreshold: 30
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          limits:
+            memory: 512M
+          requests:
+            cpu: 10m
+            memory: 128M
+
+persistence:
+  config:
+    enabled: true
+    type: emptyDir
+
+  local:
+    type: emptyDir
+    globalMounts:
+      - path: /.local
+
+  config-file:
+    type: configMap
+    name: plex-auto-languages-configmap
+    globalMounts:
+      - path: /config/config.yaml
+        subPath: config.yaml
+        readOnly: true

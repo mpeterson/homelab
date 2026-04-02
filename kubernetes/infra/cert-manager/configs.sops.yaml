@@ -5,27 +5,22 @@ metadata:
     namespace: infra
 type: Opaque
 stringData:
-    api-token: ENC[AES256_GCM,data:q5TQONwpD6uMTbwIbtBhkAVuJPm8fFye7DuFB5NATD5Ne2OmdLb+xg==,iv:cSG4nO0fzQMm+QsZelYiTB8soXGHBepGQ9X7fVPXS34=,tag:U/bFtoFXOryXTc6KkHIGVQ==,type:str]
+    api-token: ENC[AES256_GCM,data:AQ20/EAAHLBFUD9v8JGrHRg188ih2TPyeCF6tN/ER/17vb+nnr61Pg==,iv:kO5ZpVPV7tON0Jddw/OiAf33IjzMcbknu9JNu9Ricbk=,tag:ECM7kki1W7k54E/RSCfvhQ==,type:str]
 sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
     age:
         - recipient: age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664
           enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBpWTRjNlQ5clUvRTVtVnRp
-            WHltRk9QcUZsQ3JEV3FQVVJwS2cvaVM4ZEZBCnNmdEI4K0NLQS80WlBWV08wRldi
-            MlNSc2F0bGFNaHZ1TC9tc3k1cDZ1T2sKLS0tIGRNc2gyOWlwUHllUGU3V0RRTklZ
-            Q3MrbU05dk9DQ05hdk1Rd0ZjT2J6dHcKH+tSy9Y9A7hs5VHbhdlPJywK1k+kphZs
-            lBNeTWh0wInE6p10UWb91gkurE90SpS5pvTwrI0GWLtpVJJ3Fw9kBQ==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB5WEZ4VVJFS0wveXB4WGdW
+            Nzlickk0QTRxbnh6OUtwcnNWQnBueWtNTUdFCmY5QThqUFZXL3YveGFsbitKYjV6
+            a2tSMVFZK0J3UW9sSytzQXR1ZzBhakkKLS0tIEtRL2wxSjZUbEM4c0o1bHdYeHZQ
+            dExraFpac3ZoZnlRRHhkREJidy83eUkKx1ouAFmz9sd/VvapmmJq4T8ZDoT+p97U
+            gi/eIsIkIw9Fn8PP+9aAGLX6UTCHc8xwxNzMsE4yBla6IkxX1kROKA==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-05T16:54:27Z"
-    mac: ENC[AES256_GCM,data:LDVgSi2DZI0uvePkUCRtZwZcg0C4e0XPaCFfzx8lU2f/MCnWlXuigpvy4RHME6GdoVrn6XxT2UFqKqRkVI4Pon4hiB/F8fAzkHjnalHjupLzkgdidx9zH8MUdQXTNsdtL/eg2Aevh2u0AVMijsiuR1p8nmJvTCvGl3lqIMpWjLg=,iv:ZqFPWkURCzzq6HwdkaodwJqN2jb7IgfIFRqpPACPZ/8=,tag:npXWYybcdESzqEth8C6zGw==,type:str]
-    pgp: []
-    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
-    version: 3.9.4
+    lastmodified: "2026-04-02T13:42:02Z"
+    mac: ENC[AES256_GCM,data:CrETqa6P7gUwtt6iVUI+rF07xmruW0R5D30eXgHqsqK14L0CR1Kiq9GX9nZH+6UDvLszzMDzB3ys1PDHWHbDXfUcwd+FKj6oAYGnKriVe5jLFWoB873/ZJF9YUWipjLGiYO8rfcjpfDHS69UgZNopFFz2gbrJOB48vWg+YslD1E=,iv:sPJjZuTfQd3uT4kk6XeRNvitQ+C1+IhpRgHZfKAes3k=,tag:z8v7Y9ntDeGutfI1Snr8gA==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
+    version: 3.12.2
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -33,36 +28,31 @@ metadata:
     name: letsencrypt-prod-cloudflare
 spec:
     acme:
-        email: ENC[AES256_GCM,data:7bEfqBzFAhC+GACj9BCRn915G2JXKRhMaN5X,iv:d5l2SNLM+6H3ACJG4I2CzaR+kTjNClCPRKuDwUkzm8c=,tag:2WfoE11Wefc7XNfA0oRBAw==,type:str]
-        server: ENC[AES256_GCM,data:cFHLA799ie0413bpkDuL+SHqVqDUN5np87zKQsyUmQjdci9QL+7eIBZ8dMHrkg==,iv:Spfkz7/oPLlVL29Hq5sck/T1v7nAfsllr9UyNATQ5Rk=,tag:bOiHGAXTA5l8zQgPJ5Ux6w==,type:str]
+        email: ENC[AES256_GCM,data:nBfZm6GtPby5XlkCouqmvvmFjLLACloLW2NL,iv:8RuAMluGFE+TiTLnIKPvWBwUvDZsevhpKNMAWrcYu9E=,tag:UaOlVG2Teh9ZgTwobEpRGQ==,type:str]
+        server: ENC[AES256_GCM,data:0emPM1tMxe9hmio6Id7hGobzsKQ2KbeTewxRQlvqsE0a2N5yoFGoCVzr5gPtpg==,iv:nB+yos5m1fnmdNH6aWUZI8BNj/jOS22vO3Ww2bSCPCc=,tag:itl54u7Zbcn9J1O34rRRMw==,type:str]
         privateKeySecretRef:
-            name: ENC[AES256_GCM,data:D2DmC7FHrRk8PfjJlv8soqkX2J4ZXbJ4vIsZ,iv:IZrUoNdOMfcKCpE2534QCx3H7zeBY932CpslyjS0aNE=,tag:VC7jaENrnFwoT7naAkxApw==,type:str]
+            name: ENC[AES256_GCM,data:MY46QsPBu0xg84knVCNl8nFvaRcWJLI2cpKx,iv:Dc5KWQRQbrhrciYSlXIzCCVMGMKC0R082ryuvyuuRrY=,tag:u4Pkj+preF+BF4KnkYabAg==,type:str]
         solvers:
             - dns01:
                 cloudflare:
                     apiTokenSecretRef:
-                        name: ENC[AES256_GCM,data:9EImETTBsi1DuZ6xcbDGPNcTpQ0=,iv:0t5STSnmiW5Q5bAXArzJmC26Yk55TE2KKRYAdQfCNtA=,tag:62Xs7IGRkNU5SmLdu3+xQw==,type:str]
-                        key: ENC[AES256_GCM,data:YDooi73jXUPb,iv:QliN9gXd8gm5owPH04BXZ9XiwxKSrhsKcM0MXNWU358=,tag:r8aibGfx6O8qqbH1DfSZwQ==,type:str]
+                        name: ENC[AES256_GCM,data:uq4ouli551X4WtWVro/iq7r7PIc=,iv:xOkNCGK1u/7ahQ1zXaGLhTAoFMPKXs1OjjbIMQ8jPSc=,tag:RcxdU/cHlGCFitNvFwOZAQ==,type:str]
+                        key: ENC[AES256_GCM,data:u4cj6ZN6r8ru,iv:XRVxMZh2fxfEgGawiXvyx6O2n4eAaZIZFLgUU6iNDSk=,tag:ATaZSJvwCkYNj+Dk36j1hA==,type:str]
 sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
     age:
         - recipient: age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664
           enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBpWTRjNlQ5clUvRTVtVnRp
-            WHltRk9QcUZsQ3JEV3FQVVJwS2cvaVM4ZEZBCnNmdEI4K0NLQS80WlBWV08wRldi
-            MlNSc2F0bGFNaHZ1TC9tc3k1cDZ1T2sKLS0tIGRNc2gyOWlwUHllUGU3V0RRTklZ
-            Q3MrbU05dk9DQ05hdk1Rd0ZjT2J6dHcKH+tSy9Y9A7hs5VHbhdlPJywK1k+kphZs
-            lBNeTWh0wInE6p10UWb91gkurE90SpS5pvTwrI0GWLtpVJJ3Fw9kBQ==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB5WEZ4VVJFS0wveXB4WGdW
+            Nzlickk0QTRxbnh6OUtwcnNWQnBueWtNTUdFCmY5QThqUFZXL3YveGFsbitKYjV6
+            a2tSMVFZK0J3UW9sSytzQXR1ZzBhakkKLS0tIEtRL2wxSjZUbEM4c0o1bHdYeHZQ
+            dExraFpac3ZoZnlRRHhkREJidy83eUkKx1ouAFmz9sd/VvapmmJq4T8ZDoT+p97U
+            gi/eIsIkIw9Fn8PP+9aAGLX6UTCHc8xwxNzMsE4yBla6IkxX1kROKA==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-05T16:54:27Z"
-    mac: ENC[AES256_GCM,data:LDVgSi2DZI0uvePkUCRtZwZcg0C4e0XPaCFfzx8lU2f/MCnWlXuigpvy4RHME6GdoVrn6XxT2UFqKqRkVI4Pon4hiB/F8fAzkHjnalHjupLzkgdidx9zH8MUdQXTNsdtL/eg2Aevh2u0AVMijsiuR1p8nmJvTCvGl3lqIMpWjLg=,iv:ZqFPWkURCzzq6HwdkaodwJqN2jb7IgfIFRqpPACPZ/8=,tag:npXWYybcdESzqEth8C6zGw==,type:str]
-    pgp: []
-    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
-    version: 3.9.4
+    lastmodified: "2026-04-02T13:42:02Z"
+    mac: ENC[AES256_GCM,data:CrETqa6P7gUwtt6iVUI+rF07xmruW0R5D30eXgHqsqK14L0CR1Kiq9GX9nZH+6UDvLszzMDzB3ys1PDHWHbDXfUcwd+FKj6oAYGnKriVe5jLFWoB873/ZJF9YUWipjLGiYO8rfcjpfDHS69UgZNopFFz2gbrJOB48vWg+YslD1E=,iv:sPJjZuTfQd3uT4kk6XeRNvitQ+C1+IhpRgHZfKAes3k=,tag:z8v7Y9ntDeGutfI1Snr8gA==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
+    version: 3.12.2
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -70,34 +60,29 @@ metadata:
     name: letsencrypt-prod-http01
 spec:
     acme:
-        email: ENC[AES256_GCM,data:7bEfqBzFAhC+GACj9BCRn915G2JXKRhMaN5X,iv:d5l2SNLM+6H3ACJG4I2CzaR+kTjNClCPRKuDwUkzm8c=,tag:2WfoE11Wefc7XNfA0oRBAw==,type:str]
-        server: ENC[AES256_GCM,data:cFHLA799ie0413bpkDuL+SHqVqDUN5np87zKQsyUmQjdci9QL+7eIBZ8dMHrkg==,iv:Spfkz7/oPLlVL29Hq5sck/T1v7nAfsllr9UyNATQ5Rk=,tag:bOiHGAXTA5l8zQgPJ5Ux6w==,type:str]
+        email: ENC[AES256_GCM,data:4375LEENTzU84SGLywTWsiakRQeDABN9WAkB,iv:vLDY5Sqx0IkL+zikGf/xZ4B+er/xOFfAo+nc8n/M3xQ=,tag:U+4dd5lipIOhXz/NgRVi+A==,type:str]
+        server: ENC[AES256_GCM,data:kqPWegwLFVmE5OclEtSu28PXutQfTaI61QR3oI6F9sVAReA1N2a5MBA7emtsLQ==,iv:58sFYioTk1vov5baLlHC7jGIpHLO0uf8q9mxdC6l4RM=,tag:R71RS2z5lnV0juyje0qVuQ==,type:str]
         privateKeySecretRef:
-            name: ENC[AES256_GCM,data:wqL3m9dxVHQM48mQr4l6C9gY3lIHbBE=,iv:3xSmw7y2+ec/LdHkOSFtMDn4tc/Sh6h5ntKZQQXnlCQ=,tag:IA5eJpfBexdyM0x41fZ2oA==,type:str]
+            name: ENC[AES256_GCM,data:JMTiE9Xk6paTAe4YcDX66ptwvXXcDR0=,iv:26KcB17LI0bidjlwcnvXAiZgVtl5Y3uTOBCaH/VE2GU=,tag:SKPYgZfRXIZEkqRFAF5O7g==,type:str]
         solvers:
             - http01:
                 gatewayHTTPRoute:
                     parentRefs:
-                        - name: ENC[AES256_GCM,data:BqDPjtq/8ylHiLEhhr0=,iv:Uiq7B4XK00rSHG3W7bNwlmpXXT4GdvytoEADUY3q8yA=,tag:H8i8BsYm2d6NTHcRiNzpbg==,type:str]
-                          namespace: ENC[AES256_GCM,data:3nChIi2RvLwQK88=,iv:ImxVwmoTdvPA7Yv7Tyd1P8osJrUT7l4bGSZIc9EeVks=,tag:XETHiJd/PwJn7Z3aF2C+dA==,type:str]
+                        - name: ENC[AES256_GCM,data:eUK7kWMv4R+xSmFBGj4=,iv:pLLky0LP1ODnaEBi0xukho0C8mHWjmeRY3W8Rjyn5II=,tag:8I6g8lpweLYQHDSX79EQwQ==,type:str]
+                          namespace: ENC[AES256_GCM,data:Fj6Unz/l8Ai/wmY=,iv:/x6rnHQOwOovY2R3WPbb2zUyISch/IrhvuG/kiCN/eg=,tag:oq5qiF5wWsho2k54rU6WLQ==,type:str]
                           kind: Gateway
 sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
     age:
         - recipient: age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664
           enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBpWTRjNlQ5clUvRTVtVnRp
-            WHltRk9QcUZsQ3JEV3FQVVJwS2cvaVM4ZEZBCnNmdEI4K0NLQS80WlBWV08wRldi
-            MlNSc2F0bGFNaHZ1TC9tc3k1cDZ1T2sKLS0tIGRNc2gyOWlwUHllUGU3V0RRTklZ
-            Q3MrbU05dk9DQ05hdk1Rd0ZjT2J6dHcKH+tSy9Y9A7hs5VHbhdlPJywK1k+kphZs
-            lBNeTWh0wInE6p10UWb91gkurE90SpS5pvTwrI0GWLtpVJJ3Fw9kBQ==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB5WEZ4VVJFS0wveXB4WGdW
+            Nzlickk0QTRxbnh6OUtwcnNWQnBueWtNTUdFCmY5QThqUFZXL3YveGFsbitKYjV6
+            a2tSMVFZK0J3UW9sSytzQXR1ZzBhakkKLS0tIEtRL2wxSjZUbEM4c0o1bHdYeHZQ
+            dExraFpac3ZoZnlRRHhkREJidy83eUkKx1ouAFmz9sd/VvapmmJq4T8ZDoT+p97U
+            gi/eIsIkIw9Fn8PP+9aAGLX6UTCHc8xwxNzMsE4yBla6IkxX1kROKA==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-05T16:54:27Z"
-    mac: ENC[AES256_GCM,data:LDVgSi2DZI0uvePkUCRtZwZcg0C4e0XPaCFfzx8lU2f/MCnWlXuigpvy4RHME6GdoVrn6XxT2UFqKqRkVI4Pon4hiB/F8fAzkHjnalHjupLzkgdidx9zH8MUdQXTNsdtL/eg2Aevh2u0AVMijsiuR1p8nmJvTCvGl3lqIMpWjLg=,iv:ZqFPWkURCzzq6HwdkaodwJqN2jb7IgfIFRqpPACPZ/8=,tag:npXWYybcdESzqEth8C6zGw==,type:str]
-    pgp: []
-    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision)$
-    version: 3.9.4
+    lastmodified: "2026-04-02T13:42:02Z"
+    mac: ENC[AES256_GCM,data:CrETqa6P7gUwtt6iVUI+rF07xmruW0R5D30eXgHqsqK14L0CR1Kiq9GX9nZH+6UDvLszzMDzB3ys1PDHWHbDXfUcwd+FKj6oAYGnKriVe5jLFWoB873/ZJF9YUWipjLGiYO8rfcjpfDHS69UgZNopFFz2gbrJOB48vWg+YslD1E=,iv:sPJjZuTfQd3uT4kk6XeRNvitQ+C1+IhpRgHZfKAes3k=,tag:z8v7Y9ntDeGutfI1Snr8gA==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
+    version: 3.12.2
