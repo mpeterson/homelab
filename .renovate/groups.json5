@@ -102,6 +102,11 @@
       groupName: "kubernetes-version",
     },
     {
+      description: "Group Spegel Helm chart and container image into a single PR",
+      matchFileNames: ["kubernetes/infra/spegel/**"],
+      groupName: "spegel",
+    },
+    {
       description: "Group Tuppr Helm chart updates",
       matchFileNames: ["kubernetes/infra/tuppr/app.yaml"],
       groupName: "tuppr",
