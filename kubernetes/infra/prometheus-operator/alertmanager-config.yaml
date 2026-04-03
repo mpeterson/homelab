@@ -53,6 +53,7 @@ spec:
     - name: pushover
       pushoverConfigs:
         - html: true
+          monospace: false
           token:
             name: alertmanager-secrets
             key: pushover_api_token
@@ -60,30 +61,28 @@ spec:
             name: alertmanager-secrets
             key: pushover_api_userkey
           sendResolved: true
+          sound: gamelan
+          ttl: 86400s
           priority: '{{ if eq .Status "firing" }}1{{ else }}0{{ end }}'
           urlTitle: View in Alert Manager
           title: >-
             [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
           message: |-
             {{- range .Alerts }}
-              {{- if ne .Labels.severity "" }}
-                <b>Severity:</b> <i>{{ .Labels.severity }}</i>
-              {{- else }}
-                <b>Severity:</b> <i>N/A</i>
-              {{- end }}
               {{- if ne .Annotations.description "" }}
-                <b>Description:</b> <i>{{ .Annotations.description }}</i>
+                {{ .Annotations.description }}
               {{- else if ne .Annotations.summary "" }}
-                <b>Summary:</b> <i>{{ .Annotations.summary }}</i>
+                {{ .Annotations.summary }}
               {{- else if ne .Annotations.message "" }}
-                <b>Message:</b> <i>{{ .Annotations.message }}</i>
+                {{ .Annotations.message }}
               {{- else }}
-                <b>Description:</b> <i>N/A</i>
+                Alert description not available
               {{- end }}
               {{- if gt (len .Labels.SortedPairs) 0 }}
-                <b>Details:</b>
-                {{- range .Labels.SortedPairs }}
-                  • <b>{{ .Name }}:</b> <i>{{ .Value }}</i>
-                {{- end }}
+                <small>
+                  {{- range .Labels.SortedPairs }}
+                    <b>{{ .Name }}:</b> {{ .Value }}
+                  {{- end }}
+                </small>
               {{- end }}
             {{- end }}
