@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: external-dns-internal-rules
+spec:
+  groups:
+    - name: external-dns-internal.rules
+      rules:
+        - alert: ExternalDNSInternalStale
+          expr: |-
+            time() - external_dns_controller_last_sync_timestamp_seconds{job="external-dns-internal"} > 60
+          for: 5m
+          annotations:
+            summary: ExternalDNS Internal (RFC2136) has not synced successfully in the last five minutes
+          labels:
+            severity: critical
