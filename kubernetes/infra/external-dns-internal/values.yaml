@@ -34,3 +34,6 @@ env:
       secretKeyRef:
         name: external-dns-internal-secret
         key: tsig-secret
+
+serviceMonitor:
+  enabled: true

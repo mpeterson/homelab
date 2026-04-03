@@ -33,3 +33,6 @@ env:
       secretKeyRef:
         name: external-dns-cloudflare-secret
         key: api-token
+
+serviceMonitor:
+  enabled: true
