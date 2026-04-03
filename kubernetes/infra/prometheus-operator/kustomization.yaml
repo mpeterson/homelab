@@ -7,6 +7,10 @@ namespace: &ns monitoring
 
 resources:
   - scrapeconfigs/node-exporter.yaml
+  - alertmanager-config.yaml
+
+generators:
+  - secret-generator.yaml
 
 helmCharts:
   - name: prometheus-operator-crds
