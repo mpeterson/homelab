@@ -200,7 +200,7 @@ images:
       fi
     done <<< "$images"
 
-    for pid in "${pids[@]}"; do
+    for pid in ${pids+"${pids[@]}"}; do
       if ! wait "$pid"; then
         status=1
       fi
