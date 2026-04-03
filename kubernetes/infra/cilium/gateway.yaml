@@ -4,6 +4,8 @@ kind: Gateway
 metadata:
   name: public-gateway
   namespace: network
+  labels:
+    external-dns/zone: public
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod-cloudflare
 spec:
@@ -46,6 +48,8 @@ kind: Gateway
 metadata:
   name: internal-gateway
   namespace: network
+  labels:
+    external-dns/zone: internal
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod-cloudflare
 spec:
