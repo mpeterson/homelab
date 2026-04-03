@@ -26,3 +26,7 @@ auto_install = true
 [env]
 # Ensure just uses unstable features (needed for mod support)
 JUST_UNSTABLE = "1"
+
+[tasks."ansible:deps"]
+description = "Install Ansible Galaxy collections"
+run = "ansible-galaxy collection install -r ansible/requirements.yml"
