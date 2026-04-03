@@ -1,0 +1,36 @@
+---
+fullnameOverride: external-dns-internal
+
+image:
+  repository: registry.k8s.io/external-dns/external-dns
+  tag: v0.20.0@sha256:ddc7f4212ed09a21024deb1f470a05240837712e74e4b9f6d1f2632ff10672e7
+
+provider:
+  name: rfc2136
+
+sources:
+  - gateway-httproute
+
+domainFilters:
+  - lan.peterson.com.ar
+
+policy: sync
+registry: txt
+txtOwnerId: homelab-internal
+txtPrefix: _edns.
+
+extraArgs:
+  - --rfc2136-host=10.3.0.250
+  - --rfc2136-port=53
+  - --rfc2136-zone=lan.peterson.com.ar
+  - --rfc2136-tsig-keyname=externaldns_key
+  - --rfc2136-tsig-secret-alg=hmac-sha256
+  - --rfc2136-tsig-axfr
+  - --gateway-label-filter=external-dns/zone=internal
+
+env:
+  - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: external-dns-internal-secret
+        key: tsig-secret

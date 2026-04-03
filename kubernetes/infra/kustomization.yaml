@@ -10,6 +10,7 @@ resources:
   - cilium/app.yaml
   - cert-manager/app.yaml
   - external-dns-cloudflare/app.yaml
+  - external-dns-internal/app.yaml
   - snapshot-controller/app.yaml
   - gateway-api/app.yaml
   - kromgo/app.yaml
