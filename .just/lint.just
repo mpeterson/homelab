@@ -28,11 +28,13 @@ yaml:
     mise install --quiet
     cd "{{ repo_root }}"
 
+    fmt_flag=()
     if [ -n "${GITHUB_ACTIONS:-}" ]; then
-      mise x -- yamllint --strict --format github -c .yamllint.yaml .
-    else
-      mise x -- yamllint --strict -c .yamllint.yaml .
+      fmt_flag=(--format github)
     fi
+
+    git ls-files -z --cached --others --exclude-standard -- '*.yaml' '*.yml' \
+      | xargs -0 mise x -- yamllint --strict ${fmt_flag+"${fmt_flag[@]}"} -c .yamllint.yaml
 
 [doc('Validate JSON and JSON5 files')]
 json:
@@ -42,7 +44,7 @@ json:
     cd "{{ repo_root }}"
     status=0
 
-    while IFS= read -r file; do
+    while IFS= read -r -d '' file; do
       if ! mise x -- json5 -v "$file" > /dev/null 2>&1; then
         if [ -n "${GITHUB_ACTIONS:-}" ]; then
           echo "::error file=${file}::Invalid JSON/JSON5"
@@ -51,7 +53,7 @@ json:
         fi
         status=1
       fi
-    done < <(find . \( -name '*.json' -o -name '*.json5' \) -not -path './.git/*')
+    done < <(git ls-files -z --cached --others --exclude-standard -- '*.json' '*.json5')
     exit "$status"
 
 [doc('Lint GitHub Actions workflows with actionlint')]
@@ -68,7 +70,8 @@ markdown:
     set -euo pipefail
     mise install --quiet
     cd "{{ repo_root }}"
-    mise x -- markdownlint-cli2 "**/*.md" "#ansible/roles/bind9/**"
+    git ls-files -z --cached --others --exclude-standard -- '*.md' \
+      | xargs -0 mise x -- markdownlint-cli2
 
 [doc('Validate Renovate configuration')]
 renovate:
