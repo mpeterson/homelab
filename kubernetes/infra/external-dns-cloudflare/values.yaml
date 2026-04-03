@@ -24,6 +24,8 @@ txtPrefix: _edns.
 
 extraArgs:
   - --default-targets=ashton.peterson.com.ar
+  - --force-default-targets
+  - --gateway-label-filter=external-dns/zone=public
 
 env:
   - name: CF_API_TOKEN
