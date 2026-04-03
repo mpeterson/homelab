@@ -9,7 +9,9 @@
 `kubectl delete`, `talos reset`, `helm uninstall`, force-pushes, deleting files/resources,
 or anything that could cause data loss or downtime. Always ask first.
 
-All changes go through a PR rebased from latest `main`. Before pushing, run locally:
+All changes go through a PR. **Before making any changes**, create a feature branch from
+latest `origin/main`. Make all changes on that branch. Push and open a PR (with `gh pr create`)
+before marking the task complete. Before pushing, run locally:
 
 ```sh
 just lint                   # Lint YAML, JSON, Actions, Markdown, Renovate config
