@@ -24,13 +24,13 @@ alertmanager:
           sectionName: https
 
   alertmanagerSpec:
+    alertmanagerConfiguration:
+      name: alertmanager
     externalUrl: "https://alertmanager.lan.peterson.com.ar"
     alertmanagerConfigSelector: {}
     alertmanagerConfigNamespaceSelector: {}
     alertmanagerConfigMatcherStrategy:
       type: None
-    secrets:
-      - alertmanager-secrets
     storage:
       volumeClaimTemplate:
         spec:
@@ -44,70 +44,6 @@ alertmanager:
         memory: 50M
       limits:
         memory: 99M
-
-  config:
-    inhibit_rules:
-      - source_matchers:
-          - severity = "critical"
-        target_matchers:
-          - severity = "warning"
-        equal: ["alertname", "namespace"]
-    route:
-      receiver: pushover
-      group_by: ["alertname", "job"]
-      group_wait: 30s
-      group_interval: 5m
-      repeat_interval: 6h
-      routes:
-        - receiver: healthcheck_canary
-          matchers:
-            - alertname = "Watchdog"
-          repeat_interval: 5m
-          group_interval: 1m
-        - receiver: pushover
-          matchers:
-            - severity = critical
-          continue: true
-    receivers:
-      - name: "null"
-      - name: healthcheck_canary
-        webhook_configs:
-          - url_file: /etc/alertmanager/secrets/alertmanager-secrets/healthcheck_canary_url
-            send_resolved: false
-      - name: pushover
-        pushover_configs:
-          - html: true
-            token_file: /etc/alertmanager/secrets/alertmanager-secrets/pushover_api_token
-            user_key_file: /etc/alertmanager/secrets/alertmanager-secrets/pushover_api_userkey
-            send_resolved: true
-            priority: |-
-              {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
-            url_title: View in Alert Manager
-            title: |-
-              [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
-            message: |-
-              {{- range .Alerts }}
-                {{- if ne .Labels.severity "" }}
-                  <b>Severity:</b> <i>{{ .Labels.severity }}</i>
-                {{- else }}
-                  <b>Severity:</b> <i>N/A</i>
-                {{- end }}
-                {{- if ne .Annotations.description "" }}
-                  <b>Description:</b> <i>{{ .Annotations.description }}</i>
-                {{- else if ne .Annotations.summary "" }}
-                  <b>Summary:</b> <i>{{ .Annotations.summary }}</i>
-                {{- else if ne .Annotations.message "" }}
-                  <b>Message:</b> <i>{{ .Annotations.message }}</i>
-                {{- else }}
-                  <b>Description:</b> <i>N/A</i>
-                {{- end }}
-                {{- if gt (len .Labels.SortedPairs) 0 }}
-                  <b>Details:</b>
-                  {{- range .Labels.SortedPairs }}
-                    • <b>{{ .Name }}:</b> <i>{{ .Value }}</i>
-                  {{- end }}
-                {{- end }}
-              {{- end }}
 
 kubeApiServer:
   enabled: true
