@@ -11,8 +11,6 @@ defaultRules:
 ### Component values
 ###
 alertmanager:
-  enabled: true
-
   route:
     main:
       enabled: true
@@ -27,10 +25,6 @@ alertmanager:
     alertmanagerConfiguration:
       name: alertmanager
     externalUrl: "https://alertmanager.lan.peterson.com.ar"
-    alertmanagerConfigSelector: {}
-    alertmanagerConfigNamespaceSelector: {}
-    alertmanagerConfigMatcherStrategy:
-      type: None
     storage:
       volumeClaimTemplate:
         spec:
@@ -46,7 +40,6 @@ alertmanager:
         memory: 99M
 
 kubeApiServer:
-  enabled: true
   serviceMonitor:
     metricRelabelings:
       # Drop high cardinality labels
@@ -64,7 +57,6 @@ kubeEtcd:
   enabled: false
 
 kubelet:
-  enabled: true
   serviceMonitor:
     metricRelabelings:
       # Drop high cardinality labels
@@ -81,12 +73,6 @@ kubeProxy:
 
 kubeScheduler:
   enabled: false
-
-kubeStateMetrics:
-  enabled: true
-
-nodeExporter:
-  enabled: true
 
 grafana:
   enabled: false
@@ -129,7 +115,6 @@ prometheus:
     externalUrl: "https://prometheus.lan.peterson.com.ar"
     podMonitorSelectorNilUsesHelmValues: false
     probeSelectorNilUsesHelmValues: false
-    replicas: 1
     replicaExternalLabelName: "__replica__"  # must match with thanos value `.query.replicaLabel[0]`
     resources:
       requests:
@@ -141,7 +126,6 @@ prometheus:
     retentionSize: 50GB
     ruleSelectorNilUsesHelmValues: false
     scrapeConfigSelectorNilUsesHelmValues: false
-    scrapeInterval: 1m  # Must match interval in Grafana Helm chart
     serviceMonitorSelectorNilUsesHelmValues: false
     storageSpec:
       volumeClaimTemplate:
@@ -150,7 +134,6 @@ prometheus:
           resources:
             requests:
               storage: 55Gi
-    walCompression: true
 
   route:
     main:
