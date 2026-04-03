@@ -54,5 +54,19 @@
       automergeType: "pr",
       labels: [],
     },
+    {
+      description: "Automerge linter and validation tool updates (low-risk dev dependencies)",
+      matchDepNames: [
+        "pipx:yamllint",
+        "npm:markdownlint-cli2",
+        "aqua:rhysd/actionlint",
+        "npm:json5",
+        "npm:renovate",
+      ],
+      matchUpdateTypes: ["minor", "patch", "digest", "pin", "pinDigest"],
+      automerge: true,
+      automergeType: "pr",
+      labels: [],
+    },
   ],
 }

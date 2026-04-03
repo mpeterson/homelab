@@ -107,6 +107,17 @@
       groupName: "spegel",
     },
     {
+      description: "Group linter and validation tools into a single PR",
+      matchDepNames: [
+        "pipx:yamllint",
+        "npm:markdownlint-cli2",
+        "aqua:rhysd/actionlint",
+        "npm:json5",
+        "npm:renovate",
+      ],
+      groupName: "linters",
+    },
+    {
       description: "Group Tuppr Helm chart and container image updates",
       matchFileNames: [
         "kubernetes/infra/tuppr/app.yaml",
