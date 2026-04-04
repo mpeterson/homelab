@@ -17,7 +17,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://prometheus-community.github.io/helm-charts depName=kube-prometheus-stack
-      value: kube-prometheus-stack@82.16.2
+      value: kube-prometheus-stack@82.17.1
 
   syncPolicy:
     syncOptions:
