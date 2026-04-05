@@ -78,7 +78,7 @@ Laptop ──HTTPS──▶ Kopia Server ──NFS──▶ NAS (nibbler/apps/ko
 ```bash
 kopia repository connect s3 \
   --bucket=kopia-server-offsite \
-  --endpoint=s3.us-west-004.backblazeb2.com \
+  --endpoint=<s3-endpoint> \
   --access-key=<key-id> \
   --secret-access-key=<key>
 

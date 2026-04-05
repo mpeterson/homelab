@@ -11,9 +11,9 @@ generators:
 configMapGenerator:
   - name: kopia-server-scripts
     files:
-      - init-repo.sh=./config/init-repo.sh
-      - start-server.sh=./config/start-server.sh
-      - sync-offsite.sh=./config/sync-offsite.sh
+      - init-repo.sh=./scripts/init-repo.sh
+      - start-server.sh=./scripts/start-server.sh
+      - sync-offsite.sh=./scripts/sync-offsite.sh
 
 helmCharts:
   - name: app-template

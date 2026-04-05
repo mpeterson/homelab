@@ -11,7 +11,7 @@ generators:
 configMapGenerator:
   - name: kopia-nas-backup-scripts
     files:
-      - backup.sh=./config/backup.sh
+      - backup.sh=./scripts/backup.sh
 
 helmCharts:
   - name: app-template
