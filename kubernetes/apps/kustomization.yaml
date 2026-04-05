@@ -9,6 +9,7 @@ resources:
   - custom-arrscripts/app.yaml
   - idrac-fan-control/app.yaml
   - kometa/app.yaml
+  - kopia-nas-backup/app.yaml
   - mosquitto/app.yaml
   - n8n/app.yaml
   - ollama/app.yaml
