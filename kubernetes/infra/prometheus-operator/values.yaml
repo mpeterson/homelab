@@ -27,6 +27,9 @@ alertmanager:
     externalUrl: "https://alertmanager.lan.peterson.com.ar"
     storage:
       volumeClaimTemplate:
+        metadata:
+          labels:
+            velero.io/exclude-from-backup: "true"
         spec:
           storageClassName: zfs-generic-iscsi-csi-xfs
           resources:
@@ -129,6 +132,9 @@ prometheus:
     serviceMonitorSelectorNilUsesHelmValues: false
     storageSpec:
       volumeClaimTemplate:
+        metadata:
+          labels:
+            velero.io/exclude-from-backup: "true"
         spec:
           storageClassName: zfs-generic-iscsi-csi-xfs
           resources:
