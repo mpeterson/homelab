@@ -140,7 +140,7 @@ route:
         sectionName: https
     rules:
       - backendRefs:
-          - name: kopia-server-app
+          - name: kopia-server
             port: *port
         matches:
           - path:
