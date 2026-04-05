@@ -150,7 +150,7 @@ persistence:
   kopia-cache:
     storageClass: zfs-generic-iscsi-csi-xfs
     accessMode: ReadWriteOnce
-    size: 10Gi
+    size: 50Gi
     labels:
       velero.io/exclude-from-backup: "true"
     advancedMounts:
@@ -159,6 +159,9 @@ persistence:
           - path: /app/cache
         init-repo:
           - path: /app/cache
+  kopia-sync-cache:
+    type: emptyDir
+    advancedMounts:
       offsite-sync:
         app:
           - path: /app/cache
