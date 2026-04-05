@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: &app kopia-nas-backup
+  name: &app kopia-server
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -34,5 +34,5 @@ spec:
 
   source:
     repoURL: https://github.com/mpeterson/homelab
-    path: kubernetes/apps/kopia-nas-backup/
+    path: kubernetes/apps/kopia-server/
     targetRevision: main

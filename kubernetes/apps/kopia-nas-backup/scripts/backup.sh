@@ -1,20 +1,16 @@
-#!/bin/sh
-set -e
-
-export KOPIA_PASSWORD="${KOPIA_REPOSITORY_PASSWORD}"
+#!/bin/bash
+set -eo pipefail
 
 S3_ARGS="--bucket=${KOPIA_S3_BUCKET} --endpoint=${KOPIA_S3_ENDPOINT} --access-key=${AWS_ACCESS_KEY_ID} --secret-access-key=${AWS_SECRET_ACCESS_KEY}"
 CONN_ARGS="--override-hostname=kopia-nas-backup --override-username=cronjob"
 
 connect_or_create() {
-  if kopia repository connect s3 ${S3_ARGS} \
-    --password="${KOPIA_REPOSITORY_PASSWORD}" ${CONN_ARGS} 2>/dev/null; then
+  if kopia repository connect s3 ${S3_ARGS} ${CONN_ARGS} 2>/dev/null; then
     return
   fi
 
   echo "Repository not found, initializing..."
-  kopia repository create s3 ${S3_ARGS} \
-    --password="${KOPIA_REPOSITORY_PASSWORD}" ${CONN_ARGS} \
+  kopia repository create s3 ${S3_ARGS} ${CONN_ARGS} \
     --retention-mode COMPLIANCE \
     --retention-period 30d
 
@@ -43,7 +39,7 @@ for dir in /data/*/; do
   name=$(basename "$dir")
   echo "==> Backing up ${name}..."
   kopia snapshot create "$dir" --tags="source:nas,dataset:${name}" \
-    --progress-update-interval 1m 2>&1 | stdbuf -oL -eL tr '\r' '\n'
+    --progress-update-interval 1m 2>&1 | tr '\r' '\n'
 done
 
 echo "==> Running maintenance..."

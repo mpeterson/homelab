@@ -21,8 +21,8 @@ pip install b2
 ### Create bucket and key
 
 ```bash
-# Create bucket with Object Lock (cannot be enabled after creation)
-b2 bucket create kopia-nas-offsite allPrivate --object-lock
+# Create bucket with File Lock (cannot be enabled after creation)
+b2 bucket create kopia-nas-offsite allPrivate --file-lock-enabled
 
 # Create scoped key with Object Lock permissions (no deleteFiles)
 b2 key create --bucket kopia-nas-offsite kopia-nas-backup \
@@ -68,10 +68,11 @@ snapshots each one — no script changes needed.
 From any machine with Kopia and the repository password:
 
 ```bash
-kopia repository connect b2 \
-  --bucket=<bucket-name> \
-  --key-id=<key-id> \
-  --key=<key>
+kopia repository connect s3 \
+  --bucket=kopia-nas-offsite \
+  --endpoint=<s3-endpoint> \
+  --access-key=<key-id> \
+  --secret-access-key=<key>
 
 # List snapshots
 kopia snapshot list
