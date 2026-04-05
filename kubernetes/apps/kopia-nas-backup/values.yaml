@@ -28,6 +28,12 @@ controllers:
         command:
           - /bin/bash
           - /scripts/backup.sh
+        env:
+          - name: KOPIA_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: kopia-nas-backup-secret
+                key: KOPIA_REPOSITORY_PASSWORD
         envFrom:
           - secretRef:
               name: kopia-nas-backup-secret

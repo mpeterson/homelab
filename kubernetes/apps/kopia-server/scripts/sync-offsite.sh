@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-export KOPIA_PASSWORD="${KOPIA_REPOSITORY_PASSWORD}"
-
 kopia repository connect filesystem --path /repo \
   --override-hostname=kopia-server --override-username=server
 

@@ -12,7 +12,6 @@ configMapGenerator:
   - name: kopia-server-scripts
     files:
       - init-repo.sh=./scripts/init-repo.sh
-      - start-server.sh=./scripts/start-server.sh
       - sync-offsite.sh=./scripts/sync-offsite.sh
 
 helmCharts:
