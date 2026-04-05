@@ -16,3 +16,12 @@ helmCharts:
     releaseName: ollama
     namespace: *ns
     valuesFile: values.yaml
+
+patches:
+  - target:
+      kind: PersistentVolumeClaim
+      name: ollama
+    patch: |
+      - op: add
+        path: /metadata/labels/velero.io~1exclude-from-backup
+        value: "true"

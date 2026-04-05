@@ -83,6 +83,8 @@ persistence:
     storageClass: zfs-generic-iscsi-csi-xfs
     accessMode: ReadWriteOnce
     size: 500Mi
+    labels:
+      velero.io/exclude-from-backup: "true"
     globalMounts:
       - path: /app/config/cache
   config-logs:
