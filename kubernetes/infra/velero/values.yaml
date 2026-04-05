@@ -7,8 +7,7 @@ initContainers:
       - mountPath: /target
         name: plugins
 
-nodeAgent:
-  enabled: true
+deployNodeAgent: true
 
 configuration:
   backupStorageLocation:
