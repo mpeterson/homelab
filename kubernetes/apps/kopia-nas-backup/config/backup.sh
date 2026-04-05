@@ -1,25 +1,18 @@
 #!/bin/sh
 set -e
 
+S3_ARGS="--bucket=${KOPIA_S3_BUCKET} --endpoint=${KOPIA_S3_ENDPOINT} --access-key=${AWS_ACCESS_KEY_ID} --secret-access-key=${AWS_SECRET_ACCESS_KEY}"
+CONN_ARGS="--override-hostname=kopia-nas-backup --override-username=cronjob"
+
 connect_or_create() {
-  if kopia repository connect b2 \
-    --bucket="${KOPIA_B2_BUCKET}" \
-    --key-id="${B2_KEY_ID}" \
-    --key="${B2_KEY}" \
-    --password="${KOPIA_REPOSITORY_PASSWORD}" \
-    --override-hostname=kopia-nas-backup \
-    --override-username=cronjob 2>/dev/null; then
+  if kopia repository connect s3 ${S3_ARGS} \
+    --password="${KOPIA_REPOSITORY_PASSWORD}" ${CONN_ARGS} 2>/dev/null; then
     return
   fi
 
   echo "Repository not found, initializing..."
-  kopia repository create b2 \
-    --bucket="${KOPIA_B2_BUCKET}" \
-    --key-id="${B2_KEY_ID}" \
-    --key="${B2_KEY}" \
-    --password="${KOPIA_REPOSITORY_PASSWORD}" \
-    --override-hostname=kopia-nas-backup \
-    --override-username=cronjob
+  kopia repository create s3 ${S3_ARGS} \
+    --password="${KOPIA_REPOSITORY_PASSWORD}" ${CONN_ARGS}
 
   kopia policy set --global \
     --keep-daily 7 \
