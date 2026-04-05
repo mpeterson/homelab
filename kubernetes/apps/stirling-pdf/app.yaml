@@ -20,7 +20,7 @@ spec:
       value: app-template@4.6.2
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/stirling-tools/s-pdf
-      value: ghcr.io/stirling-tools/s-pdf:2.9.1-fat@sha256:a568980579d6e9dc89d308e16e58c510298562d69e04eb562b291b0f99c5cc2b
+      value: ghcr.io/stirling-tools/s-pdf:2.9.2-fat@sha256:ebaa984c410681939837920c18d2cea8103b46d4961fe6ddc6b6498fa26590b2
 
   syncPolicy:
     syncOptions:
