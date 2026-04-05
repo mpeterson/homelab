@@ -30,7 +30,7 @@ ping_healthcheck() {
   fi
 }
 
-echo "==> Connecting to B2 repository..."
+echo "==> Connecting to S3 repository..."
 connect_or_create
 
 # Autodiscover: snapshot each mounted directory under /data

@@ -2,6 +2,7 @@
 set -eo pipefail
 
 if kopia repository connect filesystem --path /repo \
+  --password="${KOPIA_PASSWORD}" \
   --override-hostname=kopia-server --override-username=server 2>/dev/null; then
   echo "==> Repository already initialized"
   exit 0
@@ -9,6 +10,7 @@ fi
 
 echo "==> Initializing repository..."
 kopia repository create filesystem --path /repo \
+  --password="${KOPIA_PASSWORD}" \
   --override-hostname=kopia-server --override-username=server
 
 kopia policy set --global \
