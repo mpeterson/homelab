@@ -24,9 +24,9 @@ pip install b2
 # Create bucket with Object Lock (cannot be enabled after creation)
 b2 bucket create kopia-nas-offsite allPrivate --object-lock
 
-# Create scoped key (no deleteFiles capability)
+# Create scoped key with Object Lock permissions (no deleteFiles)
 b2 key create --bucket kopia-nas-offsite kopia-nas-backup \
-  listBuckets,listFiles,readFiles,writeFiles
+  listBuckets,readBuckets,listFiles,readFiles,writeFiles,readBucketEncryption,readBucketReplications,readBucketRetentions,readFileRetentions,writeFileRetentions,readFileLegalHolds
 ```
 
 ### Export NFS shares on NAS
