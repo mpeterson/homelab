@@ -26,8 +26,6 @@ controllers:
               secretKeyRef:
                 name: kopia-server-secret
                 key: KOPIA_REPOSITORY_PASSWORD
-          - name: KOPIA_PERSIST_CREDENTIALS_ON_CONNECT
-            value: "true"
         envFrom:
           - secretRef:
               name: kopia-server-secret
@@ -37,6 +35,12 @@ controllers:
         image:
           repository: ghcr.io/home-operations/kopia
           tag: 0.22.3@sha256:17ab64542280197a5368247deaefadc3e3bbe15714ab666c2455a06824e86efd
+        env:
+          - name: KOPIA_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: kopia-server-secret
+                key: KOPIA_REPOSITORY_PASSWORD
         args:
           - --server-control-username=$(KOPIA_SERVER_USERNAME)
           - --server-control-password=$(KOPIA_SERVER_PASSWORD)
