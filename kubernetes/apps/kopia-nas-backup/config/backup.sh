@@ -12,13 +12,17 @@ connect_or_create() {
 
   echo "Repository not found, initializing..."
   kopia repository create s3 ${S3_ARGS} \
-    --password="${KOPIA_REPOSITORY_PASSWORD}" ${CONN_ARGS}
+    --password="${KOPIA_REPOSITORY_PASSWORD}" ${CONN_ARGS} \
+    --retention-mode COMPLIANCE \
+    --retention-period 30d
 
   kopia policy set --global \
     --keep-daily 7 \
     --keep-weekly 4 \
     --keep-monthly 6 \
     --keep-annual 2
+
+  kopia maintenance set --extend-object-locks true
 }
 
 ping_healthcheck() {
