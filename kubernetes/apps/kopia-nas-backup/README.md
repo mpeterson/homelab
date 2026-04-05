@@ -70,7 +70,7 @@ From any machine with Kopia and the repository password:
 ```bash
 kopia repository connect s3 \
   --bucket=kopia-nas-offsite \
-  --endpoint=s3.us-west-004.backblazeb2.com \
+  --endpoint=<s3-endpoint> \
   --access-key=<key-id> \
   --secret-access-key=<key>
 
