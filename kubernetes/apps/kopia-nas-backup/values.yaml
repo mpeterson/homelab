@@ -14,9 +14,11 @@ controllers:
 
     pod:
       securityContext:
-        runAsUser: 0
-        runAsGroup: 0
-        fsGroup: 0
+        runAsUser: 65534
+        runAsGroup: 100
+        runAsNonRoot: true
+        fsGroup: 100
+        fsGroupChangePolicy: OnRootMismatch
 
     containers:
       app:
@@ -58,6 +60,8 @@ controllers:
             if [ -n "${HEALTHCHECK_URL}" ]; then
               curl -fsS -m 10 --retry 5 "${HEALTHCHECK_URL}" > /dev/null 2>&1 || true
             fi
+        env:
+          HOME: /home/kopia
         envFrom:
           - secretRef:
               name: kopia-nas-backup-secret
@@ -69,6 +73,7 @@ controllers:
             memory: 2Gi
         securityContext:
           allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
           capabilities: {drop: ["ALL"]}
 
 persistence:
@@ -90,12 +95,12 @@ persistence:
     type: emptyDir
     sizeLimit: 2Gi
     globalMounts:
-      - path: /root/.cache/kopia
+      - path: /home/kopia/.cache/kopia
   kopia-config:
     type: emptyDir
     globalMounts:
-      - path: /root/.config/kopia
+      - path: /home/kopia/.config/kopia
   kopia-logs:
     type: emptyDir
     globalMounts:
-      - path: /root/.local/share/kopia
+      - path: /home/kopia/.local/share/kopia
