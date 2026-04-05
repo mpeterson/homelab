@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+export KOPIA_PASSWORD="${KOPIA_REPOSITORY_PASSWORD}"
+
 S3_ARGS="--bucket=${KOPIA_S3_BUCKET} --endpoint=${KOPIA_S3_ENDPOINT} --access-key=${AWS_ACCESS_KEY_ID} --secret-access-key=${AWS_SECRET_ACCESS_KEY}"
 CONN_ARGS="--override-hostname=kopia-nas-backup --override-username=cronjob"
 
@@ -20,7 +22,8 @@ connect_or_create() {
     --keep-daily 7 \
     --keep-weekly 4 \
     --keep-monthly 6 \
-    --keep-annual 2
+    --keep-annual 2 \
+    --compression=zstd
 
   kopia maintenance set --extend-object-locks true
 }
