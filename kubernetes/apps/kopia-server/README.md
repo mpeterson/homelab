@@ -1,0 +1,87 @@
+# Kopia Repository Server
+
+Persistent [Kopia](https://kopia.io/) repository server for receiving
+backups from laptops and devices. Data is stored on the NAS via NFS
+(`nibbler/apps/kopia-backups`). A nightly CronJob mirrors the repository
+to Backblaze B2 (`kopia-server-offsite`) using `kopia repository sync-to`.
+
+## Access
+
+- **Web UI**: `https://kopia.lan.peterson.com.ar` (internal gateway, LAN + Tailscale)
+- **API**: same URL — Kopia clients connect here
+
+## Schedule
+
+- **Offsite sync**: daily at 01:00 UTC to `kopia-server-offsite` B2 bucket
+
+## Setup
+
+### Create NFS dataset on the NAS
+
+```bash
+sudo zfs create nibbler/apps/kopia-backups
+sudo zfs set sharenfs="rw=@10.3.0.34:@10.3.0.35:@10.3.0.36,no_root_squash,no_subtree_check" \
+  nibbler/apps/kopia-backups
+```
+
+### Create B2 bucket and key
+
+```bash
+# Create bucket with File Lock (cannot be enabled after creation)
+b2 bucket create kopia-server-offsite allPrivate --file-lock-enabled
+
+# Create scoped key (no deleteFiles)
+b2 key create --bucket kopia-server-offsite kopia-server-backup \
+  listBuckets,readBuckets,listFiles,readFiles,writeFiles,readBucketEncryption,readBucketReplications,readBucketRetentions,readFileRetentions,writeFileRetentions,readFileLegalHolds
+```
+
+### Encrypt the secret
+
+Fill in `secret.sops.yaml` with:
+
+- `KOPIA_REPOSITORY_PASSWORD` — password for the filesystem repository on NAS
+- `KOPIA_SERVER_USERNAME` — admin username for the web UI / server control
+- `KOPIA_SERVER_PASSWORD` — admin password for the web UI / server control
+- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` — B2 app key for offsite sync
+- `KOPIA_OFFSITE_PASSWORD` — password for the B2 offsite repository (can differ from local)
+- `HEALTHCHECK_URL` — optional healthcheck ping URL for the sync job
+
+```bash
+sops -e -i secret.sops.yaml
+```
+
+## Connecting a laptop
+
+```bash
+kopia repository connect server \
+  --url=https://kopia.lan.peterson.com.ar \
+  --server-cert-fingerprint=<fingerprint> \
+  --override-hostname=<laptop-name> \
+  --override-username=<user>
+```
+
+The server admin must first add the user via the web UI or CLI.
+
+## Architecture
+
+```text
+Laptop ──HTTPS──▶ Kopia Server ──NFS──▶ NAS (nibbler/apps/kopia-backups)
+                                              │
+                  offsite-sync CronJob ◀──────┘
+                        │
+                        ▼
+                   Backblaze B2 (kopia-server-offsite)
+```
+
+## Restoring from offsite
+
+```bash
+kopia repository connect s3 \
+  --bucket=kopia-server-offsite \
+  --endpoint=s3.us-west-004.backblazeb2.com \
+  --access-key=<key-id> \
+  --secret-access-key=<key>
+
+kopia snapshot list
+kopia restore <snapshot-id> /restore/target/
+```

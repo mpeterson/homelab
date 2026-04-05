@@ -1,0 +1,176 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+---
+controllers:
+  kopia-server:
+    replicas: 1
+
+    pod:
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 100
+        runAsNonRoot: true
+        fsGroup: 100
+        fsGroupChangePolicy: OnRootMismatch
+
+    initContainers:
+      init-repo:
+        image:
+          repository: kopia/kopia
+          tag: 0.22.3@sha256:4dcc208c1b191770bf4d0854f8deec06b4a16b35be4b63abdcfa9755cee7960e
+        command:
+          - /bin/sh
+          - /scripts/init-repo.sh
+        envFrom:
+          - secretRef:
+              name: kopia-server-secret
+
+    containers:
+      app:
+        image:
+          repository: kopia/kopia
+          tag: 0.22.3@sha256:4dcc208c1b191770bf4d0854f8deec06b4a16b35be4b63abdcfa9755cee7960e
+        command:
+          - /bin/sh
+          - /scripts/start-server.sh
+        envFrom:
+          - secretRef:
+              name: kopia-server-secret
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: &port 51515
+              initialDelaySeconds: 10
+              periodSeconds: 30
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: *port
+              initialDelaySeconds: 5
+              periodSeconds: 10
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            memory: 2Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: ["ALL"]}
+
+  offsite-sync:
+    type: cronjob
+
+    cronjob:
+      schedule: "0 1 * * *"
+      backoffLimit: 0
+      timeZone: UTC
+      concurrencyPolicy: Forbid
+      failedJobsHistory: 3
+      successfulJobsHistory: 3
+
+    pod:
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 100
+        runAsNonRoot: true
+        fsGroup: 100
+        fsGroupChangePolicy: OnRootMismatch
+
+    containers:
+      app:
+        image:
+          repository: kopia/kopia
+          tag: 0.22.3@sha256:4dcc208c1b191770bf4d0854f8deec06b4a16b35be4b63abdcfa9755cee7960e
+        command:
+          - /bin/sh
+          - /scripts/sync-offsite.sh
+        envFrom:
+          - secretRef:
+              name: kopia-server-secret
+        resources:
+          requests:
+            cpu: 1500m
+            memory: 2Gi
+          limits:
+            memory: 4Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: ["ALL"]}
+
+service:
+  app:
+    controller: kopia-server
+    ports:
+      http:
+        port: *port
+
+route:
+  app:
+    enabled: true
+    kind: HTTPRoute
+    hostnames:
+      - kopia.lan.peterson.com.ar
+    parentRefs:
+      - kind: Gateway
+        name: internal-gateway
+        namespace: network
+        sectionName: https
+    rules:
+      - backendRefs:
+          - name: kopia-server-app
+            port: *port
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+persistence:
+  nfs-repo:
+    type: nfs
+    server: nas.lan.peterson.com.ar
+    path: /nibbler/apps/kopia-backups
+    globalMounts:
+      - path: /repo
+  scripts:
+    type: configMap
+    name: kopia-server-scripts
+    defaultMode: 0775
+    globalMounts:
+      - path: /scripts
+        readOnly: true
+  kopia-cache:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    labels:
+      velero.io/exclude-from-backup: "true"
+    advancedMounts:
+      kopia-server:
+        app:
+          - path: /app/cache
+        init-repo:
+          - path: /app/cache
+      offsite-sync:
+        app:
+          - path: /app/cache
+  kopia-config:
+    type: emptyDir
+    globalMounts:
+      - path: /app/config
+  kopia-logs:
+    type: emptyDir
+    globalMounts:
+      - path: /app/logs
+  tmp:
+    type: emptyDir
+    globalMounts:
+      - path: /tmp
