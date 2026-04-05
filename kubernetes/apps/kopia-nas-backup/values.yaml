@@ -92,8 +92,9 @@ persistence:
       - path: /data/paperless
         readOnly: true
   kopia-cache:
-    type: emptyDir
-    sizeLimit: 2Gi
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 2Gi
     globalMounts:
       - path: /home/kopia/.cache/kopia
   kopia-config:
