@@ -33,10 +33,10 @@ controllers:
               name: kopia-nas-backup-secret
         resources:
           requests:
-            cpu: 50m
-            memory: 256Mi
-          limits:
+            cpu: 1500m
             memory: 2Gi
+          limits:
+            memory: 4Gi
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
