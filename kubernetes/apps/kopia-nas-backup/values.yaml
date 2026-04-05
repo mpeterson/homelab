@@ -1,0 +1,84 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+---
+controllers:
+  kopia-nas-backup:
+    type: cronjob
+
+    cronjob:
+      schedule: "0 23 * * *"
+      backoffLimit: 0
+      timeZone: UTC
+      concurrencyPolicy: Forbid
+      failedJobsHistory: 3
+      successfulJobsHistory: 3
+
+    pod:
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 100
+        runAsNonRoot: true
+        fsGroup: 100
+        fsGroupChangePolicy: OnRootMismatch
+
+    containers:
+      app:
+        image:
+          repository: kopia/kopia
+          tag: 0.22.3@sha256:4dcc208c1b191770bf4d0854f8deec06b4a16b35be4b63abdcfa9755cee7960e
+        command:
+          - /bin/sh
+          - /scripts/backup.sh
+        env:
+          HOME: /home/kopia
+        envFrom:
+          - secretRef:
+              name: kopia-nas-backup-secret
+        resources:
+          requests:
+            cpu: 50m
+            memory: 256Mi
+          limits:
+            memory: 2Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: ["ALL"]}
+
+persistence:
+  nfs-nas-memories:
+    type: nfs
+    server: nas.lan.peterson.com.ar
+    path: /nibbler/media/memories
+    globalMounts:
+      - path: /data/memories
+        readOnly: true
+  nfs-nas-paperless:
+    type: nfs
+    server: nas.lan.peterson.com.ar
+    path: /nibbler/apps/paperless
+    globalMounts:
+      - path: /data/paperless
+        readOnly: true
+  scripts:
+    type: configMap
+    name: kopia-nas-backup-scripts
+    defaultMode: 0775
+    globalMounts:
+      - path: /scripts
+        readOnly: true
+  kopia-cache:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 50Gi
+    labels:
+      velero.io/exclude-from-backup: "true"
+    globalMounts:
+      - path: /home/kopia/.cache/kopia
+  kopia-config:
+    type: emptyDir
+    globalMounts:
+      - path: /home/kopia/.config/kopia
+  kopia-logs:
+    type: emptyDir
+    globalMounts:
+      - path: /home/kopia/.local/share/kopia
