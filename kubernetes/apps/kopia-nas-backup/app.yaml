@@ -19,8 +19,8 @@ spec:
       # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
       value: app-template@4.6.2
     - name: Image
-      # renovate: datasource=docker depName=kopia/kopia
-      value: kopia/kopia:0.22.3@sha256:4dcc208c1b191770bf4d0854f8deec06b4a16b35be4b63abdcfa9755cee7960e
+      # renovate: datasource=docker depName=ghcr.io/home-operations/kopia
+      value: ghcr.io/home-operations/kopia:0.22.3@sha256:17ab64542280197a5368247deaefadc3e3bbe15714ab666c2455a06824e86efd
 
   syncPolicy:
     syncOptions:
