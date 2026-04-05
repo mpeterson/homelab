@@ -8,6 +8,11 @@ namespace: &ns backup
 generators:
   - secret-generator.yaml
 
+configMapGenerator:
+  - name: kopia-nas-backup-scripts
+    files:
+      - backup.sh=./config/backup.sh
+
 helmCharts:
   - name: app-template
     repo: https://bjw-s-labs.github.io/helm-charts

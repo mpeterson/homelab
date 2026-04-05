@@ -27,39 +27,7 @@ controllers:
           tag: 0.22.3@sha256:4dcc208c1b191770bf4d0854f8deec06b4a16b35be4b63abdcfa9755cee7960e
         command:
           - /bin/sh
-          - -c
-        args:
-          - |
-            set -e
-
-            B2_ARGS="--bucket=${KOPIA_B2_BUCKET} --key-id=${B2_KEY_ID} --key=${B2_KEY}"
-            CONN_ARGS="--override-hostname=kopia-nas-backup --override-username=cronjob"
-
-            echo "==> Connecting to B2 repository..."
-            if ! kopia repository connect b2 ${B2_ARGS} \
-              --password="${KOPIA_REPOSITORY_PASSWORD}" ${CONN_ARGS} 2>/dev/null; then
-              echo "==> Repository not found, initializing..."
-              kopia repository create b2 ${B2_ARGS} \
-                --password="${KOPIA_REPOSITORY_PASSWORD}" ${CONN_ARGS}
-              kopia policy set --global \
-                --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --keep-annual 2
-            fi
-
-            echo "==> Backing up memories..."
-            kopia snapshot create /data/memories \
-              --tags=source:nas,dataset:memories
-
-            echo "==> Backing up paperless..."
-            kopia snapshot create /data/paperless \
-              --tags=source:nas,dataset:paperless
-
-            echo "==> Running maintenance..."
-            kopia maintenance run --full
-
-            echo "==> Backup completed successfully"
-            if [ -n "${HEALTHCHECK_URL}" ]; then
-              curl -fsS -m 10 --retry 5 "${HEALTHCHECK_URL}" > /dev/null 2>&1 || true
-            fi
+          - /scripts/backup.sh
         env:
           HOME: /home/kopia
         envFrom:
@@ -90,6 +58,13 @@ persistence:
     path: /nibbler/apps/paperless
     globalMounts:
       - path: /data/paperless
+        readOnly: true
+  scripts:
+    type: configMap
+    name: kopia-nas-backup-scripts
+    defaultMode: 0775
+    globalMounts:
+      - path: /scripts
         readOnly: true
   kopia-cache:
     storageClass: zfs-generic-iscsi-csi-xfs
