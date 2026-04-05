@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 export KOPIA_PASSWORD="${KOPIA_REPOSITORY_PASSWORD}"
@@ -6,7 +6,7 @@ export KOPIA_PASSWORD="${KOPIA_REPOSITORY_PASSWORD}"
 kopia repository connect filesystem --path /repo \
   --override-hostname=kopia-server --override-username=server
 
-kopia server start \
+exec kopia server start \
   --address=0.0.0.0:51515 \
   --insecure \
   --without-password \

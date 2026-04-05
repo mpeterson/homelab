@@ -15,10 +15,10 @@ controllers:
     initContainers:
       init-repo:
         image:
-          repository: kopia/kopia
-          tag: 0.22.3@sha256:4dcc208c1b191770bf4d0854f8deec06b4a16b35be4b63abdcfa9755cee7960e
+          repository: ghcr.io/home-operations/kopia
+          tag: 0.22.3@sha256:17ab64542280197a5368247deaefadc3e3bbe15714ab666c2455a06824e86efd
         command:
-          - /bin/sh
+          - /bin/bash
           - /scripts/init-repo.sh
         envFrom:
           - secretRef:
@@ -27,10 +27,10 @@ controllers:
     containers:
       app:
         image:
-          repository: kopia/kopia
-          tag: 0.22.3@sha256:4dcc208c1b191770bf4d0854f8deec06b4a16b35be4b63abdcfa9755cee7960e
+          repository: ghcr.io/home-operations/kopia
+          tag: 0.22.3@sha256:17ab64542280197a5368247deaefadc3e3bbe15714ab666c2455a06824e86efd
         command:
-          - /bin/sh
+          - /bin/bash
           - /scripts/start-server.sh
         envFrom:
           - secretRef:
@@ -87,10 +87,10 @@ controllers:
     containers:
       app:
         image:
-          repository: kopia/kopia
-          tag: 0.22.3@sha256:4dcc208c1b191770bf4d0854f8deec06b4a16b35be4b63abdcfa9755cee7960e
+          repository: ghcr.io/home-operations/kopia
+          tag: 0.22.3@sha256:17ab64542280197a5368247deaefadc3e3bbe15714ab666c2455a06824e86efd
         command:
-          - /bin/sh
+          - /bin/bash
           - /scripts/sync-offsite.sh
         envFrom:
           - secretRef:
@@ -156,23 +156,24 @@ persistence:
     advancedMounts:
       kopia-server:
         app:
-          - path: /app/cache
+          - path: /config/cache
         init-repo:
-          - path: /app/cache
+          - path: /config/cache
   kopia-sync-cache:
     type: emptyDir
     advancedMounts:
       offsite-sync:
         app:
-          - path: /app/cache
+          - path: /config/cache
   kopia-config:
     type: emptyDir
     globalMounts:
-      - path: /app/config
+      - path: /config
+        subPath: config
   kopia-logs:
     type: emptyDir
     globalMounts:
-      - path: /app/logs
+      - path: /config/logs
   tmp:
     type: emptyDir
     globalMounts:

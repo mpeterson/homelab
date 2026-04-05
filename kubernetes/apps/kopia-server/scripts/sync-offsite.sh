@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 export KOPIA_PASSWORD="${KOPIA_REPOSITORY_PASSWORD}"
