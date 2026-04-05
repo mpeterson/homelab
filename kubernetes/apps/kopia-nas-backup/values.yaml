@@ -28,8 +28,6 @@ controllers:
         command:
           - /bin/sh
           - /scripts/backup.sh
-        env:
-          HOME: /home/kopia
         envFrom:
           - secretRef:
               name: kopia-nas-backup-secret
@@ -73,12 +71,12 @@ persistence:
     labels:
       velero.io/exclude-from-backup: "true"
     globalMounts:
-      - path: /home/kopia/.cache/kopia
+      - path: /app/cache
   kopia-config:
     type: emptyDir
     globalMounts:
-      - path: /home/kopia/.config/kopia
+      - path: /app/config
   kopia-logs:
     type: emptyDir
     globalMounts:
-      - path: /home/kopia/.local/share/kopia
+      - path: /app/logs
