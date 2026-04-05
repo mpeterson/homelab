@@ -1,30 +1,13 @@
 # Kopia NAS Backup
 
 Daily offsite backup of NAS ZFS datasets to Backblaze B2 using
-[Kopia](https://kopia.io/).
+[Kopia](https://kopia.io/). NFS shares are mounted **read-only**.
 
-## What gets backed up
-
-| Dataset   | Path                      | Content                  |
-|-----------|---------------------------|--------------------------|
-| memories  | `/nibbler/media/memories` | Photos and videos        |
-| paperless | `/nibbler/apps/paperless` | Document management data |
-
-NFS shares are mounted **read-only** — the backup job cannot modify source data.
-
-## Schedule
+## Schedule and retention
 
 - **Daily at 2:00 AM UTC**
 - Retention: 7 daily, 4 weekly, 6 monthly, 2 yearly snapshots
 - Auto-initializes the Kopia repository on first run
-
-## Backup target
-
-Backblaze B2 with:
-
-- **Client-side encryption** (AES-256-GCM, handled by Kopia)
-- **Object Lock** enabled on the bucket (storage-level immutability)
-- **Scoped application key** with no delete permissions
 
 ## Setup
 
@@ -39,10 +22,10 @@ pip install b2
 
 ```bash
 # Create bucket with Object Lock (cannot be enabled after creation)
-b2 bucket create kopia-nas-offsite allPrivate --object-lock
+b2 bucket create <bucket-name> allPrivate --object-lock
 
 # Create scoped key (no deleteFiles capability)
-b2 key create --bucket kopia-nas-offsite kopia-nas-backup \
+b2 key create --bucket <bucket-name> <key-name> \
   listBuckets,listFiles,readFiles,writeFiles
 ```
 
@@ -50,11 +33,8 @@ b2 key create --bucket kopia-nas-offsite kopia-nas-backup \
 
 ```bash
 # Read-only exports to worker node IPs
-sudo zfs set sharenfs="ro=@10.3.0.34:@10.3.0.35:@10.3.0.36,no_root_squash,no_subtree_check" \
-  nibbler/media/memories
-
-sudo zfs set sharenfs="ro=@10.3.0.34:@10.3.0.35:@10.3.0.36,no_root_squash,no_subtree_check" \
-  nibbler/apps/paperless
+sudo zfs set sharenfs="ro=@<worker1-ip>:@<worker2-ip>:@<worker3-ip>,no_root_squash,no_subtree_check" \
+  <pool>/<dataset>
 
 # Verify
 sudo exportfs -v
