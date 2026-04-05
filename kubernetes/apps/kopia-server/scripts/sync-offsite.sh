@@ -9,7 +9,6 @@ S3_ARGS="--bucket=${KOPIA_S3_BUCKET} --endpoint=${KOPIA_S3_ENDPOINT} --access-ke
 
 echo "==> Syncing repository to S3..."
 kopia repository sync-to s3 ${S3_ARGS} \
-  --password="${KOPIA_OFFSITE_PASSWORD}" \
   --no-must-exist \
   --parallel 4 \
   --progress-update-interval 1m 2>&1 | tr '\r' '\n'
