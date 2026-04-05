@@ -11,7 +11,7 @@ kopia repository sync-to s3 ${S3_ARGS} \
   --password="${KOPIA_OFFSITE_PASSWORD}" \
   --must-exist=false \
   --parallel 4 \
-  --progress-update-interval 1m 2>&1 | stdbuf -oL -eL tr '\r' '\n'
+  --progress-update-interval 1m 2>&1 | tr '\r' '\n'
 
 echo "==> Sync completed successfully"
 

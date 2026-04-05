@@ -39,7 +39,7 @@ for dir in /data/*/; do
   name=$(basename "$dir")
   echo "==> Backing up ${name}..."
   kopia snapshot create "$dir" --tags="source:nas,dataset:${name}" \
-    --progress-update-interval 1m 2>&1 | stdbuf -oL -eL tr '\r' '\n'
+    --progress-update-interval 1m 2>&1 | tr '\r' '\n'
 done
 
 echo "==> Running maintenance..."
