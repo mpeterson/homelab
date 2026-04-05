@@ -2,4 +2,4 @@ inventories
 hack
 .local
 talos/clusterconfig
-.decrypted~*.sops.yaml
+.decrypted~*

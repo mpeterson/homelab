@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 kopia repository connect filesystem --path /repo \
   --override-hostname=kopia-server --override-username=server
