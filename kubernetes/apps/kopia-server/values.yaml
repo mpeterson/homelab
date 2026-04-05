@@ -42,6 +42,8 @@ controllers:
                 name: kopia-server-secret
                 key: KOPIA_REPOSITORY_PASSWORD
         args:
+          - --server-username=$(KOPIA_SERVER_USERNAME)
+          - --server-password=$(KOPIA_SERVER_PASSWORD)
           - --server-control-username=$(KOPIA_SERVER_USERNAME)
           - --server-control-password=$(KOPIA_SERVER_PASSWORD)
         envFrom:
