@@ -69,7 +69,9 @@ persistence:
   kopia-cache:
     storageClass: zfs-generic-iscsi-csi-xfs
     accessMode: ReadWriteOnce
-    size: 2Gi
+    size: 5Gi
+    labels:
+      velero.io/exclude-from-backup: "true"
     globalMounts:
       - path: /home/kopia/.cache/kopia
   kopia-config:
