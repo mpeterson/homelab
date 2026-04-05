@@ -52,18 +52,22 @@ controllers:
             enabled: true
             custom: true
             spec:
-              httpGet:
-                path: /
-                port: &port 51515
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - curl -fsS -u "${KOPIA_SERVER_USERNAME}:${KOPIA_SERVER_PASSWORD}" http://localhost:51515/ > /dev/null
               initialDelaySeconds: 10
               periodSeconds: 30
           readiness:
             enabled: true
             custom: true
             spec:
-              httpGet:
-                path: /
-                port: *port
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - curl -fsS -u "${KOPIA_SERVER_USERNAME}:${KOPIA_SERVER_PASSWORD}" http://localhost:51515/ > /dev/null
               initialDelaySeconds: 5
               periodSeconds: 10
         resources:
@@ -129,7 +133,7 @@ service:
     controller: kopia-server
     ports:
       http:
-        port: *port
+        port: &port 51515
 
 route:
   app:
