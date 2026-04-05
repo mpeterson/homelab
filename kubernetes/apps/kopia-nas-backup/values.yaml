@@ -55,7 +55,7 @@ persistence:
     server: nas.lan.peterson.com.ar
     path: /nibbler/apps/paperless
     globalMounts:
-      - path: /data/paperless
+      - path: /data/apps-paperless
         readOnly: true
   scripts:
     type: configMap
