@@ -28,11 +28,6 @@ connect_or_create() {
     --keep-annual 2
 }
 
-snapshot() {
-  echo "==> Backing up $1..."
-  kopia snapshot create "/data/$1" --tags="source:nas,dataset:$1"
-}
-
 ping_healthcheck() {
   if [ -n "${HEALTHCHECK_URL}" ]; then
     curl -fsS -m 10 --retry 5 "${HEALTHCHECK_URL}" > /dev/null 2>&1 || true
@@ -42,8 +37,13 @@ ping_healthcheck() {
 echo "==> Connecting to B2 repository..."
 connect_or_create
 
-snapshot memories
-snapshot paperless
+# Autodiscover: snapshot each mounted directory under /data
+for dir in /data/*/; do
+  [ -d "$dir" ] || continue
+  name=$(basename "$dir")
+  echo "==> Backing up ${name}..."
+  kopia snapshot create "$dir" --tags="source:nas,dataset:${name}"
+done
 
 echo "==> Running maintenance..."
 kopia maintenance run --full

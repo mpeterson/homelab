@@ -52,8 +52,10 @@ sops -e -i secret.sops.yaml
 ## Adding more datasets
 
 1. Export the new dataset as a read-only NFS share on the NAS
-2. Add an NFS volume and mount to `values.yaml`
-3. Add a `kopia snapshot create` line to the CronJob script in `values.yaml`
+2. Add an NFS volume in `values.yaml` mounted under `/data/<name>`
+
+The backup script autodiscovers all directories under `/data/` and
+snapshots each one — no script changes needed.
 
 ## Monitoring
 
