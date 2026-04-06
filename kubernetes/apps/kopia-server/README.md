@@ -7,8 +7,8 @@ to Backblaze B2 (`kopia-server-offsite`) using `kopia repository sync-to`.
 
 ## Access
 
-- **Web UI**: `https://kopia.lan.peterson.com.ar` (internal gateway, LAN + Tailscale)
-- **API**: same URL — Kopia clients connect here
+- **Web UI + CLI**: `https://kopia.lan.peterson.com.ar` (LoadBalancer with cert-manager TLS)
+- Kopia clients connect with GRPC over the same HTTPS endpoint
 
 ## Schedule
 
@@ -58,12 +58,16 @@ sops -e -i secret.sops.yaml
 ```bash
 kopia repository connect server \
   --url=https://kopia.lan.peterson.com.ar \
-  --server-cert-fingerprint=<fingerprint> \
   --override-hostname=<laptop-name> \
   --override-username=<user>
 ```
 
-The server admin must first add the user via the web UI or CLI.
+The server admin must first add the user via the web UI or CLI:
+
+```bash
+kubectl exec -n backup deploy/kopia-server -- \
+  kopia server user add <user>@<hostname> --user-password=<password>
+```
 
 ## Architecture
 

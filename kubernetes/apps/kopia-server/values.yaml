@@ -42,6 +42,8 @@ controllers:
                 name: kopia-server-secret
                 key: KOPIA_REPOSITORY_PASSWORD
         args:
+          - --tls-cert-file=/tls/tls.crt
+          - --tls-key-file=/tls/tls.key
           - --server-username=$(KOPIA_SERVER_USERNAME)
           - --server-password=$(KOPIA_SERVER_PASSWORD)
           - --server-control-username=$(KOPIA_SERVER_USERNAME)
@@ -58,7 +60,7 @@ controllers:
                 command:
                   - /bin/bash
                   - -c
-                  - curl -fsS -u "${KOPIA_SERVER_USERNAME}:${KOPIA_SERVER_PASSWORD}" http://localhost:51515/ > /dev/null
+                  - curl -fsSk -u "${KOPIA_SERVER_USERNAME}:${KOPIA_SERVER_PASSWORD}" https://localhost:51515/ > /dev/null
               initialDelaySeconds: 10
               periodSeconds: 30
           readiness:
@@ -69,7 +71,7 @@ controllers:
                 command:
                   - /bin/bash
                   - -c
-                  - curl -fsS -u "${KOPIA_SERVER_USERNAME}:${KOPIA_SERVER_PASSWORD}" http://localhost:51515/ > /dev/null
+                  - curl -fsSk -u "${KOPIA_SERVER_USERNAME}:${KOPIA_SERVER_PASSWORD}" https://localhost:51515/ > /dev/null
               initialDelaySeconds: 5
               periodSeconds: 10
         resources:
@@ -133,31 +135,24 @@ controllers:
 service:
   app:
     controller: kopia-server
+    type: LoadBalancer
+    loadBalancerIP: 10.3.1.8
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: kopia.lan.peterson.com.ar
     ports:
-      http:
-        port: &port 51515
-
-route:
-  app:
-    enabled: true
-    kind: HTTPRoute
-    hostnames:
-      - kopia.lan.peterson.com.ar
-    parentRefs:
-      - kind: Gateway
-        name: internal-gateway
-        namespace: network
-        sectionName: https
-    rules:
-      - backendRefs:
-          - name: kopia-server
-            port: *port
-        matches:
-          - path:
-              type: PathPrefix
-              value: /
+      https:
+        port: 443
+        targetPort: 51515
 
 persistence:
+  tls-cert:
+    type: secret
+    name: kopia-server-tls
+    advancedMounts:
+      kopia-server:
+        app:
+          - path: /tls
+            readOnly: true
   nfs-repo:
     type: nfs
     server: nas.lan.peterson.com.ar
