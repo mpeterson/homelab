@@ -12,7 +12,7 @@ spec:
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: cert-manager
+    namespace: infra
 
   info:
     - name: Chart
