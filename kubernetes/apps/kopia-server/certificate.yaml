@@ -1,0 +1,12 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kopia-server-tls
+spec:
+  secretName: kopia-server-tls
+  issuerRef:
+    name: letsencrypt-prod-cloudflare
+    kind: ClusterIssuer
+  dnsNames:
+    - kopia.lan.peterson.com.ar

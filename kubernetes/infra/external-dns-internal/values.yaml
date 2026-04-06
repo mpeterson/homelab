@@ -10,6 +10,7 @@ provider:
 
 sources:
   - gateway-httproute
+  - service
 
 domainFilters:
   - lan.peterson.com.ar
