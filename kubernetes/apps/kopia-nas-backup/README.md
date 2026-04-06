@@ -21,8 +21,11 @@ pip install b2
 ### Create bucket and key
 
 ```bash
-# Create bucket with File Lock (cannot be enabled after creation)
-b2 bucket create kopia-nas-offsite allPrivate --file-lock-enabled
+# Create bucket with File Lock and lifecycle rule (cannot be enabled after creation)
+# Lifecycle: auto-delete hidden file versions after 30 days
+# See https://kopia.io/docs/advanced/ransomware-protection/
+b2 bucket create kopia-nas-offsite allPrivate --file-lock-enabled \
+  --lifecycle-rules '[{"daysFromHidingToDeleting":30,"fileNamePrefix":""}]'
 
 # Create scoped key with Object Lock permissions (no deleteFiles)
 b2 key create --bucket kopia-nas-offsite kopia-nas-backup \
