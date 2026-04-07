@@ -16,6 +16,7 @@
 | Sonny | Infra Engineer | `.squad/agents/sonny/charter.md` | ⚙️ Active |
 | Clay | Apps Engineer | `.squad/agents/clay/charter.md` | 🔧 Active |
 | Ray | Ops Engineer | `.squad/agents/ray/charter.md` | 🔄 Active |
+| Blackburn | Security Reviewer | `.squad/agents/blackburn/charter.md` | 🔒 Active |
 | Scribe | Scribe | `.squad/agents/scribe/charter.md` | 📋 Active |
 | Ralph | Work Monitor | `.squad/agents/ralph/charter.md` | 🔄 Monitor |
 

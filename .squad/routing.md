@@ -15,6 +15,9 @@ How to decide who handles what.
 | Ansible/Proxmox | Ray | Playbooks, VM provisioning, DNS (bind9) |
 | Toolchain | Ray | mise, just, editorconfig, yamllint, yamlfmt |
 | ArgoCD bootstrap | Ray | Bootstrap applications, ArgoCD self-management |
+| Secret safety | Blackburn | SOPS integrity, secret leakage review, `.decrypted~*` checks |
+| Destructive actions | Blackburn | Review any `kubectl delete`, `talos reset`, `helm uninstall`, force-push |
+| Security review | Blackburn | RBAC, network policies, operational safety gates |
 | Architecture | Hayes | Cross-cutting decisions, system design, upgrade coordination |
 | Code review | Hayes | Review PRs, check quality, enforce patterns |
 | Scope & priorities | Hayes | What to build next, trade-offs, triage |
