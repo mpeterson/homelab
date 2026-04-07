@@ -8,3 +8,5 @@
 ## Learnings
 
 <!-- Append new learnings below. Each entry is something lasting about the project. -->
+
+- **2026-04-07 — CI lint fix (PR #651):** Squad framework files (`.squad/templates/`, `.copilot/skills/`, `.github/agents/`) are upstream-maintained and excluded from yamllint and markdownlint via `.yamllint.yaml` ignore and `.markdownlint-cli2.yaml` ignores. Active workflows in `.github/workflows/` are always linted — always add `---` doc start and quote shell variables. MD060 (table column style) disabled repo-wide since compact pipe tables are the norm here.
