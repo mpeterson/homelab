@@ -3,3 +3,8 @@
 *.just linguist-detectable linguist-language=Just
 *.json5 linguist-detectable linguist-language=JSON5
 *.sops.yaml linguist-generated
+# Squad: union merge for append-only team state files
+.squad/decisions.md merge=union
+.squad/agents/*/history.md merge=union
+.squad/log/** merge=union
+.squad/orchestration-log/** merge=union

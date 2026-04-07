@@ -1,3 +1,5 @@
 ---
 # Disable line length - badge URLs and tech descriptions are naturally long
 MD013: false
+# Compact pipe tables are standard in this repo
+MD060: false

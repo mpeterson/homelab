@@ -22,6 +22,7 @@ auto_install = true
 "npm:markdownlint-cli2" = "0.22.0"
 "npm:json5" = "2.2.3"
 "npm:renovate" = "43.104.2"
+"npm:@bradygaster/squad-cli" = "0.9.1"
 
 [env]
 # Ensure just uses unstable features (needed for mod support)
