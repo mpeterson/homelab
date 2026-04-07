@@ -17,3 +17,5 @@ ignore:
   - "**/*.sops.yml"
   # Git submodule — not maintained in this repo
   - "ansible/roles/bind9/**"
+  # Squad upstream templates — not maintained in this repo
+  - ".squad/templates/**"

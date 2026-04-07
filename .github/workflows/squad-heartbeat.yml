@@ -1,3 +1,4 @@
+---
 name: Squad Heartbeat (Ralph)
 # ⚠️ SYNC: This workflow is maintained in 4 locations. Changes must be applied to all:
 #   - templates/workflows/squad-heartbeat.yml (source template)
@@ -35,9 +36,9 @@ jobs:
         id: check-script
         run: |
           if [ -f ".squad/templates/ralph-triage.js" ]; then
-            echo "has_script=true" >> $GITHUB_OUTPUT
+            echo "has_script=true" >> "$GITHUB_OUTPUT"
           else
-            echo "has_script=false" >> $GITHUB_OUTPUT
+            echo "has_script=false" >> "$GITHUB_OUTPUT"
             echo "⚠️ ralph-triage.js not found — run 'squad upgrade' to install"
           fi
 
@@ -61,13 +62,13 @@ jobs:
               core.info('No triage results — board is clear');
               return;
             }
-            
+
             const results = JSON.parse(fs.readFileSync(path, 'utf8'));
             if (results.length === 0) {
               core.info('📋 Board is clear — Ralph found no untriaged issues');
               return;
             }
-            
+
             for (const decision of results) {
               try {
                 await github.rest.issues.addLabels({
@@ -76,7 +77,7 @@ jobs:
                   issue_number: decision.issueNumber,
                   labels: [decision.label]
                 });
-                
+
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -92,13 +93,13 @@ jobs:
                     '> To reassign, swap the `squad:*` label.'
                   ].join('\n')
                 });
-                
+
                 core.info(`Triaged #${decision.issueNumber} → ${decision.assignTo} (${decision.source})`);
               } catch (e) {
                 core.warning(`Failed to triage #${decision.issueNumber}: ${e.message}`);
               }
             }
-            
+
             core.info(`🔄 Ralph triaged ${results.length} issue(s)`);
 
       # Copilot auto-assign step (uses PAT if available)
