@@ -20,7 +20,7 @@ spec:
       value: external-dns@1.20.0
     - name: Image
       # renovate: datasource=docker depName=registry.k8s.io/external-dns/external-dns
-      value: registry.k8s.io/external-dns/external-dns:v0.20.0@sha256:ddc7f4212ed09a21024deb1f470a05240837712e74e4b9f6d1f2632ff10672e7
+      value: registry.k8s.io/external-dns/external-dns:v0.21.0@sha256:f53faaf71cb270d1ca9dce6ea0c94bfebf1a18696263487f0fbc74b9bf2bd7ff
 
   syncPolicy:
     syncOptions:
