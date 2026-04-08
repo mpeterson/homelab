@@ -1,0 +1,34 @@
+---
+# Samba configuration for NAS cluster
+nas_samba_workgroup: "HOMELAB"
+
+# ZFS dataset shares for video/photo editing
+nas_samba_shares:
+  - name: media
+    path: /tank/media
+    comment: "Media library"
+    valid_users: "@editors"
+    writable: true
+    browseable: true
+  - name: projects
+    path: /tank/projects
+    comment: "Video editing projects"
+    valid_users: "@editors"
+    writable: true
+    browseable: true
+  - name: photos
+    path: /tank/photos
+    comment: "Photo library"
+    valid_users: "@editors"
+    writable: true
+    browseable: true
+
+# Samba users (passwords from vault)
+nas_samba_users:
+  - name: editor
+    password: "{{ vault_samba_editor_password }}"
+
+# PCS integration
+nas_samba_pcs_enabled: true
+nas_samba_pcs_colocation_with: "nas-vip"
+nas_samba_pcs_order_after: "nas-vip"

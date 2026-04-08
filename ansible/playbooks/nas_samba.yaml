@@ -1,0 +1,6 @@
+---
+- name: Configure Samba on NAS nodes
+  hosts: nas_nodes
+  become: true
+  roles:
+    - nas_samba
