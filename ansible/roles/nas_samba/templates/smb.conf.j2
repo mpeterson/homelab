@@ -1,0 +1,43 @@
+# {{ ansible_managed }}
+# Samba configuration — managed by Ansible (nas_samba role)
+# Do not edit manually; changes will be overwritten.
+
+[global]
+    workgroup = {{ nas_samba_workgroup }}
+    security = user
+
+    # Protocol versions
+    server min protocol = {{ nas_samba_min_protocol }}
+    server max protocol = {{ nas_samba_max_protocol }}
+
+    # Encryption and signing
+    smb encrypt = {{ nas_samba_encrypt }}
+    server signing = {{ nas_samba_server_signing }}
+    client signing = {{ nas_samba_client_signing }}
+
+{% if nas_samba_disable_netbios %}
+    # Disable legacy NetBIOS
+    disable netbios = yes
+    smb ports = 445
+{% endif %}
+
+    # ZFS-optimized settings (HA safety)
+    strict locking = auto
+    kernel oplocks = no
+
+    # Logging
+    log file = /var/log/samba/log.%m
+    max log size = 1000
+
+{% for share in nas_samba_shares %}
+[{{ share.name }}]
+    path = {{ share.path }}
+{% if share.valid_users is defined %}
+    valid users = {{ share.valid_users }}
+{% endif %}
+    writable = {{ 'yes' if share.writable | default(false) else 'no' }}
+    browseable = {{ 'yes' if share.browseable | default(true) else 'no' }}
+    create mask = {{ share.create_mask | default('0664') }}
+    directory mask = {{ share.directory_mask | default('0775') }}
+
+{% endfor %}

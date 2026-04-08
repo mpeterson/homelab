@@ -1,0 +1,12 @@
+---
+- name: Open SMB port (445/tcp) in firewalld
+  ansible.posix.firewalld:
+    port: 445/tcp
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: Reload firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    state: reloaded

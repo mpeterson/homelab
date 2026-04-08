@@ -1,0 +1,13 @@
+---
+- name: Restart Samba via PCS
+  ansible.builtin.command: >
+    pcs resource restart {{ nas_samba_pcs_resource_name }}
+  when: nas_samba_pcs_enabled
+  listen: Restart Samba
+
+- name: Restart Samba via systemd
+  ansible.builtin.systemd:
+    name: smb
+    state: restarted
+  when: not nas_samba_pcs_enabled
+  listen: Restart Samba
