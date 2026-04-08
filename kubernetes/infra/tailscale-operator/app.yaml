@@ -17,7 +17,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://pkgs.tailscale.com/helmcharts depName=tailscale-operator
-      value: tailscale-operator@1.94.2
+      value: tailscale-operator@1.96.5
 
   syncPolicy:
     syncOptions:
