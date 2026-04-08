@@ -1,5 +1,7 @@
 # NAS Samba Failover Test Plan
 
+<!-- markdownlint-disable MD024 -->
+
 This document provides procedures to validate Samba failover behavior on the HA NAS cluster managed by Pacemaker. The NAS uses active/passive HA with PCS constraints (no CTDB clustering). SMB sessions do **not** survive failover.
 
 ## System Overview
@@ -49,27 +51,34 @@ zpool status
 ### Procedure
 
 1. **Identify active node**:
+
    ```bash
    pcs status
    ```
+
    Note which node is running `smb-service`.
 
 2. **Trigger failover**:
+
    ```bash
    pcs resource move smb-service
    ```
+
    This moves Samba to the standby node. ZFS, NFS, iSCSI, and VIP will migrate together due to colocation constraints.
 
 3. **Monitor failover progress** (on either node):
+
    ```bash
    watch -n 2 'pcs status | grep -A 20 "Resources:"'
    ```
+
    Watch until:
    - Samba stops on node A
    - Samba starts on node B
    - All other resources complete migration
 
 4. **Verify Samba stopped on original active node**:
+
    ```bash
    # SSH to node A
    ssh node-a
@@ -78,6 +87,7 @@ zpool status
    ```
 
 5. **Verify Samba started on new active node**:
+
    ```bash
    # SSH to node B
    ssh node-b
@@ -86,12 +96,14 @@ zpool status
    ```
 
 6. **Verify VIP is still present** (now on node B):
+
    ```bash
    ip addr show | grep "<VIP_ADDRESS>"
    # Expected: inet <VIP_ADDRESS>/32 dev <interface>
    ```
 
 7. **Verify ZFS datasets remain**:
+
    ```bash
    zpool status
    zfs list
@@ -104,9 +116,11 @@ zpool status
    - Verify file integrity (checksum or size comparison)
 
 9. **Clear resource move constraint**:
+
    ```bash
    pcs resource clear smb-service
    ```
+
    This allows normal cluster failover rules to apply again.
 
 ### Pass Criteria
@@ -127,11 +141,13 @@ zpool status
 ### Procedure
 
 1. **Identify the active node**:
+
    ```bash
    pcs status
    ```
 
 2. **Stop corosync on the active node** to simulate a complete node failure:
+
    ```bash
    # SSH to active node
    ssh node-a
@@ -139,6 +155,7 @@ zpool status
    ```
 
 3. **Monitor failover from the standby node**:
+
    ```bash
    # SSH to node B
    ssh node-b
@@ -149,23 +166,28 @@ zpool status
    - Pacemaker will detect node A is offline
    - Watchdog or power device will be triggered to fence node A
    - Verify STONITH event in logs:
+
      ```bash
      tail -50 /var/log/pacemaker/pacemaker.log
      grep -i "stonith\|fence" /var/log/pacemaker/pacemaker.log
+
      ```
 
 5. **Verify full resource migration**:
+
    ```bash
    pcs status
    # Expected: All resources (ZFS, VIP, NFS, iSCSI, Samba) now running on node B
    ```
 
 6. **Verify VIP is on node B**:
+
    ```bash
    ip addr show | grep "<VIP_ADDRESS>"
    ```
 
 7. **Verify Samba is running on node B**:
+
    ```bash
    systemctl is-active smb
    systemctl status smb
@@ -178,6 +200,7 @@ zpool status
    - Re-open any files or projects
 
 9. **Recover failed node**:
+
    ```bash
    # Power on or restart node A
    # Verify it rejoins the cluster
@@ -205,6 +228,7 @@ zpool status
 ### Procedure
 
 1. **Identify active node and Samba PID**:
+
    ```bash
    pcs status
    ssh node-a
@@ -212,11 +236,13 @@ zpool status
    ```
 
 2. **Kill the smbd process**:
+
    ```bash
    killall smbd
    ```
 
 3. **Monitor cluster response** (watch from node B or via pcs):
+
    ```bash
    watch -n 1 'pcs status'
    ```
@@ -224,18 +250,21 @@ zpool status
 4. **Observe one of two outcomes**:
 
    **Scenario A** — Samba restarts on the same node (if within failure threshold):
+
    ```bash
    systemctl is-active smb
    # Should transition to active again within 30 seconds
    ```
 
    **Scenario B** — Cluster fails over to node B:
+
    ```bash
    pcs status
    # Samba now running on node B
    ```
 
 5. **Check Pacemaker monitor logs**:
+
    ```bash
    tail -50 /var/log/pacemaker/pacemaker.log
    grep -i "smb\|restart\|migrate" /var/log/pacemaker/pacemaker.log
@@ -268,12 +297,15 @@ zpool status
 ### Procedure
 
 1. **Map SMB share** (Windows example):
-   ```
+
+   ```text
    \\<VIP_ADDRESS>\<share_name>
    ```
+
    Verify encryption and signing are enforced (check share properties).
 
 2. **Copy large file during idle**:
+
    ```bash
    # Client-side: copy 5GB test file from share to local drive
    # Compare checksum before and after

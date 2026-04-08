@@ -1,5 +1,7 @@
 # NAS Samba Performance Test Plan
 
+<!-- markdownlint-disable MD024 -->
+
 This document provides procedures to benchmark Samba (SMB3) performance on the HA NAS cluster over a 10GbE network. These tests establish baseline performance for 4K/8K video editing workloads and compare SMB against NFS.
 
 ## System Overview
@@ -25,6 +27,7 @@ zpool status
 systemctl status smb nfs-server
 
 # Expected: All resources online, no degraded pools
+
 ```
 
 ### Network Baseline
@@ -41,11 +44,13 @@ iperf3 -s -D
 
 # On client, test connection to VIP
 iperf3 -c <VIP_ADDRESS> -P 1 -t 30
+
 ```
 
 **Expected Result**: ~9.3 Gbps (90% of 10 Gbps wire speed is normal; overhead accounts for ~10%)
 
 If below 8.5 Gbps, investigate:
+
 - Network interface negotiation: `ethtool <interface>`
 - Switch settings: verify 10GbE full duplex
 - Jumbo frames: `ip link show <interface>` (MTU should be ≥ 9000)
@@ -57,12 +62,15 @@ If below 8.5 Gbps, investigate:
 ### Procedure
 
 1. **Start iperf3 server on NAS**:
+
    ```bash
    # On NAS (node with active resources)
    iperf3 -s -D --logfile /tmp/iperf3_server.log
+
    ```
 
 2. **Run 3 iterations from client**:
+
    ```bash
    # On client
    # Iteration 1: Bidirectional
@@ -73,6 +81,7 @@ If below 8.5 Gbps, investigate:
    
    # Iteration 3: Parallel streams (simulates concurrent clients)
    iperf3 -c <VIP_ADDRESS> -P 4 -t 30
+
    ```
 
 3. **Record results**:
@@ -102,15 +111,18 @@ If below 8.5 Gbps, investigate:
 ### Procedure
 
 1. **Create large test file on share** (use existing or create 10GB):
+
    ```bash
    # On NAS, create test file
    dd if=/dev/zero of=/mnt/zfs/smb_share/testfile-10gb.bin bs=1M count=10240
    
    # Verify file exists
    ls -lh /mnt/zfs/smb_share/testfile-10gb.bin
+
    ```
 
 2. **Mount share on client**:
+
    ```bash
    # macOS (SMB3)
    mount_smb smb://<username>@<VIP_ADDRESS>/share /Volumes/nas_share
@@ -120,9 +132,11 @@ If below 8.5 Gbps, investigate:
    
    # Linux (cifsx with SMB3)
    mount -t cifs //<VIP_ADDRESS>/share /mnt/nas -o username=<user>,vers=3.1.1
+
    ```
 
 3. **Read test with dd**:
+
    ```bash
    # Read from share to /dev/null, measure speed
    dd if=/Volumes/nas_share/testfile-10gb.bin of=/dev/null bs=1M
@@ -130,12 +144,15 @@ If below 8.5 Gbps, investigate:
    # Example output:
    # 10737418240 bytes transferred in 13.500 secs (796069 bytes/sec)
    # ≈ 758 MB/s
+
    ```
 
 4. **Read test with smbclient** (Linux/Unix alternative):
+
    ```bash
    # Use smbclient to read file
    smbclient //<VIP_ADDRESS>/share -U <user> -c "get testfile-10gb.bin /dev/null"
+
    ```
 
 5. **Repeat 3 times** and average results.
@@ -161,6 +178,7 @@ If below 8.5 Gbps, investigate:
 ### Procedure
 
 1. **Write test with dd**:
+
    ```bash
    # Write from /dev/zero to share, measure speed
    dd if=/dev/zero of=/Volumes/nas_share/testfile-write-10gb.bin bs=1M count=10240
@@ -168,17 +186,22 @@ If below 8.5 Gbps, investigate:
    # Example output:
    # 10737418240 bytes transferred in 17.850 secs (601701 bytes/sec)
    # ≈ 573 MB/s
+
    ```
 
 2. **Verify file was written**:
+
    ```bash
    ls -lh /Volumes/nas_share/testfile-write-10gb.bin
+
    ```
 
 3. **Read back and checksum**:
+
    ```bash
    md5 testfile-write-10gb.bin
    # Note the hash for comparison
+
    ```
 
 4. **Repeat 3 times** and average results.
@@ -204,12 +227,15 @@ If below 8.5 Gbps, investigate:
 ### Procedure
 
 1. **Install fio** (benchmark tool):
+
    ```bash
    # macOS: brew install fio
    # Linux: apt install fio / yum install fio
+
    ```
 
 2. **Create fio job file** for video timeline scrubbing pattern:
+
    ```ini
    # Save as /tmp/video-timeline.fio
    [global]
@@ -228,9 +254,11 @@ If below 8.5 Gbps, investigate:
    filename=/Volumes/nas_share/fio-test-random.bin
    name=video-scrub-read
    description=Random 4K reads (simulating video codec seeks)
+
    ```
 
 3. **Run random read benchmark**:
+
    ```bash
    fio /tmp/video-timeline.fio
    
@@ -238,6 +266,7 @@ If below 8.5 Gbps, investigate:
    # - IOPS (I/O operations per second)
    # - Bandwidth (MB/s)
    # - Latency (mean, p99, p99.9)
+
    ```
 
 4. **Capture output metrics**:
@@ -246,6 +275,7 @@ If below 8.5 Gbps, investigate:
    - Read latency (average and 99th percentile)
 
 5. **Create mixed read/write job** for editing operations:
+
    ```ini
    [global]
    ioengine=libaio
@@ -264,11 +294,14 @@ If below 8.5 Gbps, investigate:
    filename=/Volumes/nas_share/fio-test-mixed.bin
    name=video-edit-mixed
    description=70% read / 30% write (simulating editing operations)
+
    ```
 
 6. **Run mixed I/O benchmark**:
+
    ```bash
    fio /tmp/video-timeline.fio
+
    ```
 
 7. **Record latency percentiles** (especially p99 for NLE responsiveness).
@@ -276,11 +309,13 @@ If below 8.5 Gbps, investigate:
 ### Expected Results
 
 **Random Read (4K blocks)**:
+
 - IOPS: **5,000–15,000 IOPS** (depends on CPU, RAM, ZFS cache)
 - Bandwidth: **20–60 MB/s** (for 4K blocks)
 - Latency p99: **<50ms** (acceptable for video scrubbing)
 
 **Mixed I/O (70% read, 30% write)**:
+
 - Combined IOPS: **4,000–10,000 IOPS**
 - Latency p99: **<100ms** (editing is more latency-sensitive than scrubbing)
 
@@ -300,23 +335,28 @@ If below 8.5 Gbps, investigate:
 ### Procedure
 
 1. **On client, start concurrent read threads**:
+
    ```bash
    # Run 4 parallel sequential reads (simulate 4 editors scrubbing timelines)
    for i in {1..4}; do
      (dd if=/Volumes/nas_share/testfile-10gb.bin of=/dev/null bs=1M &)
    done
    wait
+
    ```
 
 2. **Monitor aggregate throughput** (watch from another terminal):
+
    ```bash
    # macOS: use Instruments or Activity Monitor
    # Linux: iostat -x 1 or iotop
    
    # Expected: near-full link saturation (approaching 1.25 GB/s on 10GbE)
+
    ```
 
 3. **Alternative: Use fio with multiple jobs**:
+
    ```ini
    [global]
    ioengine=libaio
@@ -332,6 +372,7 @@ If below 8.5 Gbps, investigate:
    [4-concurrent-reads]
    rw=read
    filename=/Volumes/nas_share/fio-4stream.bin
+
    ```
 
 4. **Run and record aggregate throughput**.
@@ -357,38 +398,47 @@ If below 8.5 Gbps, investigate:
 ### Procedure
 
 1. **Configure NFS share** (ensure NFS service is running):
+
    ```bash
    # Verify NFS is online
    systemctl status nfs-server
    pcs resource show nfs-resource
+
    ```
 
 2. **Mount NFS on client**:
+
    ```bash
    # macOS
    mount_nfs -o vers=3,proto=tcp <VIP_ADDRESS>:/export/path /Volumes/nfs_share
    
    # Linux
    mount -t nfs -o vers=3,proto=tcp <VIP_ADDRESS>:/export/path /mnt/nfs
+
    ```
 
 3. **Run identical sequential read test on NFS**:
+
    ```bash
    dd if=/Volumes/nfs_share/testfile-10gb.bin of=/dev/null bs=1M
+
    ```
 
 4. **Run identical random I/O test on NFS**:
+
    ```bash
    fio /tmp/video-timeline.fio --directory=/Volumes/nfs_share
+
    ```
 
 5. **Tabulate results**:
-   | Metric | SMB | NFS | Ratio (SMB/NFS) |
-   |--------|-----|-----|-----------------|
-   | Sequential Read (MB/s) | | | |
-   | Sequential Write (MB/s) | | | |
-   | Random Read IOPS | | | |
-   | Random Read Latency (ms) | | | |
+
+   | Metric                     | SMB | NFS | Ratio (SMB/NFS) |
+   | -------------------------- | --- | --- | --------------- |
+   | Sequential Read (MB/s)     |     |     |                 |
+   | Sequential Write (MB/s)    |     |     |                 |
+   | Random Read IOPS           |     |     |                 |
+   | Random Read Latency (ms)   |     |     |                 |
 
 ### Expected Results
 
@@ -425,6 +475,7 @@ zfs set atime=off tank/samba_share
 
 # Set primary cache to most (favor ARC over disk reads)
 zfs set primarycache=all tank/samba_share
+
 ```
 
 ### ARC Sizing (in ZFS module parameters)
@@ -438,6 +489,7 @@ echo "options zfs zfs_arc_max=34359738368" >> /etc/modprobe.d/zfs.conf
 
 # Disable ARC shrinking to maintain performance
 echo "options zfs zfs_arc_shrink_adjust=0" >> /etc/modprobe.d/zfs.conf
+
 ```
 
 Then reload ZFS module:
@@ -445,6 +497,7 @@ Then reload ZFS module:
 ```bash
 # Reboot or unload/reload (risky on active system)
 # Safer: reboot after load testing
+
 ```
 
 ### Monitor ARC During Testing
@@ -454,6 +507,7 @@ Then reload ZFS module:
 arcstat.py -i 1
 
 # Expected: Hit ratio >80% during sequential reads, >60% during random I/O
+
 ```
 
 ---
@@ -468,12 +522,14 @@ dd if=<share_path>/testfile-10gb.bin of=/dev/null bs=1M
 
 # With timing
 time dd if=<share_path>/testfile-10gb.bin of=/dev/null bs=1M status=progress
+
 ```
 
 ### Sequential Write (SMB)
 
 ```bash
 time dd if=/dev/zero of=<share_path>/testfile-write-10gb.bin bs=1M count=10240 status=progress
+
 ```
 
 ### Random I/O (fio)
@@ -488,6 +544,7 @@ fio --name=randread --ioengine=libaio --iodepth=16 --blocksize=4k --filesize=50G
 fio --name=randrw --ioengine=libaio --iodepth=16 --blocksize=4k --filesize=50G \
     --direct=1 --rw=randrw --rwmixread=70 --runtime=120 --time_based \
     --filename=<share_path>/fio-test.bin
+
 ```
 
 ### Network Baseline (iperf3)
@@ -501,6 +558,7 @@ iperf3 -c <VIP_ADDRESS> -P 1 -t 30
 
 # Client (4 parallel streams)
 iperf3 -c <VIP_ADDRESS> -P 4 -t 30
+
 ```
 
 ### Monitor Live Performance
@@ -517,6 +575,7 @@ iotop -o
 
 # Watch NAS CPU/mem during tests
 top -o %CPU
+
 ```
 
 ---
@@ -569,10 +628,10 @@ top -o %CPU
 
 Record results in a spreadsheet for historical tracking:
 
-| Date | Protocol | Test | Throughput | Latency | Notes |
-|------|----------|------|-----------|---------|-------|
-| 2024-01-15 | SMB3 | Sequential Read | 847 MB/s | N/A | Baseline, ARC hit 82% |
-| 2024-01-15 | SMB3 | Random Read | 8,243 IOPS | 28ms p99 | Video timeline scrub simulation |
-| 2024-01-15 | NFS | Sequential Read | 921 MB/s | N/A | Comparison baseline |
+| Date       | Protocol | Test            | Throughput | Latency  | Notes                           |
+| ---------- | -------- | --------------- | ---------- | -------- | ------------------------------- |
+| 2024-01-15 | SMB3     | Sequential Read | 847 MB/s   | N/A      | Baseline, ARC hit 82%           |
+| 2024-01-15 | SMB3     | Random Read     | 8,243 IOPS | 28ms p99 | Video timeline scrub simulation |
+| 2024-01-15 | NFS      | Sequential Read | 921 MB/s   | N/A      | Comparison baseline             |
 
 This enables trend analysis and SLA validation for the video editing workload.
