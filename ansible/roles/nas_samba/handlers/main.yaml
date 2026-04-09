@@ -2,7 +2,6 @@
 - name: Restart Samba via PCS
   ansible.builtin.command: >
     pcs resource restart {{ nas_samba_pcs_resource_name }}
-  become: "{{ nas_samba_pcs_become }}"
   when: nas_samba_pcs_enabled
   listen: Restart Samba
 

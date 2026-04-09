@@ -20,8 +20,7 @@ resource group, which provides implicit colocation and ordering.
 | `nas_samba_disable_netbios` | `true` | Disable legacy NetBIOS |
 | `nas_samba_workgroup` | `HOMELAB` | Workgroup name |
 | `nas_samba_shares` | `[]` | List of share definitions (see below) |
-| `nas_samba_users` | `[]` | List of Samba users (passwords from vault) |
-| `nas_samba_pcs_become` | `true` | Use become (sudo) for PCS and firewall tasks |
+| `nas_samba_users` | `[]` | List of Samba users (passwords from SOPS-encrypted vars) |
 | `nas_samba_pcs_enabled` | `true` | Whether PCS manages Samba |
 | `nas_samba_pcs_resource_name` | `smb-service` | PCS resource name |
 | `nas_samba_pcs_group` | `group-nas` | PCS resource group to add Samba to |

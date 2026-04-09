@@ -35,9 +35,6 @@ nas_samba_users: []
 #     password: "{{ vault_samba_michel_password }}"
 #     create_system_user: false
 
-# Whether to use become (sudo) for PCS and firewall tasks
-nas_samba_pcs_become: true
-
 # PCS resource settings
 nas_samba_pcs_enabled: true
 nas_samba_pcs_resource_name: "smb-service"
