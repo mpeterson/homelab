@@ -4,8 +4,8 @@ Ansible role for managing Samba (SMB/CIFS) on Rocky Linux NAS nodes with
 Pacemaker/PCS high-availability support.
 
 Designed for active/passive HA clusters where PCS manages Samba lifecycle
-alongside ZFS and VIP resources using explicit colocation and ordering
-constraints (not resource groups).
+alongside ZFS and VIP resources. Samba is added to the existing `group-nas`
+resource group, which provides implicit colocation and ordering.
 
 ## Variables
 
@@ -21,10 +21,10 @@ constraints (not resource groups).
 | `nas_samba_workgroup` | `HOMELAB` | Workgroup name |
 | `nas_samba_shares` | `[]` | List of share definitions (see below) |
 | `nas_samba_users` | `[]` | List of Samba users (passwords from vault) |
+| `nas_samba_pcs_become` | `true` | Use become (sudo) for PCS and firewall tasks |
 | `nas_samba_pcs_enabled` | `true` | Whether PCS manages Samba |
 | `nas_samba_pcs_resource_name` | `smb-service` | PCS resource name |
-| `nas_samba_pcs_colocation_with` | `nas-vip` | Resource to colocate with |
-| `nas_samba_pcs_order_after` | `nas-vip` | Resource that must start first |
+| `nas_samba_pcs_group` | `group-nas` | PCS resource group to add Samba to |
 | `nas_samba_pcs_monitor_interval` | `30s` | PCS health check interval |
 | `nas_samba_pcs_start_timeout` | `30s` | PCS start timeout |
 | `nas_samba_pcs_stop_timeout` | `30s` | PCS stop timeout |
@@ -48,9 +48,17 @@ Passwords **must** come from Ansible Vault variables:
 
 ```yaml
 nas_samba_users:
-  - name: editor
+  - name: editor                                    # New dedicated SMB user
     password: "{{ vault_samba_editor_password }}"
+    create_system_user: true
+  - name: michel                                    # Existing Linux user
+    password: "{{ vault_samba_michel_password }}"
+    create_system_user: false
 ```
+
+When `create_system_user` is omitted it defaults to `true` (backward compatible).
+Set it to `false` for users that already exist on the host to avoid changing
+their shell or other properties.
 
 ## Example playbook
 
@@ -68,15 +76,22 @@ nas_samba_users:
         nas_samba_users:
           - name: editor
             password: "{{ vault_samba_editor_password }}"
-        nas_samba_pcs_colocation_with: nas-vip
-        nas_samba_pcs_order_after: nas-vip
+            create_system_user: true
+        nas_samba_pcs_group: group-nas
 ```
 
-## PCS constraints
+## PCS resource group
 
-This role creates **individual colocation and ordering constraints** rather
-than resource groups. This avoids the cascading-restart bug in multi-protocol
-PCS setups (iSCSI + NFS + SMB) and gives fine-grained failover control.
+This role adds the Samba resource to an existing PCS resource group
+(default: `group-nas`). The group provides implicit colocation and start
+ordering — resources within a group always run on the same node and start
+in the order they were added. This is simpler than explicit colocation and
+ordering constraints and matches the existing pattern for VIP (`nas-ip`) and
+ZFS resources.
+
+> **Note:** iSCSI resources are intentionally kept outside `group-nas` with
+> separate constraints to avoid a known democratic-csi cascading restart bug.
+> Samba does not trigger this bug because it is not managed by democratic-csi.
 
 When `nas_samba_pcs_enabled` is true, the systemd `smb` service is disabled —
 PCS is the sole owner of the Samba lifecycle.

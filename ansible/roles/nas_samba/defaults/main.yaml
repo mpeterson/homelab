@@ -24,17 +24,24 @@ nas_samba_shares: []
 #     create_mask: "0664"
 #     directory_mask: "0775"
 
-# Samba users — list of dicts (passwords from vault)
+# Samba users — list of dicts (passwords from SOPS-encrypted vars)
+# Set create_system_user: false to skip system user creation for existing Linux users
 nas_samba_users: []
 # Example:
-#   - name: editor
+#   - name: editor                                    # New dedicated SMB user
 #     password: "{{ vault_samba_editor_password }}"
+#     create_system_user: true
+#   - name: michel                                    # Existing Linux user
+#     password: "{{ vault_samba_michel_password }}"
+#     create_system_user: false
+
+# Whether to use become (sudo) for PCS and firewall tasks
+nas_samba_pcs_become: true
 
 # PCS resource settings
 nas_samba_pcs_enabled: true
 nas_samba_pcs_resource_name: "smb-service"
-nas_samba_pcs_colocation_with: "nas-vip"
-nas_samba_pcs_order_after: "nas-vip"
+nas_samba_pcs_group: "group-nas"
 nas_samba_pcs_monitor_interval: "30s"
 nas_samba_pcs_start_timeout: "30s"
 nas_samba_pcs_stop_timeout: "30s"

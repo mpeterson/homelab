@@ -1,7 +1,5 @@
 # NAS Samba Performance Test Plan
 
-<!-- markdownlint-disable MD024 -->
-
 This document provides procedures to benchmark Samba (SMB3) performance on the HA NAS cluster over a 10GbE network. These tests establish baseline performance for 4K/8K video editing workloads and compare SMB against NFS.
 
 ## System Overview

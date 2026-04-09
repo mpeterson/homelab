@@ -1,4 +1,6 @@
-inventories
+inventories/**
+!inventories/**/
+!inventories/**/*.sops.yaml
 hack
 .local
 talos/clusterconfig

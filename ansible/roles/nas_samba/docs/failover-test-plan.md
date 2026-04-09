@@ -1,7 +1,5 @@
 # NAS Samba Failover Test Plan
 
-<!-- markdownlint-disable MD024 -->
-
 This document provides procedures to validate Samba failover behavior on the HA NAS cluster managed by Pacemaker. The NAS uses active/passive HA with PCS constraints (no CTDB clustering). SMB sessions do **not** survive failover.
 
 ## System Overview
@@ -10,7 +8,7 @@ This document provides procedures to validate Samba failover behavior on the HA 
 - **Cluster Manager**: Pacemaker (PCS)
 - **Storage**: ZFS pool with shared datasets
 - **Resources**: VIP (virtual IP), iSCSI, NFS, Samba (SMB3)
-- **Resource Constraints**: Colocation and ordering constraints (not groups)
+- **Resource Constraints**: Samba added to `group-nas` resource group (VIP + ZFS + Samba)
 - **Expected Failover Duration**: 30–180 seconds (dominated by ZFS import time)
 - **Client Handling**: SMB clients must reconnect after failover; sessions are NOT persistent
 
@@ -32,9 +30,11 @@ systemctl status smb
 # Verify VIP is assigned to active node
 ip addr show | grep "inet <VIP_ADDRESS>"
 
-# Verify NFS and iSCSI are running
+# Verify NFS is running
 systemctl status nfs-server
-systemctl status target
+
+# Verify iSCSI and other PCS-managed resources
+pcs status
 
 # Verify ZFS pool is imported
 zpool status
@@ -64,7 +64,7 @@ zpool status
    pcs resource move smb-service
    ```
 
-   This moves Samba to the standby node. ZFS, NFS, iSCSI, and VIP will migrate together due to colocation constraints.
+   This moves Samba to the standby node. ZFS, NFS, iSCSI, and VIP will migrate together (Samba is part of `group-nas`).
 
 3. **Monitor failover progress** (on either node):
 
@@ -385,7 +385,8 @@ After each test, verify the cluster is stable:
 pcs status
 pcs resource show --full
 zpool status
-systemctl status smb nfs-server target
+systemctl status smb nfs-server
+pcs status
 ```
 
 Document any anomalies or extended recovery times for capacity planning.

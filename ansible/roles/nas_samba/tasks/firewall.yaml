@@ -5,8 +5,10 @@
     permanent: true
     immediate: true
     state: enabled
+  become: "{{ nas_samba_pcs_become }}"
 
 - name: Reload firewalld
   ansible.builtin.systemd:
     name: firewalld
     state: reloaded
+  become: "{{ nas_samba_pcs_become }}"

@@ -1,4 +1,7 @@
 creation_rules:
+  - path_regex: ansible/.*\.sops\.yaml$
+    age: >-
+      age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664
   - unencrypted_regex: "^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$"
     age: >-
       age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664

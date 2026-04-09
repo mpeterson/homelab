@@ -5,6 +5,7 @@
   register: _pcs_resource_check
   changed_when: false
   failed_when: false
+  become: "{{ nas_samba_pcs_become }}"
   when: nas_samba_pcs_enabled
 
 - name: Create PCS resource for Samba
@@ -13,46 +14,33 @@
     op start timeout={{ nas_samba_pcs_start_timeout }}
     op stop timeout={{ nas_samba_pcs_stop_timeout }}
     op monitor interval={{ nas_samba_pcs_monitor_interval }}
+  become: "{{ nas_samba_pcs_become }}"
   when:
     - nas_samba_pcs_enabled
     - _pcs_resource_check.rc != 0
 
-- name: Check existing colocation constraints
+- name: Check if resource is already in group
   ansible.builtin.shell: >
-    pcs constraint colocation show
-    | grep -q '{{ nas_samba_pcs_resource_name }} with {{ nas_samba_pcs_colocation_with }}'
-  register: _pcs_colocation_check
+    pcs resource group list
+    | grep -q '{{ nas_samba_pcs_group }}:.*{{ nas_samba_pcs_resource_name }}'
+  register: _pcs_group_check
   changed_when: false
   failed_when: false
+  become: "{{ nas_samba_pcs_become }}"
   when: nas_samba_pcs_enabled
 
-- name: Create colocation constraint (Samba with VIP)
+- name: Add Samba resource to group
   ansible.builtin.command: >
-    pcs constraint colocation add {{ nas_samba_pcs_resource_name }}
-    with {{ nas_samba_pcs_colocation_with }} INFINITY
+    pcs resource group add {{ nas_samba_pcs_group }}
+    {{ nas_samba_pcs_resource_name }}
+  become: "{{ nas_samba_pcs_become }}"
   when:
     - nas_samba_pcs_enabled
-    - _pcs_colocation_check.rc != 0
+    - _pcs_group_check.rc != 0
 
-- name: Check existing ordering constraints
-  ansible.builtin.shell: >
-    pcs constraint order show
-    | grep -q '{{ nas_samba_pcs_order_after }} then start {{ nas_samba_pcs_resource_name }}'
-  register: _pcs_order_check
+- name: Verify PCS resource group
+  ansible.builtin.command: pcs resource group list
+  register: _pcs_group_verify
   changed_when: false
-  failed_when: false
-  when: nas_samba_pcs_enabled
-
-- name: Create ordering constraint (VIP before Samba)
-  ansible.builtin.command: >
-    pcs constraint order start {{ nas_samba_pcs_order_after }}
-    then start {{ nas_samba_pcs_resource_name }}
-  when:
-    - nas_samba_pcs_enabled
-    - _pcs_order_check.rc != 0
-
-- name: Verify PCS constraints
-  ansible.builtin.command: pcs constraint show
-  register: _pcs_constraint_verify
-  changed_when: false
+  become: "{{ nas_samba_pcs_become }}"
   when: nas_samba_pcs_enabled

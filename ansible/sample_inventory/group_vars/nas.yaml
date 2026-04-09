@@ -27,8 +27,8 @@ nas_samba_shares:
 nas_samba_users:
   - name: editor
     password: "{{ vault_samba_editor_password }}"
+    create_system_user: true
 
 # PCS integration
 nas_samba_pcs_enabled: true
-nas_samba_pcs_colocation_with: "nas-vip"
-nas_samba_pcs_order_after: "nas-vip"
+nas_samba_pcs_group: "group-nas"

@@ -1,4 +1,0 @@
----
-# Encrypt this file with: ansible-vault encrypt vault_example.yaml
-# These are EXAMPLE values — replace with real passwords
-vault_samba_editor_password: "CHANGE_ME"
