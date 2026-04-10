@@ -37,23 +37,44 @@
     - nas_samba_pcs_enabled
     - _pcs_resource_check.rc != 0
 
-- name: Check if resource is already in group
+- name: Check if colocation constraint exists
   ansible.builtin.shell: >
-    pcs resource group list
-    | grep -q '{{ nas_samba_pcs_group }}:.*{{ nas_samba_pcs_resource_name }}'
-  register: _pcs_group_check
+    pcs constraint colocation show
+    | grep -q '{{ nas_samba_pcs_resource_name }} with {{ nas_samba_pcs_group }}'
+  register: _pcs_colocation_check
   changed_when: false
   failed_when: false
   delegate_to: "{{ _pcs_active_node }}"
   run_once: true
   when: nas_samba_pcs_enabled
 
-- name: Add Samba resource to group
+- name: Add colocation constraint (Samba runs on same node as group)
   ansible.builtin.command: >
-    pcs resource group add {{ nas_samba_pcs_group }}
-    {{ nas_samba_pcs_resource_name }}
+    pcs constraint colocation add {{ nas_samba_pcs_resource_name }}
+    with {{ nas_samba_pcs_group }} INFINITY
   delegate_to: "{{ _pcs_active_node }}"
   run_once: true
   when:
     - nas_samba_pcs_enabled
-    - _pcs_group_check.rc != 0
+    - _pcs_colocation_check.rc != 0
+
+- name: Check if ordering constraint exists
+  ansible.builtin.shell: >
+    pcs constraint order show
+    | grep -q '{{ nas_samba_pcs_group }}.*then.*{{ nas_samba_pcs_resource_name }}'
+  register: _pcs_order_check
+  changed_when: false
+  failed_when: false
+  delegate_to: "{{ _pcs_active_node }}"
+  run_once: true
+  when: nas_samba_pcs_enabled
+
+- name: Add ordering constraint (group starts before Samba)
+  ansible.builtin.command: >
+    pcs constraint order {{ nas_samba_pcs_group }}
+    then {{ nas_samba_pcs_resource_name }}
+  delegate_to: "{{ _pcs_active_node }}"
+  run_once: true
+  when:
+    - nas_samba_pcs_enabled
+    - _pcs_order_check.rc != 0
