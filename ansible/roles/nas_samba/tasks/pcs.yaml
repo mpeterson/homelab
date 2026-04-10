@@ -1,4 +1,19 @@
 ---
+- name: Detect PCS designated controller (active node)
+  ansible.builtin.shell: >
+    pcs status | grep -oP 'Current DC: \K[^ ]+'
+  register: _pcs_dc
+  changed_when: false
+  failed_when: _pcs_dc.rc != 0
+  run_once: true
+  when: nas_samba_pcs_enabled
+
+- name: Set active node fact
+  ansible.builtin.set_fact:
+    _pcs_active_node: "{{ _pcs_dc.stdout }}"
+  run_once: true
+  when: nas_samba_pcs_enabled
+
 - name: Check if PCS resource already exists
   ansible.builtin.shell: >
     pcs resource status {{ nas_samba_pcs_resource_name }} ||
@@ -6,6 +21,7 @@
   register: _pcs_resource_check
   changed_when: false
   failed_when: false
+  delegate_to: "{{ _pcs_active_node }}"
   run_once: true
   when: nas_samba_pcs_enabled
 
@@ -15,6 +31,7 @@
     op start timeout={{ nas_samba_pcs_start_timeout }}
     op stop timeout={{ nas_samba_pcs_stop_timeout }}
     op monitor interval={{ nas_samba_pcs_monitor_interval }}
+  delegate_to: "{{ _pcs_active_node }}"
   run_once: true
   when:
     - nas_samba_pcs_enabled
@@ -27,6 +44,7 @@
   register: _pcs_group_check
   changed_when: false
   failed_when: false
+  delegate_to: "{{ _pcs_active_node }}"
   run_once: true
   when: nas_samba_pcs_enabled
 
@@ -34,6 +52,7 @@
   ansible.builtin.command: >
     pcs resource group add {{ nas_samba_pcs_group }}
     {{ nas_samba_pcs_resource_name }}
+  delegate_to: "{{ _pcs_active_node }}"
   run_once: true
   when:
     - nas_samba_pcs_enabled
