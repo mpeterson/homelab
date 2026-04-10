@@ -2,7 +2,7 @@
 nas_samba_workgroup: ENC[AES256_GCM,data:W1WoOxjOzg==,iv:knFsMT8pmQ6x5CqdE7X7hspAMvEXxx7igw6EGmVPoWg=,tag:3hONZKpTwp/Mysb+GMymfw==,type:str]
 #ENC[AES256_GCM,data:wdJT8MKQ0JspsAnInmQsuXDVpeBQLynImKt579UJm8mvdNSyE6OmZHyhKw==,iv:uMS50uwCUwU3o7aZtQp9ckFpGGvdEYrzQ57EjIVXkFc=,tag:psKAWbKVcf4jHljH8vLXQQ==,type:comment]
 nas_samba_shares:
-    - name: ENC[AES256_GCM,data:RahEvuY=,iv:tj3mf2T/O5pDnUuM1vT2h9B8ysq9NCbrDbmQ+uRl7UY=,tag:TqhZWExuSy6hoxWuvN4I7A==,type:str]
+    - name: ENC[AES256_GCM,data:un6GmhgW5og=,iv:gWLqABdCj/ScTXln0vEnyxB25N8hPA0dsn8p8GMkKF4=,tag:pLt3ChpW9fN4bPO+UlZ/xw==,type:str]
       path: ENC[AES256_GCM,data:98t1o9OiqbwSQnKWPJj1CHo4PXJ2p7w=,iv:HHKsl30WOoN+oy31jO3I8aEGgZXBI3MvxsjfiaEim9I=,tag:3pgM1l93khKNzGfAmpP/hA==,type:str]
       comment: ENC[AES256_GCM,data:IUjjmJTlh6s=,iv:kYN1XETI5ApviLM3WaY66D/T9mw8WDizQdAXYEHKMb4=,tag:0fraEpKLGHaq710ageUdlw==,type:str]
       valid_users: ENC[AES256_GCM,data:rD/JHDCgdUtP,iv:/+wpSUVHtnDF+ahXomd/5SC4ZWvrl8OSLv5ERWxZBr0=,tag:P3AlG2Qg2DZ7+lxy7VF+jQ==,type:str]
@@ -27,7 +27,7 @@ sops:
             clRFQ0hnbnRGMFMydUliVVFTM2ZHNG8KyWiWFsLQa2TiJzwt9tOalpmixRSWLgez
             fmdQSe9AGGj0yDvAm82fP7Ce2us6/PksfEiMy06qS31Sipa+ElJaDw==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-04-10T14:52:04Z"
-    mac: ENC[AES256_GCM,data:+YFj0j3shldsixTdCz4/Bet/5Yubmvxz4hzzf2TfE2p/E309weSFc+2RhN+WyH+skl12Zek0TO7Eq0jlfxBo4MCCoUJpJXBfqlrKRZc1pZT3YfBHdFc7PEbUY2YuV9FpOSL5zYC41VuejMC6OOfLX4BtcjdYRSgYS/cFFnc4hgo=,iv:xCpzpW4a7phQnYdIy7xcHWZBaFep503TSxMMW5LNM1k=,tag:ig6NqBD0mjG0Qi+oujJl8A==,type:str]
+    lastmodified: "2026-04-10T15:01:26Z"
+    mac: ENC[AES256_GCM,data:5jYPMoGc4Bk1wIn59BdxYp5QcoCn+6yKVu+owJ00QafIJx/qXeJCG8wWXJUrZsdRw7p2Es0BSgjc6/3RMVefZ0yBdR/MWJuL09XWxCVqKZQ9o5ZvomQi8m+Kb4oEGupPA7TYAkINY0so6uej4z1HtgiDdIoZGAOs6NSi041CmXY=,iv:xzavEsprBbNKSCcrHaZ58SFYbYkbnkYCakVqdUtw+go=,tag:TuQEcKCtmhxVgDZHBnwJig==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.12.2
