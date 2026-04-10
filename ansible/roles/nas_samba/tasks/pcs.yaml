@@ -1,7 +1,8 @@
 ---
 - name: Check if PCS resource already exists
-  ansible.builtin.command: >
-    pcs resource show {{ nas_samba_pcs_resource_name }}
+  ansible.builtin.shell: >
+    pcs resource status {{ nas_samba_pcs_resource_name }} ||
+    pcs resource config {{ nas_samba_pcs_resource_name }}
   register: _pcs_resource_check
   changed_when: false
   failed_when: false
