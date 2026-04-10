@@ -33,9 +33,3 @@
   when:
     - nas_samba_pcs_enabled
     - _pcs_group_check.rc != 0
-
-- name: Verify PCS resource group
-  ansible.builtin.command: pcs resource group list
-  register: _pcs_group_verify
-  changed_when: false
-  when: nas_samba_pcs_enabled
