@@ -1,0 +1,14 @@
+---
+bind9:
+  children:
+    bind9_main:
+      hosts:
+        dns-01.lan.peterson.com.ar:
+          ansible_user: mpeterson
+          ansible_become: yes
+
+    bind9_secondaries:
+      hosts:
+        dns-02.lan.peterson.com.ar:
+          ansible_user: mpeterson
+          ansible_become: yes

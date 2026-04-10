@@ -1,0 +1,14 @@
+---
+proxmox:
+  children:
+    pve:
+      children:
+        pve_main:
+          hosts:
+            pve-01.lan.peterson.com.ar:
+              ansible_user: root
+
+        pve_secondaries:
+          hosts:
+            pve-02.lan.peterson.com.ar:
+              ansible_user: root

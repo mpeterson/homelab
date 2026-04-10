@@ -1,6 +1,9 @@
-inventories/**
-!inventories/**/
-!inventories/**/*.sops.yaml
+# Ansible inventories — commit inventory files and SOPS secrets, ignore the rest
+ansible/inventories/host_vars/*
+ansible/inventories/group_vars/*
+ansible/inventories/files/
+!ansible/inventories/group_vars/*.sops.yaml
+!ansible/inventories/host_vars/*.sops.yaml
 hack
 .local
 talos/clusterconfig
