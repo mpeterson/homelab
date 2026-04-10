@@ -5,6 +5,12 @@
     - nas_samba
     - nas_samba_install
 
+- name: Configure SELinux for Samba
+  ansible.builtin.import_tasks: selinux.yaml
+  tags:
+    - nas_samba
+    - nas_samba_selinux
+
 - name: Configure Samba
   ansible.builtin.import_tasks: configure.yaml
   tags:
