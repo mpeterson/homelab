@@ -1,5 +1,0 @@
----
-# SOPS-encrypted secrets for NAS nodes
-# Encrypt with: sops --encrypt --in-place nas.sops.yaml
-# Decrypt for editing: sops nas.sops.yaml
-vault_samba_editor_password: "CHANGE_ME"

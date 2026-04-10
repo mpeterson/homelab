@@ -23,7 +23,8 @@ nas_samba_shares:
     writable: true
     browseable: true
 
-# Samba users (passwords from vault)
+# Samba users (passwords should be stored in a SOPS-encrypted file)
+# Example SOPS file: nas.sops.yaml with vault_samba_editor_password defined
 nas_samba_users:
   - name: editor
     password: "{{ vault_samba_editor_password }}"
