@@ -39,8 +39,8 @@
 
 - name: Check if colocation constraint exists
   ansible.builtin.shell: >
-    pcs constraint colocation show
-    | grep -q '{{ nas_samba_pcs_resource_name }} with {{ nas_samba_pcs_group }}'
+    pcs constraint colocation config
+    | grep -q "resource '{{ nas_samba_pcs_resource_name }}' with resource '{{ nas_samba_pcs_group }}'"
   register: _pcs_colocation_check
   changed_when: false
   failed_when: false
@@ -60,8 +60,8 @@
 
 - name: Check if ordering constraint exists
   ansible.builtin.shell: >
-    pcs constraint order show
-    | grep -q '{{ nas_samba_pcs_group }}.*then.*{{ nas_samba_pcs_resource_name }}'
+    pcs constraint order config
+    | grep -q "resource '{{ nas_samba_pcs_group }}'.*then.*resource '{{ nas_samba_pcs_resource_name }}'"
   register: _pcs_order_check
   changed_when: false
   failed_when: false
