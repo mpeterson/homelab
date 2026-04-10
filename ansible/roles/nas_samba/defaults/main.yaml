@@ -25,7 +25,8 @@ nas_samba_shares: []
 #     directory_mask: "0775"
 
 # Samba users — list of dicts (passwords from SOPS-encrypted vars)
-# Set create_system_user: false to skip system user creation for existing Linux users
+# Set create_system_user: true to create a dedicated system user.
+# Omitting create_system_user (or setting false) skips user creation — use for existing Linux users.
 nas_samba_users: []
 # Example:
 #   - name: editor                                    # New dedicated SMB user
@@ -33,7 +34,6 @@ nas_samba_users: []
 #     create_system_user: true
 #   - name: michel                                    # Existing Linux user
 #     password: "{{ vault_samba_michel_password }}"
-#     create_system_user: false
 
 # PCS resource settings
 nas_samba_pcs_enabled: true
