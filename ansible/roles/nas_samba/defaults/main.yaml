@@ -18,11 +18,13 @@ nas_samba_shares: []
 # Example:
 #   - name: media
 #     path: /tank/media
-#     valid_users: "@media"
+#     valid_users: "editor michel"
 #     writable: true
 #     browseable: true
 #     create_mask: "0664"
 #     directory_mask: "0775"
+# Note: valid_users accepts usernames (space-separated) or Unix groups prefixed
+# with @ (e.g. "@editors"). Groups must be managed separately on the NAS nodes.
 
 # Samba users — list of dicts (passwords from SOPS-encrypted vars)
 # Set create_system_user: true to create a dedicated system user.

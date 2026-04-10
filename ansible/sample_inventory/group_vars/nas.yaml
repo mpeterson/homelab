@@ -7,19 +7,19 @@ nas_samba_shares:
   - name: media
     path: /tank/media
     comment: "Media library"
-    valid_users: "@editors"
+    valid_users: "editor"
     writable: true
     browseable: true
   - name: projects
     path: /tank/projects
     comment: "Video editing projects"
-    valid_users: "@editors"
+    valid_users: "editor"
     writable: true
     browseable: true
   - name: photos
     path: /tank/photos
     comment: "Photo library"
-    valid_users: "@editors"
+    valid_users: "editor"
     writable: true
     browseable: true
 
