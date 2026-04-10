@@ -5,6 +5,7 @@
   register: _pcs_resource_check
   changed_when: false
   failed_when: false
+  run_once: true
   when: nas_samba_pcs_enabled
 
 - name: Create PCS resource for Samba
@@ -13,6 +14,7 @@
     op start timeout={{ nas_samba_pcs_start_timeout }}
     op stop timeout={{ nas_samba_pcs_stop_timeout }}
     op monitor interval={{ nas_samba_pcs_monitor_interval }}
+  run_once: true
   when:
     - nas_samba_pcs_enabled
     - _pcs_resource_check.rc != 0
@@ -24,12 +26,14 @@
   register: _pcs_group_check
   changed_when: false
   failed_when: false
+  run_once: true
   when: nas_samba_pcs_enabled
 
 - name: Add Samba resource to group
   ansible.builtin.command: >
     pcs resource group add {{ nas_samba_pcs_group }}
     {{ nas_samba_pcs_resource_name }}
+  run_once: true
   when:
     - nas_samba_pcs_enabled
     - _pcs_group_check.rc != 0
