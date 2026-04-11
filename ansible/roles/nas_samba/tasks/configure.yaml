@@ -6,5 +6,5 @@
     owner: root
     group: root
     mode: "0644"
-    backup: true
+    backup: false
   notify: Restart Samba
