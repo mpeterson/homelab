@@ -25,6 +25,18 @@
     strict locking = auto
     kernel oplocks = no
 
+{% if nas_samba_fruit_enabled %}
+    # macOS (vfs_fruit) optimizations
+    vfs objects = fruit streams_xattr
+    fruit:metadata = {{ nas_samba_fruit_metadata }}
+    fruit:model = {{ nas_samba_fruit_model }}
+    fruit:nfs_aces = {{ nas_samba_fruit_nfs_aces }}
+    fruit:posix_rename = {{ nas_samba_fruit_posix_rename }}
+    fruit:veto_appledouble = {{ nas_samba_fruit_veto_appledouble }}
+    fruit:wipe_intentionally_left_blank_rfork = {{ nas_samba_fruit_wipe_blank_rfork }}
+    fruit:delete_empty_adfiles = {{ nas_samba_fruit_delete_empty_adfiles }}
+{% endif %}
+
     # Logging
     log file = /var/log/samba/log.%m
     max log size = 1000
