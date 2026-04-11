@@ -27,7 +27,7 @@
 
 {% if nas_samba_fruit_enabled %}
     # macOS (vfs_fruit) optimizations
-    vfs objects = fruit streams_xattr
+    vfs objects = catia fruit streams_xattr
     fruit:metadata = {{ nas_samba_fruit_metadata }}
     fruit:model = {{ nas_samba_fruit_model }}
     fruit:nfs_aces = {{ nas_samba_fruit_nfs_aces }}
