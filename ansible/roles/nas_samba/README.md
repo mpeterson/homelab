@@ -19,6 +19,10 @@ resource group, which provides implicit colocation and ordering.
 | `nas_samba_client_signing` | `mandatory` | Client message signing |
 | `nas_samba_disable_netbios` | `true` | Disable legacy NetBIOS |
 | `nas_samba_workgroup` | `HOMELAB` | Workgroup name |
+| `nas_samba_fruit_enabled` | `true` | Enable macOS vfs_fruit optimizations |
+| `nas_samba_fruit_model` | `Xserve` | Finder server icon model |
+| `nas_samba_fruit_metadata` | `stream` | How to store macOS metadata |
+| `nas_samba_fruit_nfs_aces` | `no` | Prevent macOS from modifying UNIX perms via NFS ACEs |
 | `nas_samba_shares` | `[]` | List of share definitions (see below) |
 | `nas_samba_users` | `[]` | List of Samba users (passwords from SOPS-encrypted vars) |
 | `nas_samba_pcs_enabled` | `true` | Whether PCS manages Samba |
@@ -79,18 +83,38 @@ their shell or other properties.
         nas_samba_pcs_group: group-nas
 ```
 
-## PCS resource group
+## PCS integration
 
-This role adds the Samba resource to an existing PCS resource group
-(default: `group-nas`). The group provides implicit colocation and start
-ordering — resources within a group always run on the same node and start
-in the order they were added. This is simpler than explicit colocation and
-ordering constraints and matches the existing pattern for VIP (`nas-ip`) and
-ZFS resources.
-
-> **Note:** iSCSI resources are intentionally kept outside `group-nas` with
-> separate constraints to avoid a known democratic-csi cascading restart bug.
-> Samba does not trigger this bug because it is not managed by democratic-csi.
+This role manages Samba as a standalone PCS resource with **colocation and
+ordering constraints** against `group-nas` (rather than group membership).
+This isolates Samba failures from the ZFS/VIP/iSCSI stack — a transient
+Samba restart won't cascade to other resources.
 
 When `nas_samba_pcs_enabled` is true, the systemd `smb` service is disabled —
 PCS is the sole owner of the Samba lifecycle.
+
+## File permissions (POSIX ACLs)
+
+ZFS datasets shared via both NFS and SMB typically have mixed ownership
+(`nobody:users` from NFS, `root:root` from root-squash-disabled clients).
+Instead of changing base ownership (which would break NFS), use POSIX ACLs
+to grant the SMB user write access as an additive overlay.
+
+Prerequisites: ZFS `acltype=posix` (check with `zfs get acltype <dataset>`).
+
+```bash
+# Grant user rw on existing files/dirs (X = execute on dirs only)
+setfacl -R -m u:<samba_user>:rwX /path/to/share
+
+# Default ACL — new files/dirs inherit the grant automatically
+setfacl -R -d -m u:<samba_user>:rwX /path/to/share
+
+# Verify
+getfacl /path/to/share
+```
+
+This approach:
+- Leaves base ownership intact (NFS apps unaffected)
+- Grants SMB write access through ACL, not `force user`
+- Default ACLs ensure new files from any source remain accessible
+- Works with `fruit:nfs_aces = no` (which prevents macOS from mangling perms)
