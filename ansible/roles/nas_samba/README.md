@@ -43,6 +43,12 @@ nas_samba_shares:
     browseable: true
     create_mask: "0664"
     directory_mask: "0775"
+  - name: timemachine
+    path: /tank/timemachine
+    valid_users: "mpeterson"
+    writable: true
+    time_machine: true
+    time_machine_max_size: "500G"
 ```
 
 ## User definition

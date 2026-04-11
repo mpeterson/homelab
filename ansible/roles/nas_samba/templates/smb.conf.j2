@@ -51,5 +51,11 @@
     browseable = {{ 'yes' if share.browseable | default(true) else 'no' }}
     create mask = {{ share.create_mask | default('0664') }}
     directory mask = {{ share.directory_mask | default('0775') }}
+{% if share.time_machine | default(false) %}
+    fruit:time machine = yes
+{% if share.time_machine_max_size is defined %}
+    fruit:time machine max size = {{ share.time_machine_max_size }}
+{% endif %}
+{% endif %}
 
 {% endfor %}
