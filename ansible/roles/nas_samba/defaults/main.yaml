@@ -15,7 +15,7 @@ nas_samba_workgroup: "HOMELAB"
 
 # macOS (vfs_fruit) optimizations
 nas_samba_fruit_enabled: true
-nas_samba_fruit_model: "MacSamba"
+nas_samba_fruit_model: "Xserve"
 nas_samba_fruit_metadata: "stream"
 nas_samba_fruit_nfs_aces: "no"
 nas_samba_fruit_posix_rename: "yes"
