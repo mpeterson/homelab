@@ -114,6 +114,7 @@ getfacl /path/to/share
 ```
 
 This approach:
+
 - Leaves base ownership intact (NFS apps unaffected)
 - Grants SMB write access through ACL, not `force user`
 - Default ACLs ensure new files from any source remain accessible
