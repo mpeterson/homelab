@@ -17,7 +17,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://charts.jetstack.io depName=cert-manager
-      value: cert-manager@v1.20.1
+      value: cert-manager@v1.20.2
 
   syncPolicy:
     syncOptions:
