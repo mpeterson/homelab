@@ -12,7 +12,7 @@ helmCharts:
   - name: ollama
     repo: https://helm.otwld.com/
     # renovate: datasource=helm registryUrl=https://helm.otwld.com/ depName=ollama
-    version: 1.54.0
+    version: 1.55.0
     releaseName: ollama
     namespace: *ns
     valuesFile: values.yaml
