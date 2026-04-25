@@ -1,0 +1,14 @@
+---
+# corosync-qnetd defaults
+
+# Network port for the qnetd daemon
+corosync_qnetd_port: 5403
+
+# NSS certificate database path
+corosync_qnetd_nss_db: /etc/corosync/qnetd/nssdb
+
+# Quorum algorithm: ffsplit (fifty-fifty split) is correct for 2-node clusters
+corosync_qnetd_algorithm: ffsplit
+
+# Firewall service name for high-availability (includes port 5403)
+corosync_qnetd_firewall_service: high-availability
