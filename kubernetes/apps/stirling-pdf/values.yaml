@@ -14,7 +14,7 @@ controllers:
       app:
         image:
           repository: ghcr.io/stirling-tools/s-pdf
-          tag: 2.9.2-fat@sha256:ebaa984c410681939837920c18d2cea8103b46d4961fe6ddc6b6498fa26590b2
+          tag: 2.10.0-fat@sha256:ae61bf189cdb2ae691be80d97e8ec62ec1fbae710f3fb5c3b9f3bcfb6ef8bafc
         env:
           PUID: "1000"
           PGID: "1000"
