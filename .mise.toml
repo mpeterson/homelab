@@ -21,7 +21,7 @@ auto_install = true
 "pipx:ansible-core" = "2.20.4"
 "npm:markdownlint-cli2" = "0.22.1"
 "npm:json5" = "2.2.3"
-"npm:renovate" = "43.139.6"
+"npm:renovate" = "43.140.0"
 
 [env]
 # Ensure just uses unstable features (needed for mod support)
