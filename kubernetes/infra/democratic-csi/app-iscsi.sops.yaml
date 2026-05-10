@@ -61,10 +61,10 @@ spec:
                         fsType: ENC[AES256_GCM,data:Hrep,iv:Z1m93qaf9R1s/1f+Icup5EmHo2P6a9SeSVA+zl9Z+v0=,tag:lR8/vfZ5KvRiwntderz46g==,type:str]
                         #ENC[AES256_GCM,data:jMGz68ynBC0qk293c/SWCJxW2Hs5hPsJVSbswleDHhHMznjLlCspnoyYmhSdfCarQa7NKHmf,iv:18R7Ow2Sy79IjqPeQGmLZGfoiv3t4dICd6CPo1zXTtU=,tag:exZJpVDbi5sW63752upMQg==,type:comment]
                         #ENC[AES256_GCM,data:FSjMmBHz9BP/vE9oPrqwH7Hm70+MqGu2DsrtRyuVWiLlMyOKtuPkdQ==,iv:nVd7PX1p5tGtK0iyFGqrZjORan26FSpnYXcAiYoMdOE=,tag:lZlIF12ST6JVhIqtWRkvCg==,type:comment]
-                        detachedVolumesFromSnapshots: ENC[AES256_GCM,data:xdrceg==,iv:01ywGKeSyVU2Vcsgs3mvJLLBR1OfO1UEayuiJYPukdQ=,tag:z7yZh1+aWBXUxoYvFDmDzA==,type:str]
+                        #ENC[AES256_GCM,data:pNuhFuAdGgCcWtNmgqmGqLrY5swPuz/1M56hKKicd4O+wNP0rmk=,iv:mnoHwQPlLfR023dZB6zwBwQ+4drwIGS6Ck37Q7vDYKw=,tag:S+3wVqc5kTheRY42zgikDw==,type:comment]
                         #ENC[AES256_GCM,data:BLprwka98//VtoeMrMlO3J0ctT0lFcx1uskhM9d486oIttDL3TOE1/JC3IuTqS/Y94O+zg==,iv:ktD0ndjbtp20Gik2Nv6tb5Cx08fiRolwzK9Lc5TLoSA=,tag:S/YqAcfGJVpweAVSPkuAkA==,type:comment]
                         #ENC[AES256_GCM,data:FSjMmBHz9BP/vE9oPrqwH7Hm70+MqGu2DsrtRyuVWiLlMyOKtuPkdQ==,iv:nVd7PX1p5tGtK0iyFGqrZjORan26FSpnYXcAiYoMdOE=,tag:lZlIF12ST6JVhIqtWRkvCg==,type:comment]
-                        detachedVolumesFromVolumes: ENC[AES256_GCM,data:1usCjQ==,iv:Am7l2i2043F0Ifw9i342FCmTQd/vB7rXSGPs90+5n7I=,tag:laUcwtPwYtbAGoknFwfMqg==,type:str]
+                        #ENC[AES256_GCM,data:k1MevCqEHIUQ09HRt0WqOkTM974oWfFeDQttf1MvXWaPhwhp,iv:kN5Yqsp4zs7J9UKlSJAwNSQ+Nc9bDW2hrFpWCZR25dY=,tag:BWKdXqfTsE/ssX/WBVcRwA==,type:comment]
                       mountOptions: []
                       secrets:
                         node-stage-secret:
@@ -157,7 +157,7 @@ sops:
             S0lWSlkreXcyQ2pZVVZsZHZYVXAyMjAK6/b+t9wtQduPuFNBrm9eKBjDBG47co2m
             M/Yc5hrb9DC84vn7lreUBk4cwpwIxd3rnQYyiWf8YnjNV98EnuWKWQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-05-10T05:11:51Z"
-    mac: ENC[AES256_GCM,data:ohWw8XQmOQHTLixRxtx/q3cl3wOSBZyLRYpHtnpdjX8LbJ0zutU9HZBYFQCC09e6ps/Ew4g/CrLLU4NMWJD04iDTVVI+VcZapYogLIOkN/5WHKKik7UpOwwoyb+nYwXd9bXkFg7Ayuq4T0Gs15eKNdp5cvjQzHB2gXcjBaIp75I=,iv:tGao7/CeqqHVjJ2pjL7PMR8rZ9DS5seND8QRsAXdYbI=,tag:edFPj0AHb36d/5Pit5OWiQ==,type:str]
+    lastmodified: "2026-04-01T11:40:59Z"
+    mac: ENC[AES256_GCM,data:PZMX9sYTjS8r9izgMCblMKauGJ02Rz1vxcrllONliF72ajLzdNGkW97ybsXJIbENgqcDRvdw0eFPG1N9GJD4r3s6z9NOSA0UgiC7EXUI3/2M9JgDzxvMy3YmW06+66LF+xrmu5fiAtbUgfDe8i2OuR4jbp/QOcmO7BBXMhAMiJ0=,iv:0QKpXkAsjkHF5e1wuWL9qn2xLzig/QhA5fVw9TOl3Kg=,tag:BJjQ9VL2W9ofh2NVYbDgJg==,type:str]
     unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
-    version: 3.12.2
+    version: 3.12.1
