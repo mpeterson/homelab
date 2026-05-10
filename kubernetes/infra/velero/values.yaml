@@ -49,7 +49,7 @@ schedules:
     template:
       ttl: "360h"
       storageLocation: cloud
-      snapshotMoveData: true
+      defaultVolumesToFsBackup: true
       includedNamespaces:
         - '*'
       excludedNamespaces:
