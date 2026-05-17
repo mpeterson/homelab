@@ -1,0 +1,21 @@
+---
+- name: Check if firewalld is available and running
+  ansible.builtin.command: systemctl is-active firewalld
+  register: _firewalld_status
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Open SMB port (445/tcp) in firewalld
+  ansible.posix.firewalld:
+    port: 445/tcp
+    permanent: true
+    immediate: true
+    state: enabled
+  when: _firewalld_status.rc == 0
+
+- name: Reload firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    state: reloaded
+  when: _firewalld_status.rc == 0

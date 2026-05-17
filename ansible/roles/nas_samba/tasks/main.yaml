@@ -1,0 +1,36 @@
+---
+- name: Install Samba packages
+  ansible.builtin.import_tasks: install.yaml
+  tags:
+    - nas_samba
+    - nas_samba_install
+
+- name: Configure SELinux for Samba
+  ansible.builtin.import_tasks: selinux.yaml
+  tags:
+    - nas_samba
+    - nas_samba_selinux
+
+- name: Configure Samba
+  ansible.builtin.import_tasks: configure.yaml
+  tags:
+    - nas_samba
+    - nas_samba_configure
+
+- name: Configure firewall for SMB
+  ansible.builtin.import_tasks: firewall.yaml
+  tags:
+    - nas_samba
+    - nas_samba_firewall
+
+- name: Manage Samba users
+  ansible.builtin.import_tasks: users.yaml
+  tags:
+    - nas_samba
+    - nas_samba_users
+
+- name: Configure PCS resources
+  ansible.builtin.import_tasks: pcs.yaml
+  tags:
+    - nas_samba
+    - nas_samba_pcs

@@ -1,0 +1,56 @@
+---
+# Samba packages (Rocky Linux / RHEL)
+nas_samba_packages:
+  - samba
+  - samba-common
+
+# Protocol security — SMB3-only, encryption, signing
+nas_samba_min_protocol: "SMB3"
+nas_samba_max_protocol: "SMB3_11"
+nas_samba_encrypt: "required"
+nas_samba_server_signing: "mandatory"
+nas_samba_client_signing: "mandatory"
+nas_samba_disable_netbios: true
+nas_samba_workgroup: "HOMELAB"
+
+# macOS (vfs_fruit) optimizations
+nas_samba_fruit_enabled: true
+nas_samba_fruit_model: "Xserve"
+nas_samba_fruit_metadata: "stream"
+nas_samba_fruit_nfs_aces: "no"
+nas_samba_fruit_posix_rename: "yes"
+nas_samba_fruit_veto_appledouble: "no"
+nas_samba_fruit_wipe_blank_rfork: "yes"
+nas_samba_fruit_delete_empty_adfiles: "yes"
+
+# SMB shares — list of dicts, configured per-host or per-group
+nas_samba_shares: []
+# Example:
+#   - name: media
+#     path: /tank/media
+#     valid_users: "editor michel"
+#     writable: true
+#     browseable: true
+#     create_mask: "0664"
+#     directory_mask: "0775"
+# Note: valid_users accepts usernames (space-separated) or Unix groups prefixed
+# with @ (e.g. "@editors"). Groups must be managed separately on the NAS nodes.
+
+# Samba users — list of dicts (passwords from SOPS-encrypted vars)
+# Set create_system_user: true to create a dedicated system user.
+# Omitting create_system_user (or setting false) skips user creation — use for existing Linux users.
+nas_samba_users: []
+# Example:
+#   - name: editor                                    # New dedicated SMB user
+#     password: "{{ vault_samba_editor_password }}"
+#     create_system_user: true
+#   - name: michel                                    # Existing Linux user
+#     password: "{{ vault_samba_michel_password }}"
+
+# PCS resource settings
+nas_samba_pcs_enabled: true
+nas_samba_pcs_resource_name: "smb-service"
+nas_samba_pcs_group: "group-nas"
+nas_samba_pcs_monitor_interval: "30s"
+nas_samba_pcs_start_timeout: "30s"
+nas_samba_pcs_stop_timeout: "30s"
