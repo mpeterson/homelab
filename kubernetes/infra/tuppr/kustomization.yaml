@@ -14,7 +14,7 @@ helmCharts:
   - name: tuppr
     repo: oci://ghcr.io/home-operations/charts
     # renovate: datasource=docker depName=ghcr.io/home-operations/charts/tuppr
-    version: 0.1.4
+    version: 0.1.35
     releaseName: tuppr
     namespace: *ns
     valuesFile: values.yaml
