@@ -16,13 +16,13 @@ helmCharts:
   - name: prometheus-operator-crds
     repo: https://prometheus-community.github.io/helm-charts
     # renovate: datasource=helm registryUrl=https://prometheus-community.github.io/helm-charts depName=prometheus-operator-crds
-    version: 28.0.1
+    version: 29.0.0
     releaseName: prometheus-operator-crds
     namespace: *ns
   - name: kube-prometheus-stack
     repo: https://prometheus-community.github.io/helm-charts
     # renovate: datasource=helm registryUrl=https://prometheus-community.github.io/helm-charts depName=kube-prometheus-stack
-    version: 83.7.0
+    version: 85.2.0
     releaseName: kube-prometheus-stack
     namespace: *ns
     valuesFile: values.yaml
