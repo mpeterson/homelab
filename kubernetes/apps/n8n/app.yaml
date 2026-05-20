@@ -17,7 +17,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
-      value: app-template@4.6.2
+      value: app-template@5.0.1
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/n8n-io/n8n
       value: ghcr.io/n8n-io/n8n:2.22.0@sha256:c501989f400554913670d26aab8e5541266b76d0ca6edf610eaba3b5d8595052

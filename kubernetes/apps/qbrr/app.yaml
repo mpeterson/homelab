@@ -17,7 +17,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
-      value: app-template@4.6.2
+      value: app-template@5.0.1
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/buroa/qbrr
       value: ghcr.io/buroa/qbrr:0.1.4@sha256:35dce0dafb56f20d628b84eeb0e0214ee55fe18d452e27c850e62d163e239d8f
