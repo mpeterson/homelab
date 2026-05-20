@@ -19,7 +19,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://piraeus.io/helm-charts/ depName=snapshot-controller
-      value: snapshot-controller@5.0.3
+      value: snapshot-controller@5.0.4
 
   syncPolicy:
     syncOptions:
