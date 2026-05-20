@@ -17,7 +17,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://vmware-tanzu.github.io/helm-charts depName=velero
-      value: velero@12.0.0
+      value: velero@12.0.1
 
   syncPolicy:
     syncOptions:
