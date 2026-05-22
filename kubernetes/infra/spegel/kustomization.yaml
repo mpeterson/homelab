@@ -9,7 +9,7 @@ helmCharts:
   - name: spegel
     repo: oci://ghcr.io/spegel-org/helm-charts
     # renovate: datasource=docker depName=ghcr.io/spegel-org/helm-charts/spegel
-    version: 0.7.0
+    version: 0.7.1
     releaseName: spegel
     namespace: *ns
     valuesFile: values.yaml
