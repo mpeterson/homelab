@@ -15,7 +15,7 @@ helmCharts:
   - name: tailscale-operator
     repo: https://pkgs.tailscale.com/helmcharts
     # renovate: datasource=helm registryUrl=https://pkgs.tailscale.com/helmcharts depName=tailscale-operator
-    version: 1.96.5
+    version: 1.98.3
     releaseName: tailscale-operator
     namespace: *ns
     valuesFile: values.yaml
