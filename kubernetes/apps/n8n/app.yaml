@@ -20,7 +20,7 @@ spec:
       value: app-template@4.6.2
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/n8n-io/n8n
-      value: ghcr.io/n8n-io/n8n:2.23.0@sha256:8978cc98ec5ba609bdbf250d27ea672ac893ad55f4a61a026d808867381ff9fd
+      value: ghcr.io/n8n-io/n8n:2.23.1@sha256:a0aa4012094eec804c17ef8014b1e397a337d33f63faebf33b439388ada93289
 
   syncPolicy:
     syncOptions:
