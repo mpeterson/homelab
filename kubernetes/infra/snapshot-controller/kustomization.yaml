@@ -9,6 +9,6 @@ helmCharts:
   - name: snapshot-controller
     repo: https://piraeus.io/helm-charts/
     # renovate: datasource=helm registryUrl=https://piraeus.io/helm-charts/ depName=snapshot-controller
-    version: 5.0.3
+    version: 5.0.4
     releaseName: snapshot-controller
     namespace: *ns
