@@ -19,7 +19,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
-      value: cilium@1.18.7
+      value: cilium@1.19.4
 
   syncPolicy:
     syncOptions:
