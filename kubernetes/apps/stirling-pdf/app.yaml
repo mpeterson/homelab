@@ -17,7 +17,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
-      value: app-template@4.6.2
+      value: app-template@5.0.1
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/stirling-tools/s-pdf
       value: ghcr.io/stirling-tools/s-pdf:2.11.0-fat@sha256:fc747128f97652a99318ae861f1cdd56abe9b105d1d62e07bff3c2d781ea595f

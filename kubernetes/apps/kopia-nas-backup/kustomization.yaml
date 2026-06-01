@@ -17,7 +17,7 @@ helmCharts:
   - name: app-template
     repo: https://bjw-s-labs.github.io/helm-charts
     # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
-    version: 4.6.2
+    version: 5.0.1
     releaseName: kopia-nas-backup
     namespace: *ns
     valuesFile: values.yaml
