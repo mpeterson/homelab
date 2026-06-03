@@ -11,7 +11,7 @@ helmCharts:
   - name: cilium
     repo: https://helm.cilium.io
     # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
-    version: 1.18.7
+    version: 1.19.4
     releaseName: cilium
     namespace: kube-system
     valuesFile: values.yaml
