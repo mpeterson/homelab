@@ -20,7 +20,7 @@ spec:
       value: app-template@4.6.2
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/buroa/qbrr
-      value: ghcr.io/buroa/qbrr:0.1.4@sha256:35dce0dafb56f20d628b84eeb0e0214ee55fe18d452e27c850e62d163e239d8f
+      value: ghcr.io/buroa/qbrr:0.1.6@sha256:50baeb6633f144b7220777c56a8d501ea708d43043e28eb416d93e4e96efe06b
 
   syncPolicy:
     syncOptions:
