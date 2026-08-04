@@ -8,8 +8,6 @@ controllers:
     #   reloader.stakater.com/auto: "true"
 
     pod:
-      annotations:
-        backup.velero.io/backup-volumes: data
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000

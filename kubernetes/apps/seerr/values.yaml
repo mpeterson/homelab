@@ -6,7 +6,7 @@ controllers:
   overseerr:
     pod:
       annotations:
-        backup.velero.io/backup-volumes: config
+        backup.velero.io/backup-volumes-excludes: cache
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000

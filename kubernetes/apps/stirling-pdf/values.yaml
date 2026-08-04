@@ -7,7 +7,7 @@ controllers:
     replicas: 1
     pod:
       annotations:
-        backup.velero.io/backup-volumes: configs
+        backup.velero.io/backup-volumes-excludes: tessdata,logs,pipeline
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: "OnRootMismatch"

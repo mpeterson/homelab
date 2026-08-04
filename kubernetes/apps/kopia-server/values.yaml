@@ -5,6 +5,8 @@ controllers:
     replicas: 1
 
     pod:
+      annotations:
+        backup.velero.io/backup-volumes-excludes: kopia-cache
       securityContext:
         runAsUser: 65534
         runAsGroup: 100

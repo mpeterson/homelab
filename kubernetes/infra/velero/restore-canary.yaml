@@ -31,8 +31,6 @@ spec:
       labels:
         app.kubernetes.io/name: velero-restore-canary
         app.kubernetes.io/part-of: velero
-      annotations:
-        backup.velero.io/backup-volumes: data
     spec:
       initContainers:
         - name: initialize-sentinel

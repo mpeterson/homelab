@@ -38,7 +38,3 @@ data:
             - emptyDir
         action:
           type: skip
-      - conditions:
-          capacity: "100Gi,"
-        action:
-          type: skip

@@ -155,8 +155,8 @@ velero:
     values="kubernetes/infra/velero/values.yaml"
     policy="kubernetes/infra/velero/resource-policy.yaml"
 
-    if ! mise exec -- yq -e '.schedules.weekly-offsite.template.defaultVolumesToFsBackup == false' "$values" > /dev/null; then
-      _error "$values" "weekly-offsite must use opt-in file-system backup"
+    if ! mise exec -- yq -e '.schedules.weekly-offsite.template.defaultVolumesToFsBackup == true' "$values" > /dev/null; then
+      _error "$values" "weekly-offsite must discover mounted volumes automatically"
       status=1
     fi
 
@@ -170,37 +170,52 @@ velero:
       status=1
     fi
 
-    if ! grep -q 'nfs: {}' "$policy" \
-      || ! grep -q 'capacity: "100Gi,"' "$policy" \
-      || ! grep -q -- '- emptyDir' "$policy" \
-      || ! grep -q 'type: snapshot' "$policy"; then
-      _error "$policy" "policies must force daily CSI snapshots and cap weekly FSB"
+    daily_policy=$(mise exec -- yq -r 'select(.metadata.name == "velero-daily-volume-policies").data."policies.yaml"' "$policy")
+    weekly_policy=$(mise exec -- yq -r 'select(.metadata.name == "velero-weekly-volume-policies").data."policies.yaml"' "$policy")
+
+    if ! printf '%s' "$daily_policy" | mise exec -- yq -e '
+      (.volumePolicies | length) == 3
+      and (.volumePolicies[0].conditions | keys | length) == 1
+      and (.volumePolicies[0].conditions | keys | .[0]) == "nfs"
+      and (.volumePolicies[0].conditions.nfs | tag) == "!!map"
+      and (.volumePolicies[0].conditions.nfs | length) == 0
+      and .volumePolicies[0].action.type == "skip"
+      and (.volumePolicies[1].conditions | keys | length) == 1
+      and (.volumePolicies[1].conditions | keys | .[0]) == "volumeTypes"
+      and (.volumePolicies[1].conditions.volumeTypes | length) == 1
+      and .volumePolicies[1].conditions.volumeTypes[0] == "emptyDir"
+      and .volumePolicies[1].action.type == "skip"
+      and (.volumePolicies[2].conditions | keys | length) == 1
+      and (.volumePolicies[2].conditions | keys | .[0]) == "csi"
+      and (.volumePolicies[2].conditions.csi | tag) == "!!map"
+      and (.volumePolicies[2].conditions.csi | length) == 0
+      and .volumePolicies[2].action.type == "snapshot"
+    ' - > /dev/null; then
+      _error "$policy" "daily policy must snapshot CSI and skip NFS/emptyDir"
       status=1
     fi
 
-    while IFS='|' read -r file query expected; do
-      actual=$(mise exec -- yq -r "$query // \"\"" "$file")
-      if [ "$actual" != "$expected" ]; then
-        _error "$file" "expected Velero FSB volume '$expected', found '${actual:-none}'"
-        status=1
-      fi
-    done <<'EOF'
-    kubernetes/apps/bazarr/values.yaml|.controllers.bazarr.pod.annotations."backup.velero.io/backup-volumes"|config
-    kubernetes/apps/cross-seed/values.yaml|.controllers."cross-seed".pod.annotations."backup.velero.io/backup-volumes"|config
-    kubernetes/apps/mosquitto/values.yaml|.defaultPodOptions.annotations."backup.velero.io/backup-volumes"|data
-    kubernetes/apps/n8n/values.yaml|.controllers.n8n.pod.annotations."backup.velero.io/backup-volumes"|data
-    kubernetes/apps/paperless/values.yaml|.controllers.paperless.pod.annotations."backup.velero.io/backup-volumes"|config
-    kubernetes/apps/plex/values.yaml|.controllers.plex.pod.annotations."backup.velero.io/backup-volumes"|config
-    kubernetes/apps/prowlarr/values.yaml|.controllers.prowlarr.pod.annotations."backup.velero.io/backup-volumes"|config
-    kubernetes/apps/qbittorrent/values.yaml|.controllers.qbittorrent.pod.annotations."backup.velero.io/backup-volumes"|config
-    kubernetes/apps/radarr/values.yaml|.controllers.radarr.pod.annotations."backup.velero.io/backup-volumes"|config
-    kubernetes/apps/rotki/values.yaml|.controllers.rotki.pod.annotations."backup.velero.io/backup-volumes"|config
-    kubernetes/apps/sabnzbd/values.yaml|.controllers.sabnzbd.pod.annotations."backup.velero.io/backup-volumes"|config
-    kubernetes/apps/seerr/values.yaml|.controllers.overseerr.pod.annotations."backup.velero.io/backup-volumes"|config
-    kubernetes/apps/sonarr/values.yaml|.controllers.sonarr.pod.annotations."backup.velero.io/backup-volumes"|config
-    kubernetes/apps/stirling-pdf/values.yaml|.controllers."stirling-pdf".pod.annotations."backup.velero.io/backup-volumes"|configs
-    kubernetes/apps/tautulli/values.yaml|.controllers.tautulli.pod.annotations."backup.velero.io/backup-volumes"|config
-    EOF
+    if ! printf '%s' "$weekly_policy" | mise exec -- yq -e '
+      (.volumePolicies | length) == 2
+      and (.volumePolicies[0].conditions | keys | length) == 1
+      and (.volumePolicies[0].conditions | keys | .[0]) == "nfs"
+      and (.volumePolicies[0].conditions.nfs | tag) == "!!map"
+      and (.volumePolicies[0].conditions.nfs | length) == 0
+      and .volumePolicies[0].action.type == "skip"
+      and (.volumePolicies[1].conditions | keys | length) == 1
+      and (.volumePolicies[1].conditions | keys | .[0]) == "volumeTypes"
+      and (.volumePolicies[1].conditions.volumeTypes | length) == 1
+      and .volumePolicies[1].conditions.volumeTypes[0] == "emptyDir"
+      and .volumePolicies[1].action.type == "skip"
+    ' - > /dev/null; then
+      _error "$policy" "weekly policy must skip NFS and emptyDir"
+      status=1
+    fi
+
+    if grep -R -E -q "^[[:space:]]*['\"]?backup\\.velero\\.io/backup-volumes['\"]?[[:space:]]*:" kubernetes/; then
+      _error "$policy" "FSB inclusion annotations can omit unlisted volumes"
+      status=1
+    fi
 
     exit "$status"
 

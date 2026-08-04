@@ -8,7 +8,7 @@ controllers:
       init-config:
         image:
           repository: &image docker.io/library/eclipse-mosquitto
-          tag: &tag 2.0.22@sha256:914f529386804c8278a4e581526b9be5e1604df44b30daabc70aa97dcefe5268
+          tag: &tag 2.0.22@sha256:212f89e1eaeb2c322d6441b64396e3346026674db8fa9c27beac293405c32b3c
         command: ["/bin/sh", "-c"]
         args:
           - |
@@ -37,8 +37,6 @@ controllers:
             memory: 20Mi
 
 defaultPodOptions:
-  annotations:
-    backup.velero.io/backup-volumes: data
   securityContext:
     runAsNonRoot: true
     runAsUser: 568

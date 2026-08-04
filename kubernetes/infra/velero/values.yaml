@@ -57,7 +57,7 @@ schedules:
     template:
       ttl: "360h"
       storageLocation: cloud
-      defaultVolumesToFsBackup: false
+      defaultVolumesToFsBackup: true
       resourcePolicy:
         kind: ConfigMap
         name: velero-weekly-volume-policies

@@ -6,22 +6,26 @@ managed Backblaze B2 bucket `backup-talos-proxmox-cluster` through the
 
 ## Backup scope
 
-The weekly schedule uses Velero file-system backup in opt-in mode. Workload pod
-templates must explicitly list approved PVC volume names in the
-`backup.velero.io/backup-volumes` annotation.
+The weekly schedule uses FSB in opt-out mode so new mounted application PVCs are
+protected automatically. A Velero volume policy prevents direct NFS and `emptyDir`
+volumes from reaching FSB.
 
-The daily schedule references a separate policy that forces annotated CSI volumes
-through snapshots instead of FSB. This preserves daily local snapshots while the same
-pod annotations opt volumes into weekly offsite FSB.
+The daily schedule references a separate policy that sends CSI volumes through local
+snapshots instead of FSB.
 
 The `velero-weekly-volume-policies` resource policy provides defense in depth:
 
 - all NFS volumes are skipped;
 - `emptyDir` volumes are skipped;
-- individual volumes of 100 GiB or larger are skipped.
+- all other eligible mounted volumes are backed up through FSB.
 
 NAS media and existing backup repositories are protected by their dedicated backup
 processes and must not be included in Velero.
+
+Known disposable cache volumes use
+`backup.velero.io/backup-volumes-excludes` pod annotations. Missing an exclusion can
+only back up extra cache data; it cannot omit application data. Provider-side caps and
+backup alerts bound unexpected growth.
 
 CronJob-only PVCs are not included in weekly FSB because completed Pods do not keep
 their volumes mounted. Their declarative configuration remains in Git and daily local

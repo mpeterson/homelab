@@ -11,6 +11,8 @@ spec:
     metadata:
       labels:
         app: iscsi-health-check
+      annotations:
+        backup.velero.io/backup-volumes-excludes: data
     spec:
       # No CP toleration — iSCSI CSI driver only runs on worker nodes
       containers:
