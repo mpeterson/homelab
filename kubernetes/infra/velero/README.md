@@ -37,6 +37,18 @@ files inside the approved config volume, and restores must include the applicati
 integrity checks. Daily CSI snapshots remain the primary crash-consistent local
 recovery point.
 
+## Restore canary
+
+The restore canary is not deployed by ArgoCD. Run it on demand:
+
+```sh
+mise exec -- just velero test-fsb
+```
+
+The recipe creates a temporary source Pod and PVC, triggers a weekly-style backup,
+restores only the canary into a separate namespace, and compares sentinel checksums.
+It prints explicit namespace cleanup commands after successful validation.
+
 ## Backblaze lifecycle
 
 The bucket configuration is not reconciled by ArgoCD. It must use the following

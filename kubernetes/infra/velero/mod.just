@@ -159,37 +159,53 @@ restore-pvc backup app *pvc: (_require "velero" "kubectl")
 
     echo "==> Done! Verify the application is working correctly."
 
-[doc('Restore and verify the synthetic FSB canary in an isolated namespace')]
-restore-canary backup: (_require "velero" "kubectl" "jq")
+[doc('Create, back up, and restore an on-demand synthetic FSB canary')]
+test-fsb: (_require "velero" "kubectl" "jq")
     #!/usr/bin/env bash
     set -euo pipefail
 
+    SOURCE_NAMESPACE="velero-restore-canary-source"
+    TIMESTAMP=$(date +%s)
+    BACKUP_NAME="velero-restore-canary-$TIMESTAMP"
+    RESTORE_NAME="restore-canary-$TIMESTAMP"
+    RESTORE_NAMESPACE="velero-restore-canary-target-$TIMESTAMP"
+
+    if kubectl get namespace "$SOURCE_NAMESPACE" > /dev/null 2>&1; then
+      echo "ERROR: Namespace '$SOURCE_NAMESPACE' already exists."
+      echo "  Clean up the previous canary before running another test."
+      exit 1
+    fi
+
+    kubectl apply -f kubernetes/infra/velero/restore-canary.yaml
+    kubectl wait pod/velero-restore-canary \
+      -n "$SOURCE_NAMESPACE" \
+      --for=condition=Ready \
+      --timeout=5m
+
+    EXPECTED_SHA=$(kubectl exec -n "$SOURCE_NAMESPACE" velero-restore-canary -- \
+      sha256sum /data/sentinel.txt | awk '{print $1}')
+
+    velero backup create "$BACKUP_NAME" \
+      --from-schedule velero-weekly-offsite \
+      --wait
+
     CANARY_PVB_COUNT=$(kubectl get podvolumebackups.velero.io -n velero \
-      -l velero.io/backup-name={{backup}} -o json \
+      -l velero.io/backup-name="$BACKUP_NAME" -o json \
       | jq '[.items[]
-          | select(.spec.pod.namespace == "velero")
-          | select(.spec.pod.name | startswith("velero-restore-canary-"))
+          | select(.spec.pod.namespace == "velero-restore-canary-source")
+          | select(.spec.pod.name == "velero-restore-canary")
           | select(.spec.volume == "data")
           | select(.status.phase == "Completed")]
           | length')
     if [ "$CANARY_PVB_COUNT" -ne 1 ]; then
-      echo "ERROR: Backup '{{backup}}' does not contain one completed canary FSB."
+      echo "ERROR: Backup '$BACKUP_NAME' does not contain one completed canary FSB."
       exit 1
     fi
 
-    SOURCE_POD=$(kubectl get pod -n velero \
-      -l app.kubernetes.io/name=velero-restore-canary \
-      -o jsonpath='{.items[0].metadata.name}')
-    EXPECTED_SHA=$(kubectl exec -n velero "$SOURCE_POD" -- \
-      sha256sum /data/sentinel.txt | awk '{print $1}')
-
-    RESTORE_NAME="restore-canary-$(date +%s)"
-    RESTORE_NAMESPACE="$RESTORE_NAME"
-
     kubectl create namespace "$RESTORE_NAMESPACE"
     velero restore create "$RESTORE_NAME" \
-      --from-backup {{backup}} \
-      --namespace-mappings "velero:$RESTORE_NAMESPACE" \
+      --from-backup "$BACKUP_NAME" \
+      --namespace-mappings "$SOURCE_NAMESPACE:$RESTORE_NAMESPACE" \
       --selector app.kubernetes.io/name=velero-restore-canary \
       --include-resources persistentvolumeclaims,persistentvolumes,pods \
       --existing-resource-policy none \
@@ -200,10 +216,7 @@ restore-canary backup: (_require "velero" "kubectl" "jq")
       -l app.kubernetes.io/name=velero-restore-canary \
       --for=condition=Ready \
       --timeout=10m
-    RESTORED_POD=$(kubectl get pod -n "$RESTORE_NAMESPACE" \
-      -l app.kubernetes.io/name=velero-restore-canary \
-      -o jsonpath='{.items[0].metadata.name}')
-    ACTUAL_SHA=$(kubectl exec -n "$RESTORE_NAMESPACE" "$RESTORED_POD" -- \
+    ACTUAL_SHA=$(kubectl exec -n "$RESTORE_NAMESPACE" velero-restore-canary -- \
       sha256sum /data/sentinel.txt | awk '{print $1}')
 
     if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
@@ -211,6 +224,6 @@ restore-canary backup: (_require "velero" "kubectl" "jq")
       exit 1
     fi
 
-    echo "Canary restore verified in namespace '$RESTORE_NAMESPACE'."
+    echo "Canary restore verified from backup '$BACKUP_NAME'."
     echo "Cleanup requires explicit approval:"
-    echo "  kubectl delete namespace $RESTORE_NAMESPACE"
+    echo "  kubectl delete namespace $SOURCE_NAMESPACE $RESTORE_NAMESPACE"
