@@ -12,6 +12,9 @@ default:
     @printf "\033[1;34m==> Validating Helm charts...\033[0m \033[2m(just validate helm)\033[0m\n"
     @just validate helm
     @echo ""
+    @printf "\033[1;34m==> Validating Velero backup policy...\033[0m \033[2m(just validate velero)\033[0m\n"
+    @just validate velero
+    @echo ""
     @printf "\033[1;34m==> Verifying container images...\033[0m \033[2m(just validate images)\033[0m\n"
     @just validate images
 
@@ -137,6 +140,82 @@ helm:
         rm -f "$values_file" "$err_file"
       done
     done < <(find kubernetes/ -name '*.yaml' -not -name '*.sops.yaml' -not -path '*/bootstrap/*' -type f)
+
+    exit "$status"
+
+[doc('Validate Velero file-system backup allowlist and safety policy')]
+velero:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ _error_fn }}
+    mise install --quiet
+    cd "{{ repo_root }}"
+    status=0
+
+    values="kubernetes/infra/velero/values.yaml"
+    policy="kubernetes/infra/velero/resource-policy.yaml"
+
+    if ! mise exec -- yq -e '.schedules.weekly-offsite.template.defaultVolumesToFsBackup == true' "$values" > /dev/null; then
+      _error "$values" "weekly-offsite must discover mounted volumes automatically"
+      status=1
+    fi
+
+    if ! mise exec -- yq -e '.schedules.weekly-offsite.template.resourcePolicy.name == "velero-weekly-volume-policies"' "$values" > /dev/null; then
+      _error "$values" "weekly-offsite must reference velero-weekly-volume-policies"
+      status=1
+    fi
+
+    if ! mise exec -- yq -e '.schedules.daily-backups.template.resourcePolicy.name == "velero-daily-volume-policies"' "$values" > /dev/null; then
+      _error "$values" "daily-backups must reference velero-daily-volume-policies"
+      status=1
+    fi
+
+    daily_policy=$(mise exec -- yq -r 'select(.metadata.name == "velero-daily-volume-policies").data."policies.yaml"' "$policy")
+    weekly_policy=$(mise exec -- yq -r 'select(.metadata.name == "velero-weekly-volume-policies").data."policies.yaml"' "$policy")
+
+    if ! printf '%s' "$daily_policy" | mise exec -- yq -e '
+      (.volumePolicies | length) == 3
+      and (.volumePolicies[0].conditions | keys | length) == 1
+      and (.volumePolicies[0].conditions | keys | .[0]) == "nfs"
+      and (.volumePolicies[0].conditions.nfs | tag) == "!!map"
+      and (.volumePolicies[0].conditions.nfs | length) == 0
+      and .volumePolicies[0].action.type == "skip"
+      and (.volumePolicies[1].conditions | keys | length) == 1
+      and (.volumePolicies[1].conditions | keys | .[0]) == "volumeTypes"
+      and (.volumePolicies[1].conditions.volumeTypes | length) == 1
+      and .volumePolicies[1].conditions.volumeTypes[0] == "emptyDir"
+      and .volumePolicies[1].action.type == "skip"
+      and (.volumePolicies[2].conditions | keys | length) == 1
+      and (.volumePolicies[2].conditions | keys | .[0]) == "csi"
+      and (.volumePolicies[2].conditions.csi | tag) == "!!map"
+      and (.volumePolicies[2].conditions.csi | length) == 0
+      and .volumePolicies[2].action.type == "snapshot"
+    ' - > /dev/null; then
+      _error "$policy" "daily policy must snapshot CSI and skip NFS/emptyDir"
+      status=1
+    fi
+
+    if ! printf '%s' "$weekly_policy" | mise exec -- yq -e '
+      (.volumePolicies | length) == 2
+      and (.volumePolicies[0].conditions | keys | length) == 1
+      and (.volumePolicies[0].conditions | keys | .[0]) == "nfs"
+      and (.volumePolicies[0].conditions.nfs | tag) == "!!map"
+      and (.volumePolicies[0].conditions.nfs | length) == 0
+      and .volumePolicies[0].action.type == "skip"
+      and (.volumePolicies[1].conditions | keys | length) == 1
+      and (.volumePolicies[1].conditions | keys | .[0]) == "volumeTypes"
+      and (.volumePolicies[1].conditions.volumeTypes | length) == 1
+      and .volumePolicies[1].conditions.volumeTypes[0] == "emptyDir"
+      and .volumePolicies[1].action.type == "skip"
+    ' - > /dev/null; then
+      _error "$policy" "weekly policy must skip NFS and emptyDir"
+      status=1
+    fi
+
+    if grep -R -E -q "^[[:space:]]*['\"]?backup\\.velero\\.io/backup-volumes['\"]?[[:space:]]*:" kubernetes/; then
+      _error "$policy" "FSB inclusion annotations can omit unlisted volumes"
+      status=1
+    fi
 
     exit "$status"
 

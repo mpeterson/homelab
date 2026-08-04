@@ -5,6 +5,10 @@ kind: Kustomization
 
 namespace: &ns velero
 
+resources:
+  - prometheusrule.yaml
+  - resource-policy.yaml
+
 generators:
   - secret-generator.yaml
 

@@ -1,0 +1,89 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: velero-restore-canary-source
+  labels:
+    app.kubernetes.io/name: velero-restore-canary
+    app.kubernetes.io/part-of: velero
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: velero-restore-canary
+  namespace: velero-restore-canary-source
+  labels:
+    app.kubernetes.io/name: velero-restore-canary
+    app.kubernetes.io/part-of: velero
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: zfs-generic-iscsi-csi-xfs
+  resources:
+    requests:
+      storage: 64Mi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: velero-restore-canary
+  namespace: velero-restore-canary-source
+  labels:
+    app.kubernetes.io/name: velero-restore-canary
+    app.kubernetes.io/part-of: velero
+spec:
+  initContainers:
+    - name: initialize-sentinel
+      image: busybox:1.37.0@sha256:1487d0af5f52b4ba31c7e465126ee2123fe3f2305d638e7827681e7cf6c83d5e
+      command:
+        - sh
+        - -c
+        - |
+          if [ ! -f /data/sentinel.txt ]; then
+            {
+              date -u +%Y-%m-%dT%H:%M:%SZ
+              cat /proc/sys/kernel/random/uuid
+            } > /data/sentinel.txt
+          fi
+          sha256sum /data/sentinel.txt > /data/sentinel.sha256
+      volumeMounts:
+        - name: data
+          mountPath: /data
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - "ALL"
+  containers:
+    - name: canary
+      image: busybox:1.37.0@sha256:1487d0af5f52b4ba31c7e465126ee2123fe3f2305d638e7827681e7cf6c83d5e
+      command:
+        - sh
+        - -c
+        - sleep infinity
+      resources:
+        requests:
+          cpu: 1m
+          memory: 4Mi
+        limits:
+          memory: 16Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - "ALL"
+      volumeMounts:
+        - name: data
+          mountPath: /data
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    fsGroup: 65534
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: velero-restore-canary

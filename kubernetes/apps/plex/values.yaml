@@ -5,6 +5,8 @@ strategy: RollingUpdate
 controllers:
   plex:
     pod:
+      annotations:
+        backup.velero.io/backup-volumes-excludes: cache
       runtimeClassName: nvidia
       securityContext:
         runAsUser: 65534

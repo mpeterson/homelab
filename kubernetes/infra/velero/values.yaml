@@ -9,6 +9,11 @@ initContainers:
 
 deployNodeAgent: true
 
+metrics:
+  serviceMonitor:
+    autodetect: false
+    enabled: true
+
 configuration:
   backupStorageLocation:
     - name: cloud
@@ -40,6 +45,9 @@ schedules:
     template:
       ttl: "240h"
       storageLocation: cloud
+      resourcePolicy:
+        kind: ConfigMap
+        name: velero-daily-volume-policies
       includedNamespaces:
         - '*'
   weekly-offsite:
@@ -50,6 +58,9 @@ schedules:
       ttl: "360h"
       storageLocation: cloud
       defaultVolumesToFsBackup: true
+      resourcePolicy:
+        kind: ConfigMap
+        name: velero-weekly-volume-policies
       includedNamespaces:
         - '*'
       excludedNamespaces:

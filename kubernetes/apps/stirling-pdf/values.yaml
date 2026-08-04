@@ -6,6 +6,8 @@ controllers:
   stirling-pdf:
     replicas: 1
     pod:
+      annotations:
+        backup.velero.io/backup-volumes-excludes: logs,pipeline
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: "OnRootMismatch"
@@ -90,8 +92,6 @@ persistence:
     storageClass: zfs-generic-iscsi-csi-xfs
     accessMode: ReadWriteOnce
     size: 1Gi
-    labels:
-      velero.io/exclude-from-backup: "true"
     globalMounts:
       - path: /usr/share/tessdata
   logs:

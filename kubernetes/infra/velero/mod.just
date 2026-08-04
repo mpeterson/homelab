@@ -54,6 +54,9 @@ view-pvc backup filter="": (_require "velero")
       echo "$PVCS" | awk -F'/' '{printf "  %-20s %s\n", $1, $2}'
     fi
 
+# This workflow restores CSI snapshots from daily backups. FSB backups require a
+# whole-workload restore so Velero can inject the PodVolumeRestore helper.
+#
 # Usage:
 #   just velero restore-pvc velero-daily-backups-20260316010049 overseerr
 #   just velero restore-pvc velero-daily-backups-20260325010002 paperless paperless-data
@@ -69,6 +72,15 @@ restore-pvc backup app *pvc: (_require "velero" "kubectl")
       exit 1
     }
     echo "==> Resolved namespace: $NAMESPACE"
+
+    PVB_COUNT=$(kubectl get podvolumebackups.velero.io -n velero \
+      -l velero.io/backup-name={{backup}} \
+      -o jsonpath='{.items[*].metadata.name}' | wc -w | tr -d ' ')
+    if [ "$PVB_COUNT" -gt 0 ]; then
+      echo "ERROR: Backup '{{backup}}' contains file-system backups."
+      echo "  restore-pvc supports CSI snapshot backups only."
+      exit 1
+    fi
 
     echo "==> Pausing ArgoCD reconciliation for '{{app}}'..."
     just argocd pause {{app}}
@@ -146,3 +158,72 @@ restore-pvc backup app *pvc: (_require "velero" "kubectl")
     just argocd resume {{app}}
 
     echo "==> Done! Verify the application is working correctly."
+
+[doc('Create, back up, and restore an on-demand synthetic FSB canary')]
+test-fsb: (_require "velero" "kubectl" "jq")
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    SOURCE_NAMESPACE="velero-restore-canary-source"
+    TIMESTAMP=$(date +%s)
+    BACKUP_NAME="velero-restore-canary-$TIMESTAMP"
+    RESTORE_NAME="restore-canary-$TIMESTAMP"
+    RESTORE_NAMESPACE="velero-restore-canary-target-$TIMESTAMP"
+
+    if kubectl get namespace "$SOURCE_NAMESPACE" > /dev/null 2>&1; then
+      echo "ERROR: Namespace '$SOURCE_NAMESPACE' already exists."
+      echo "  Clean up the previous canary before running another test."
+      exit 1
+    fi
+
+    kubectl apply -f kubernetes/infra/velero/restore-canary.yaml
+    kubectl wait pod/velero-restore-canary \
+      -n "$SOURCE_NAMESPACE" \
+      --for=condition=Ready \
+      --timeout=5m
+
+    EXPECTED_SHA=$(kubectl exec -n "$SOURCE_NAMESPACE" velero-restore-canary -- \
+      sha256sum /data/sentinel.txt | awk '{print $1}')
+
+    velero backup create "$BACKUP_NAME" \
+      --from-schedule velero-weekly-offsite \
+      --wait
+
+    CANARY_PVB_COUNT=$(kubectl get podvolumebackups.velero.io -n velero \
+      -l velero.io/backup-name="$BACKUP_NAME" -o json \
+      | jq '[.items[]
+          | select(.spec.pod.namespace == "velero-restore-canary-source")
+          | select(.spec.pod.name == "velero-restore-canary")
+          | select(.spec.volume == "data")
+          | select(.status.phase == "Completed")]
+          | length')
+    if [ "$CANARY_PVB_COUNT" -ne 1 ]; then
+      echo "ERROR: Backup '$BACKUP_NAME' does not contain one completed canary FSB."
+      exit 1
+    fi
+
+    kubectl create namespace "$RESTORE_NAMESPACE"
+    velero restore create "$RESTORE_NAME" \
+      --from-backup "$BACKUP_NAME" \
+      --namespace-mappings "$SOURCE_NAMESPACE:$RESTORE_NAMESPACE" \
+      --selector app.kubernetes.io/name=velero-restore-canary \
+      --include-resources persistentvolumeclaims,persistentvolumes,pods \
+      --existing-resource-policy none \
+      --wait
+
+    kubectl wait pod \
+      -n "$RESTORE_NAMESPACE" \
+      -l app.kubernetes.io/name=velero-restore-canary \
+      --for=condition=Ready \
+      --timeout=10m
+    ACTUAL_SHA=$(kubectl exec -n "$RESTORE_NAMESPACE" velero-restore-canary -- \
+      sha256sum /data/sentinel.txt | awk '{print $1}')
+
+    if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
+      echo "ERROR: Restored canary checksum does not match the source."
+      exit 1
+    fi
+
+    echo "Canary restore verified from backup '$BACKUP_NAME'."
+    echo "Cleanup requires explicit approval:"
+    echo "  kubectl delete namespace $SOURCE_NAMESPACE $RESTORE_NAMESPACE"
