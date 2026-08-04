@@ -6,6 +6,8 @@ controllers:
   stirling-pdf:
     replicas: 1
     pod:
+      annotations:
+        backup.velero.io/backup-volumes: configs
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: "OnRootMismatch"

@@ -12,6 +12,9 @@ default:
     @printf "\033[1;34m==> Validating Helm charts...\033[0m \033[2m(just validate helm)\033[0m\n"
     @just validate helm
     @echo ""
+    @printf "\033[1;34m==> Validating Velero backup policy...\033[0m \033[2m(just validate velero)\033[0m\n"
+    @just validate velero
+    @echo ""
     @printf "\033[1;34m==> Verifying container images...\033[0m \033[2m(just validate images)\033[0m\n"
     @just validate images
 
@@ -137,6 +140,67 @@ helm:
         rm -f "$values_file" "$err_file"
       done
     done < <(find kubernetes/ -name '*.yaml' -not -name '*.sops.yaml' -not -path '*/bootstrap/*' -type f)
+
+    exit "$status"
+
+[doc('Validate Velero file-system backup allowlist and safety policy')]
+velero:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ _error_fn }}
+    mise install --quiet
+    cd "{{ repo_root }}"
+    status=0
+
+    values="kubernetes/infra/velero/values.yaml"
+    policy="kubernetes/infra/velero/resource-policy.yaml"
+
+    if ! mise exec -- yq -e '.schedules.weekly-offsite.template.defaultVolumesToFsBackup == false' "$values" > /dev/null; then
+      _error "$values" "weekly-offsite must use opt-in file-system backup"
+      status=1
+    fi
+
+    if ! mise exec -- yq -e '.schedules.weekly-offsite.template.resourcePolicy.name == "velero-weekly-volume-policies"' "$values" > /dev/null; then
+      _error "$values" "weekly-offsite must reference velero-weekly-volume-policies"
+      status=1
+    fi
+
+    if ! mise exec -- yq -e '.schedules.daily-backups.template.resourcePolicy.name == "velero-daily-volume-policies"' "$values" > /dev/null; then
+      _error "$values" "daily-backups must reference velero-daily-volume-policies"
+      status=1
+    fi
+
+    if ! grep -q 'nfs: {}' "$policy" \
+      || ! grep -q 'capacity: "100Gi,"' "$policy" \
+      || ! grep -q -- '- emptyDir' "$policy" \
+      || ! grep -q 'type: snapshot' "$policy"; then
+      _error "$policy" "policies must force daily CSI snapshots and cap weekly FSB"
+      status=1
+    fi
+
+    while IFS='|' read -r file query expected; do
+      actual=$(mise exec -- yq -r "$query // \"\"" "$file")
+      if [ "$actual" != "$expected" ]; then
+        _error "$file" "expected Velero FSB volume '$expected', found '${actual:-none}'"
+        status=1
+      fi
+    done <<'EOF'
+    kubernetes/apps/bazarr/values.yaml|.controllers.bazarr.pod.annotations."backup.velero.io/backup-volumes"|config
+    kubernetes/apps/cross-seed/values.yaml|.controllers."cross-seed".pod.annotations."backup.velero.io/backup-volumes"|config
+    kubernetes/apps/mosquitto/values.yaml|.defaultPodOptions.annotations."backup.velero.io/backup-volumes"|data
+    kubernetes/apps/n8n/values.yaml|.controllers.n8n.pod.annotations."backup.velero.io/backup-volumes"|data
+    kubernetes/apps/paperless/values.yaml|.controllers.paperless.pod.annotations."backup.velero.io/backup-volumes"|config
+    kubernetes/apps/plex/values.yaml|.controllers.plex.pod.annotations."backup.velero.io/backup-volumes"|config
+    kubernetes/apps/prowlarr/values.yaml|.controllers.prowlarr.pod.annotations."backup.velero.io/backup-volumes"|config
+    kubernetes/apps/qbittorrent/values.yaml|.controllers.qbittorrent.pod.annotations."backup.velero.io/backup-volumes"|config
+    kubernetes/apps/radarr/values.yaml|.controllers.radarr.pod.annotations."backup.velero.io/backup-volumes"|config
+    kubernetes/apps/rotki/values.yaml|.controllers.rotki.pod.annotations."backup.velero.io/backup-volumes"|config
+    kubernetes/apps/sabnzbd/values.yaml|.controllers.sabnzbd.pod.annotations."backup.velero.io/backup-volumes"|config
+    kubernetes/apps/seerr/values.yaml|.controllers.overseerr.pod.annotations."backup.velero.io/backup-volumes"|config
+    kubernetes/apps/sonarr/values.yaml|.controllers.sonarr.pod.annotations."backup.velero.io/backup-volumes"|config
+    kubernetes/apps/stirling-pdf/values.yaml|.controllers."stirling-pdf".pod.annotations."backup.velero.io/backup-volumes"|configs
+    kubernetes/apps/tautulli/values.yaml|.controllers.tautulli.pod.annotations."backup.velero.io/backup-volumes"|config
+    EOF
 
     exit "$status"
 

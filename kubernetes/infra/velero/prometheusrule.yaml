@@ -1,0 +1,78 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: velero-rules
+spec:
+  groups:
+    - name: velero.rules
+      rules:
+        - alert: VeleroWeeklyBackupFailed
+          expr: |-
+            increase(velero_backup_failure_total{schedule="velero-weekly-offsite"}[8d]) > 0
+            or
+            increase(velero_backup_partial_failure_total{schedule="velero-weekly-offsite"}[8d]) > 0
+            or
+            increase(velero_backup_validation_failure_total{schedule="velero-weekly-offsite"}[8d]) > 0
+          for: 5m
+          annotations:
+            summary: The weekly Velero offsite backup failed or partially failed
+          labels:
+            severity: critical
+        - alert: VeleroWeeklyBackupStale
+          expr: |-
+            (
+              time() - velero_backup_last_successful_timestamp{schedule="velero-weekly-offsite"} > 691200
+            )
+            or
+            absent(velero_backup_last_successful_timestamp{schedule="velero-weekly-offsite"})
+          for: 1h
+          annotations:
+            summary: No successful weekly Velero offsite backup exists in the last eight days
+          labels:
+            severity: critical
+        - alert: VeleroBackupDeletionFailed
+          expr: |-
+            increase(velero_backup_deletion_failure_total[1h]) > 0
+          for: 5m
+          annotations:
+            summary: Velero failed to delete an expired backup
+          labels:
+            severity: critical
+        - alert: VeleroBackupStorageUnavailable
+          expr: |-
+            velero_backup_location_status_gauge{backup_location_name="cloud"} != 1
+          for: 15m
+          annotations:
+            summary: Velero cannot access the Backblaze B2 backup location
+          labels:
+            severity: critical
+        - alert: VeleroRepositoryMaintenanceFailed
+          expr: |-
+            kube_job_status_failed{namespace="velero",job_name=~".*-maintain-job-.*"} > 0
+          for: 5m
+          annotations:
+            summary: A Velero Kopia repository maintenance job failed
+          labels:
+            severity: critical
+        - alert: VeleroWeeklyBackupTooSlow
+          expr: |-
+            (
+              increase(velero_backup_duration_seconds_sum{schedule="velero-weekly-offsite"}[8d])
+              /
+              increase(velero_backup_duration_seconds_count{schedule="velero-weekly-offsite"}[8d])
+            ) > 7200
+          for: 5m
+          annotations:
+            summary: The weekly Velero offsite backup took more than two hours
+          labels:
+            severity: warning
+        - alert: VeleroWeeklyBackupItemErrors
+          expr: |-
+            velero_backup_items_errors{schedule="velero-weekly-offsite"} > 0
+          for: 15m
+          annotations:
+            summary: The latest weekly Velero offsite backup contains item errors
+          labels:
+            severity: warning

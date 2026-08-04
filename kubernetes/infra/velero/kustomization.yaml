@@ -5,6 +5,11 @@ kind: Kustomization
 
 namespace: &ns velero
 
+resources:
+  - prometheusrule.yaml
+  - resource-policy.yaml
+  - restore-canary.yaml
+
 generators:
   - secret-generator.yaml
 

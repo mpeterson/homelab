@@ -15,7 +15,7 @@ before marking the task complete. Before pushing, run locally:
 
 ```sh
 just lint                   # Lint YAML, JSON, Actions, Markdown, Renovate config
-just validate               # Build Kustomize overlays, template Helm charts, verify images
+just validate               # Build manifests, validate backup policy, verify images
 ```
 
 This catches most CI failures before they hit the PR. Run `just` to list all available commands and submodules.

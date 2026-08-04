@@ -6,6 +6,8 @@ controllers:
   sabnzbd:
     replicas: 1
     pod:
+      annotations:
+        backup.velero.io/backup-volumes: config
       securityContext:
         runAsUser: 65534
         runAsGroup: 100

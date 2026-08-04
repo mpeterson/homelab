@@ -5,6 +5,9 @@ strategy: RollingUpdate
 controllers:
   paperless:
     replicas: 1
+    pod:
+      annotations:
+        backup.velero.io/backup-volumes: config
     containers:
       app:
         image:

@@ -4,6 +4,9 @@ strategy: RollingUpdate
 
 controllers:
   rotki:
+    pod:
+      annotations:
+        backup.velero.io/backup-volumes: config
     # pod:
     #   securityContext:
     #     runAsUser: 65534
