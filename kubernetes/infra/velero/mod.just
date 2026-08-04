@@ -188,6 +188,8 @@ test-fsb: (_require "velero" "kubectl" "jq")
     velero backup create "$BACKUP_NAME" \
       --from-schedule velero-weekly-offsite \
       --wait
+    BACKUP_PHASE=$(kubectl get backup "$BACKUP_NAME" -n velero \
+      -o jsonpath='{.status.phase}')
 
     CANARY_PVB_COUNT=$(kubectl get podvolumebackups.velero.io -n velero \
       -l velero.io/backup-name="$BACKUP_NAME" -o json \
@@ -225,5 +227,10 @@ test-fsb: (_require "velero" "kubectl" "jq")
     fi
 
     echo "Canary restore verified from backup '$BACKUP_NAME'."
+    if [ "$BACKUP_PHASE" != "Completed" ]; then
+      echo "ERROR: Canary restored, but backup phase is '$BACKUP_PHASE'."
+      exit 1
+    fi
+
     echo "Cleanup requires explicit approval:"
     echo "  kubectl delete namespace $SOURCE_NAMESPACE $RESTORE_NAMESPACE"

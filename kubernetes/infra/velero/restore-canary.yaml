@@ -21,7 +21,7 @@ spec:
   storageClassName: zfs-generic-iscsi-csi-xfs
   resources:
     requests:
-      storage: 64Mi
+      storage: 512Mi
 ---
 apiVersion: v1
 kind: Pod
