@@ -176,7 +176,7 @@ test-fsb: (_require "velero" "kubectl" "jq")
       exit 1
     fi
 
-    kubectl apply -f kubernetes/infra/velero/restore-canary.yaml
+    kubectl apply -f restore-canary.yaml
     kubectl wait pod/velero-restore-canary \
       -n "$SOURCE_NAMESPACE" \
       --for=condition=Ready \
