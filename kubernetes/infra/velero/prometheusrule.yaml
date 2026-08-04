@@ -10,11 +10,11 @@ spec:
       rules:
         - alert: VeleroWeeklyBackupFailed
           expr: |-
-            increase(velero_backup_failure_total{schedule="velero-weekly-offsite"}[8d]) > 0
+            increase(velero_backup_failure_total{schedule="velero-weekly-offsite"}[15m]) > 0
             or
-            increase(velero_backup_partial_failure_total{schedule="velero-weekly-offsite"}[8d]) > 0
+            increase(velero_backup_partial_failure_total{schedule="velero-weekly-offsite"}[15m]) > 0
             or
-            increase(velero_backup_validation_failure_total{schedule="velero-weekly-offsite"}[8d]) > 0
+            increase(velero_backup_validation_failure_total{schedule="velero-weekly-offsite"}[15m]) > 0
           for: 5m
           annotations:
             summary: The weekly Velero offsite backup failed or partially failed
