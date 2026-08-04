@@ -19,9 +19,9 @@ auto_install = true
 "aqua:budimanjojo/talhelper" = "3.1.7"
 "pipx:yamllint" = "1.38.0"
 "pipx:ansible-core" = "2.20.4"
-"npm:markdownlint-cli2" = "0.23.1"
+"npm:markdownlint-cli2" = "0.23.2"
 "npm:json5" = "2.2.3"
-"npm:renovate" = { version = "43.270.0", trust_policy_excludes = ["@yarnpkg/libzip@3.2.2"] }
+"npm:renovate" = { version = "43.288.0", trust_policy_excludes = ["@yarnpkg/libzip@3.2.2"] }
 
 [env]
 # Ensure just uses unstable features (needed for mod support)
