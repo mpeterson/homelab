@@ -20,7 +20,7 @@ spec:
       value: app-template@4.6.2
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/home-operations/plex
-      value: ghcr.io/home-operations/plex:1.43.2.10687@sha256:be00a2ad851ea3193cd870636f908eb6425ad89390f23cdb08daa35ab5cceacc
+      value: ghcr.io/home-operations/plex:1.43.3.10861@sha256:235402dacb4c66224052de3dfd4c444044e792185ab27dc83b5c200a55370492
 
   syncPolicy:
     syncOptions:
