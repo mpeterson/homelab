@@ -16,7 +16,7 @@ controllers:
       app:
         image:
           repository: ghcr.io/home-operations/sonarr
-          tag: 4.0.17.2967@sha256:4ff5667a371e08b098858fa2457a99a5fef5f6a32640eb8567efe979d13ac9fc
+          tag: 4.0.19.2997@sha256:01db3e6a923f6e0f3a217baa94b4660cf2f9b45d4166b2fc8c20c67c5221cb78
         env:
           TORRENT_CLIENTS: qBittorrent
           USENET_CLIENTS: SABnzbd
