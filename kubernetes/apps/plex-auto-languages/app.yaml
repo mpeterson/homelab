@@ -20,7 +20,7 @@ spec:
       value: app-template@4.6.2
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/journeydocker/plex-auto-languages
-      value: ghcr.io/journeydocker/plex-auto-languages:1.5.3@sha256:976ad44607f5b1ad71f7cbc7a785d3b708c4abdb61b07f27b84d0a06f67e9ed0
+      value: ghcr.io/journeydocker/plex-auto-languages:1.6.0@sha256:9b00a7877f9f85e0228a5d9aa3df5e6671f1116f1e9a8654e9d3f8ed40f2d694
 
   syncPolicy:
     syncOptions:
