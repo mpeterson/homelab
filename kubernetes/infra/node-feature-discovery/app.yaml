@@ -19,7 +19,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://kubernetes-sigs.github.io/node-feature-discovery/charts depName=node-feature-discovery
-      value: node-feature-discovery@0.18.3
+      value: node-feature-discovery@0.19.0
 
   syncPolicy:
     syncOptions:
