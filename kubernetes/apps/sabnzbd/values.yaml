@@ -16,7 +16,7 @@ controllers:
       app:
         image:
           repository: &image ghcr.io/home-operations/sabnzbd
-          tag: &tag 4.5.5@sha256:f5570c0a370596ab656db6d3baa830b90a6fd9952b71ae805d022a2dcb3db12f
+          tag: &tag 5.0.4@sha256:457be5fad7b83c338a981f1945e1ecae2dedd0cc81cdd2992673b0dc84fc2890
         env:
           SABNZBD__PORT: &port 8080
           SABNZBD__HOST_WHITELIST_ENTRIES: >-
