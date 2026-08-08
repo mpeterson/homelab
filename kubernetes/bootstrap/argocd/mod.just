@@ -6,7 +6,7 @@ repo_root := source_directory() / "../../.."
 # renovate: datasource=docker depName=dagandersen/argocd-diff-preview
 _argocd_diff_preview_version := "v0.2.2@sha256:c1daee4c0a132feebf90126c3f19a21dc5a6ca09e3af9b14a701934ebe4ba346"
 # renovate: datasource=helm registryUrl=https://argoproj.github.io/argo-helm depName=argo-cd
-_argocd_chart_version := "9.4.17"
+_argocd_chart_version := "10.3.0"
 
 [private]
 default:
