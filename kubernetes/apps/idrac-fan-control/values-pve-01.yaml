@@ -15,7 +15,7 @@ controllers:
       app:
         image:
           repository: ghcr.io/tigerblue77/dell_idrac_fan_controller
-          tag: latest@sha256:f2ea4870575f752ffd63d00fc8199878f0d1a676315c19edc0b2ca6a3c384437
+          tag: latest@sha256:2017300d5fb34c9a6cac706dee43dec7a92ca27b2d8e4f8c87c1ba06b7d285aa
         env:
           IDRAC_HOST: 10.2.0.21
           FAN_SPEED: 30
