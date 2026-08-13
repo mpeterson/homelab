@@ -20,7 +20,7 @@ spec:
       value: app-template@4.6.2
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/tigerblue77/dell_idrac_fan_controller
-      value: ghcr.io/tigerblue77/dell_idrac_fan_controller:latest@sha256:2017300d5fb34c9a6cac706dee43dec7a92ca27b2d8e4f8c87c1ba06b7d285aa
+      value: ghcr.io/tigerblue77/dell_idrac_fan_controller:latest@sha256:ed547bb982b1be660752009930c1ce2844262ba697936134316850a41eb46563
 
   syncPolicy:
     syncOptions:
