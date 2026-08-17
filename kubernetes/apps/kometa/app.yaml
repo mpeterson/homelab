@@ -20,7 +20,7 @@ spec:
       value: app-template@4.6.2
     - name: Image
       # renovate: datasource=docker depName=kometateam/kometa
-      value: kometateam/kometa:v2.4.7@sha256:dfb8651d90367914c5de819622f5f18220cd96d4ccb1227e2bf7997270d45eb8
+      value: kometateam/kometa:v2.4.8@sha256:c58f6d4af511613f218b6dafbfc84078af4e5a6089790c1fdba58fd7c5dad70a
 
   syncPolicy:
     syncOptions:
