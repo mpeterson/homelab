@@ -17,7 +17,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://helm.otwld.com/ depName=ollama
-      value: ollama@1.76.0
+      value: ollama@1.77.0
 
   syncPolicy:
     syncOptions:
