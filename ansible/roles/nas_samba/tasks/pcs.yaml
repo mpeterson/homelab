@@ -1,0 +1,80 @@
+---
+- name: Detect PCS designated controller (active node)
+  ansible.builtin.shell: >
+    pcs status | grep -oP 'Current DC: \K[^ ]+'
+  register: _pcs_dc
+  changed_when: false
+  failed_when: _pcs_dc.rc != 0
+  run_once: true
+  when: nas_samba_pcs_enabled
+
+- name: Set active node fact
+  ansible.builtin.set_fact:
+    _pcs_active_node: "{{ _pcs_dc.stdout }}"
+  run_once: true
+  when: nas_samba_pcs_enabled
+
+- name: Check if PCS resource already exists
+  ansible.builtin.shell: >
+    pcs resource status {{ nas_samba_pcs_resource_name }} ||
+    pcs resource config {{ nas_samba_pcs_resource_name }}
+  register: _pcs_resource_check
+  changed_when: false
+  failed_when: false
+  delegate_to: "{{ _pcs_active_node }}"
+  run_once: true
+  when: nas_samba_pcs_enabled
+
+- name: Create PCS resource for Samba
+  ansible.builtin.command: >
+    pcs resource create {{ nas_samba_pcs_resource_name }} systemd:smb
+    op start timeout={{ nas_samba_pcs_start_timeout }}
+    op stop timeout={{ nas_samba_pcs_stop_timeout }}
+    op monitor interval={{ nas_samba_pcs_monitor_interval }}
+  delegate_to: "{{ _pcs_active_node }}"
+  run_once: true
+  when:
+    - nas_samba_pcs_enabled
+    - _pcs_resource_check.rc != 0
+
+- name: Check if colocation constraint exists
+  ansible.builtin.shell: >
+    pcs constraint colocation config
+    | grep -q "resource '{{ nas_samba_pcs_resource_name }}' with resource '{{ nas_samba_pcs_group }}'"
+  register: _pcs_colocation_check
+  changed_when: false
+  failed_when: false
+  delegate_to: "{{ _pcs_active_node }}"
+  run_once: true
+  when: nas_samba_pcs_enabled
+
+- name: Add colocation constraint (Samba runs on same node as group)
+  ansible.builtin.command: >
+    pcs constraint colocation add {{ nas_samba_pcs_resource_name }}
+    with {{ nas_samba_pcs_group }} INFINITY
+  delegate_to: "{{ _pcs_active_node }}"
+  run_once: true
+  when:
+    - nas_samba_pcs_enabled
+    - _pcs_colocation_check.rc != 0
+
+- name: Check if ordering constraint exists
+  ansible.builtin.shell: >
+    pcs constraint order config
+    | grep -q "resource '{{ nas_samba_pcs_group }}'.*then.*resource '{{ nas_samba_pcs_resource_name }}'"
+  register: _pcs_order_check
+  changed_when: false
+  failed_when: false
+  delegate_to: "{{ _pcs_active_node }}"
+  run_once: true
+  when: nas_samba_pcs_enabled
+
+- name: Add ordering constraint (group starts before Samba)
+  ansible.builtin.command: >
+    pcs constraint order {{ nas_samba_pcs_group }}
+    then {{ nas_samba_pcs_resource_name }}
+  delegate_to: "{{ _pcs_active_node }}"
+  run_once: true
+  when:
+    - nas_samba_pcs_enabled
+    - _pcs_order_check.rc != 0

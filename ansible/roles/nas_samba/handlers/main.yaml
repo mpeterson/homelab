@@ -1,0 +1,5 @@
+---
+- name: Reload Samba config
+  ansible.builtin.command: smbcontrol all reload-config
+  listen: Restart Samba
+  failed_when: false

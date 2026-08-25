@@ -1,0 +1,35 @@
+---
+# Samba configuration for NAS cluster
+nas_samba_workgroup: "HOMELAB"
+
+# ZFS dataset shares for video/photo editing
+nas_samba_shares:
+  - name: media
+    path: /tank/media
+    comment: "Media library"
+    valid_users: "editor"
+    writable: true
+    browseable: true
+  - name: projects
+    path: /tank/projects
+    comment: "Video editing projects"
+    valid_users: "editor"
+    writable: true
+    browseable: true
+  - name: photos
+    path: /tank/photos
+    comment: "Photo library"
+    valid_users: "editor"
+    writable: true
+    browseable: true
+
+# Samba users (passwords should be stored in a SOPS-encrypted file)
+# Example SOPS file: nas.sops.yaml with vault_samba_editor_password defined
+nas_samba_users:
+  - name: editor
+    password: "{{ vault_samba_editor_password }}"
+    create_system_user: true
+
+# PCS integration
+nas_samba_pcs_enabled: true
+nas_samba_pcs_group: "group-nas"
