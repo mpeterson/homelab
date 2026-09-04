@@ -68,7 +68,7 @@ controllers:
       redis:
         image:
           repository: ghcr.io/valkey-io/valkey
-          tag: 9.0.4@sha256:bdf93f670fdb026eba9e2cf852c3fa8062f92e850fa181626c3b056e83ef04cf
+          tag: 9.1.2@sha256:475ee65cc75c327407458f5096cdd36954b3de3fc83f4c8ac31a4a8edecbf49e
         resources:
           requests:
             cpu: 5m
