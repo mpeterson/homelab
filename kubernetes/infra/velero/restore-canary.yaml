@@ -34,7 +34,7 @@ metadata:
 spec:
   initContainers:
     - name: initialize-sentinel
-      image: busybox:1.37.0@sha256:1487d0af5f52b4ba31c7e465126ee2123fe3f2305d638e7827681e7cf6c83d5e
+      image: busybox:1.38.0@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616
       command:
         - sh
         - -c
@@ -56,7 +56,7 @@ spec:
             - "ALL"
   containers:
     - name: canary
-      image: busybox:1.37.0@sha256:1487d0af5f52b4ba31c7e465126ee2123fe3f2305d638e7827681e7cf6c83d5e
+      image: busybox:1.38.0@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616
       command:
         - sh
         - -c
