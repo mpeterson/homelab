@@ -65,6 +65,12 @@ route:
       - backendRefs:
           - name: prowlarr
             port: *port
+        filters:
+          - type: RequestHeaderModifier
+            requestHeaderModifier:
+              set:
+                - name: X-Forwarded-Proto
+                  value: https
         matches:
           - path:
               type: PathPrefix
