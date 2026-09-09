@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+POST_PROCESSING_STATUS=${SAB_PP_STATUS:-${7:--1}}
+if [[ "${POST_PROCESSING_STATUS}" != "0" ]]; then
+  printf "Skipping cross-seed: post-processing status is '%s'\n" "${POST_PROCESSING_STATUS}"
+  exit 0
+fi
+
 XSEED_HOST=${XSEED_HOST:-crossseed}
 XSEED_PORT=${XSEED_PORT:-8080}
 XSEED_APIKEY=${XSEED_APIKEY:-unset}
