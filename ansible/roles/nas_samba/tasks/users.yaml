@@ -1,0 +1,21 @@
+---
+- name: Create system users for Samba
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    shell: /sbin/nologin
+    create_home: false
+    system: true
+    state: present
+  loop: "{{ nas_samba_users | selectattr('create_system_user', 'defined') | selectattr('create_system_user') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Set Samba passwords
+  ansible.builtin.shell: >
+    printf '%s\n%s\n' '{{ item.password }}' '{{ item.password }}'
+    | smbpasswd -s -a {{ item.name }}
+  loop: "{{ nas_samba_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+  changed_when: true
+  no_log: true

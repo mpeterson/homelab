@@ -53,6 +53,22 @@ List all available commands:
 just
 ```
 
+### Ansible inventory
+
+Operational inventories are intentionally excluded from this public repository.
+Use `ansible/sample_inventory/` as a template, or keep the real inventory in a
+private sibling repository and pass it explicitly:
+
+```sh
+cd ansible
+ansible-playbook \
+  -i ../../homelab-private/ansible/inventories \
+  playbooks/setup_nas.yaml
+```
+
+Keep credentials encrypted with SOPS even when the inventory repository is
+private. The Age private key must remain outside Git.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

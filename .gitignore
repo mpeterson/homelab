@@ -1,4 +1,5 @@
-inventories
+# Operational Ansible inventories are maintained outside this public repository
+/ansible/inventories/
 hack
 .local
 talos/clusterconfig

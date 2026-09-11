@@ -1,0 +1,29 @@
+---
+- name: Install Samba packages
+  ansible.builtin.dnf:
+    name: "{{ nas_samba_packages }}"
+    state: present
+
+- name: Check if smb service exists
+  ansible.builtin.command: systemctl list-unit-files smb.service
+  register: _smb_service_check
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Disable systemd smb service (PCS manages lifecycle)
+  ansible.builtin.systemd:
+    name: smb
+    enabled: false
+    state: stopped
+  when:
+    - nas_samba_pcs_enabled
+    - _smb_service_check.rc == 0
+
+- name: Ensure /var/lib/samba/ directory exists
+  ansible.builtin.file:
+    path: /var/lib/samba
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
