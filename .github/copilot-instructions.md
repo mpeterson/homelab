@@ -125,6 +125,7 @@ When adding a new app, follow an existing app in the same tier as a template. Lo
 - `disableNameSuffixHash` is NOT used — hash suffixes enable automatic rolling updates on config changes
 - `spec.info` in app.yaml shows Chart and Image versions with `# renovate:` comments for automatic tracking
 - Routing uses Gateway API `HTTPRoute` (Cilium), not Ingress
+- ExternalDNS annotations use the GA prefix `external-dns.kubernetes.io/` (v0.22+ default)
 - Container images are pinned with digest: `repository/image:tag@sha256:...`
 - New apps must be added to the tier's root `kustomization.yaml`
 - Most apps use the bjw-s `app-template` chart; some infra apps use dedicated charts
