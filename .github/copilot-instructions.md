@@ -45,7 +45,20 @@ decision process behind it. Do not include rationale from conversations or plann
 
 ## Commands
 
-All tooling is managed by [mise](https://mise.jdx.dev/) (`.mise.toml`) — run `mise install` to bootstrap. Tasks use [just](https://just.systems/). Run `just` to discover all available recipes including submodules for Talos, ArgoCD, bootstrap, linting, and validation.
+All tooling is managed by [mise](https://mise.jdx.dev/) (`.mise.toml`) — run `mise install` to bootstrap. Tasks use [just](https://just.systems/). Run `just` to discover all available recipes including submodules for Ansible, Talos, ArgoCD, bootstrap, linting, and validation.
+
+### Ansible
+
+Operational inventories live in the private sibling `homelab-private` repository. Use
+`just ansible` to list the Ansible recipes. They default to the sibling inventory path;
+set `ANSIBLE_INVENTORY` to use another file or directory.
+
+```sh
+just ansible install
+just ansible inventory
+just ansible nas
+just ansible dns
+```
 
 ### Talos node operations
 
