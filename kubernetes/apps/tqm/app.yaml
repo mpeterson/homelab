@@ -20,7 +20,7 @@ spec:
       value: app-template@4.6.2
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/home-operations/tqm
-      value: ghcr.io/home-operations/tqm:1.19.0@sha256:025ee0c0c8b75f4c7bffa90216eedb494b9884e092a47e9c49824fe63427808c
+      value: ghcr.io/home-operations/tqm:1.20.0@sha256:c5bdff16ca1107712fd61dc6c39a276488908c702e68e427db889419af042761
 
   syncPolicy:
     syncOptions:
