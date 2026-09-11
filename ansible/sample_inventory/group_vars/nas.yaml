@@ -29,6 +29,9 @@ nas_samba_users:
   - name: editor
     password: "{{ vault_samba_editor_password }}"
     create_system_user: true
+    uid: 2000
+    gid: 2000
+    group: editor
 
 # PCS integration
 nas_samba_pcs_enabled: true

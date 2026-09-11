@@ -4,8 +4,8 @@ Ansible role for managing Samba (SMB/CIFS) on Rocky Linux NAS nodes with
 Pacemaker/PCS high-availability support.
 
 Designed for active/passive HA clusters where PCS manages Samba lifecycle
-alongside ZFS and VIP resources. Samba is added to the existing `group-nas`
-resource group, which provides implicit colocation and ordering.
+alongside ZFS and VIP resources. Samba remains a standalone resource with
+colocation and ordering constraints against the existing `group-nas` group.
 
 ## Variables
 
@@ -53,21 +53,26 @@ nas_samba_shares:
 
 ## User definition
 
-Passwords **must** come from Ansible Vault variables:
+Passwords **must** come from SOPS-encrypted variables:
 
 ```yaml
 nas_samba_users:
   - name: editor                                    # New dedicated SMB user
     password: "{{ vault_samba_editor_password }}"
     create_system_user: true
+    uid: 2000
+    gid: 2000
+    group: editor
   - name: michel                                    # Existing Linux user
     password: "{{ vault_samba_michel_password }}"
     create_system_user: false
 ```
 
-When `create_system_user` is omitted it defaults to `true` (backward compatible).
-Set it to `false` for users that already exist on the host to avoid changing
-their shell or other properties.
+When `create_system_user` is omitted it defaults to `false`. Existing users
+must already exist with matching UID/GID values on every NAS node. New users
+require explicit `uid`, `gid`, and `group` values so failover preserves numeric
+ownership and ACL identities. The role validates existing identities and
+refuses to rewrite them.
 
 ## Example playbook
 
@@ -97,7 +102,12 @@ This isolates Samba failures from the ZFS/VIP/iSCSI stack — a transient
 Samba restart won't cascade to other resources.
 
 When `nas_samba_pcs_enabled` is true, the systemd `smb` service is disabled —
-PCS is the sole owner of the Samba lifecycle.
+PCS is the sole owner of the Samba runtime lifecycle. Rerunning the role does
+not stop or enable an existing PCS resource. On initial creation, the resource
+remains stopped until both constraints are installed, then it is enabled.
+Existing resource operation settings and constraints are validated but never
+rewritten automatically; configuration drift fails the play before mutation so
+an operator can reconcile the live cluster explicitly.
 
 ## File permissions (POSIX ACLs)
 

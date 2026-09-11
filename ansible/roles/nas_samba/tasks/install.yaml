@@ -11,11 +11,10 @@
   failed_when: false
   check_mode: false
 
-- name: Disable systemd smb service (PCS manages lifecycle)
+- name: Disable smb service at boot (PCS manages runtime lifecycle)
   ansible.builtin.systemd:
     name: smb
     enabled: false
-    state: stopped
   when:
     - nas_samba_pcs_enabled
     - _smb_service_check.rc == 0

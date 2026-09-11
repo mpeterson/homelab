@@ -39,11 +39,16 @@ nas_samba_shares: []
 # Samba users — list of dicts (passwords from SOPS-encrypted vars)
 # Set create_system_user: true to create a dedicated system user.
 # Omitting create_system_user (or setting false) skips user creation — use for existing Linux users.
+# Existing users must have matching UID/GID values on every NAS node. New users
+# require explicit uid, gid, and group values to keep identities consistent.
 nas_samba_users: []
 # Example:
 #   - name: editor                                    # New dedicated SMB user
 #     password: "{{ vault_samba_editor_password }}"
 #     create_system_user: true
+#     uid: 2000
+#     gid: 2000
+#     group: editor
 #   - name: michel                                    # Existing Linux user
 #     password: "{{ vault_samba_michel_password }}"
 
