@@ -1,3 +1,6 @@
 ---
 # Disable line length - badge URLs and tech descriptions are naturally long
 MD013: false
+# Allow duplicate headings under different parents (e.g. "Procedure" under each test)
+MD024:
+  siblings_only: true

@@ -1,0 +1,9 @@
+---
+nas:
+  children:
+    nas_nodes:
+      hosts:
+        nas-01.local.example.com:
+          ansible_user: root
+        nas-02.local.example.com:
+          ansible_user: root

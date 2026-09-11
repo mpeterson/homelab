@@ -1,0 +1,14 @@
+---
+- name: Check if SELinux is enabled
+  ansible.builtin.command: getenforce
+  register: _selinux_status
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Enable samba_export_all_rw SELinux boolean
+  ansible.posix.seboolean:
+    name: samba_export_all_rw
+    state: true
+    persistent: true
+  when: _selinux_status.stdout | default('') in ['Enforcing', 'Permissive']

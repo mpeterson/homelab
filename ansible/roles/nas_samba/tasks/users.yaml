@@ -1,0 +1,143 @@
+---
+- name: Initialize Samba account specifications
+  ansible.builtin.set_fact:
+    _nas_samba_account_specs: []
+
+- name: Build Samba account specifications
+  ansible.builtin.set_fact:
+    _nas_samba_account_specs: >-
+      {{
+        (_nas_samba_account_specs | default([]))
+        + [{
+          'name': item.name,
+          'create_system_user': item.create_system_user | default(false) | bool,
+          'uid': item.uid | default(none),
+          'gid': item.gid | default(none),
+          'group': item.group | default(none)
+        }]
+      }}
+  loop: "{{ nas_samba_users }}"
+  no_log: true
+
+- name: Read existing Samba system accounts
+  ansible.builtin.command:
+    argv:
+      - getent
+      - passwd
+      - "{{ item.name }}"
+  register: _nas_samba_account_checks
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  loop: "{{ _nas_samba_account_specs }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Index existing Samba account IDs
+  ansible.builtin.set_fact:
+    _nas_samba_account_ids: >-
+      {{
+        (_nas_samba_account_ids | default({}))
+        | combine({
+          item.item.name: {
+            'present': item.rc == 0,
+            'uid': (item.stdout.split(':')[2] if item.rc == 0 else none),
+            'gid': (item.stdout.split(':')[3] if item.rc == 0 else none)
+          }
+        })
+      }}
+  loop: "{{ _nas_samba_account_checks.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Validate Samba account identity configuration
+  ansible.builtin.assert:
+    that:
+      - account.present or item.create_system_user
+      - account.present or (item.uid is not none and item.gid is not none and item.group is not none)
+      - not account.present or item.uid is none or account.uid | int == item.uid | int
+      - not account.present or item.gid is none or account.gid | int == item.gid | int
+    fail_msg: >-
+      Samba account '{{ item.name }}' is missing or does not match its configured
+      UID/GID. Existing identities are never rewritten. New HA accounts require
+      explicit uid, gid, and group values.
+  vars:
+    account: "{{ _nas_samba_account_ids[item.name] }}"
+  loop: "{{ _nas_samba_account_specs }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Validate Samba account IDs across NAS nodes
+  ansible.builtin.assert:
+    that:
+      - not account.present or not reference_account.present or account.uid == reference_account.uid
+      - not account.present or not reference_account.present or account.gid == reference_account.gid
+    fail_msg: >-
+      Samba account '{{ item.name }}' has different UID/GID values across NAS
+      nodes. Reconcile the account identities manually before continuing.
+  vars:
+    account: "{{ _nas_samba_account_ids[item.name] }}"
+    reference_account: >-
+      {{
+        hostvars[ansible_play_hosts_all | first]
+        ._nas_samba_account_ids[item.name]
+      }}
+  loop: "{{ _nas_samba_account_specs }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create groups for new Samba system users
+  ansible.builtin.group:
+    name: "{{ item.group }}"
+    gid: "{{ item.gid }}"
+    system: true
+    state: present
+  when:
+    - item.create_system_user
+    - item.group is not none
+    - not _nas_samba_account_ids[item.name].present
+  loop: "{{ _nas_samba_account_specs }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create system users for Samba
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    uid: >-
+      {{
+        item.uid
+        if not account.present and item.uid is not none
+        else omit
+      }}
+    group: >-
+      {{
+        item.group
+        if not account.present and item.group is not none
+        else omit
+      }}
+    shell: /sbin/nologin
+    create_home: false
+    system: true
+    state: present
+  vars:
+    account: "{{ _nas_samba_account_ids[item.name] }}"
+  when: item.create_system_user
+  loop: "{{ _nas_samba_account_specs }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Set Samba passwords
+  ansible.builtin.command:
+    argv:
+      - smbpasswd
+      - -s
+      - -a
+      - "{{ item.name }}"
+    stdin: |-
+      {{ item.password }}
+      {{ item.password }}
+  loop: "{{ nas_samba_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+  changed_when: true
+  no_log: true

@@ -53,6 +53,33 @@ List all available commands:
 just
 ```
 
+### Ansible inventory
+
+Operational inventories are intentionally excluded from this public repository.
+Use `ansible/sample_inventory/` as a template, or keep the real inventory in a
+private sibling repository. The Ansible Just recipes default to
+`../homelab-private/ansible/inventories`:
+
+```sh
+just ansible install
+just ansible inventory
+just ansible nas
+just ansible dns
+```
+
+Pass Ansible options after the recipe, or override the inventory path when
+needed:
+
+```sh
+just ansible nas --check --diff
+just ansible dns --check --diff
+ANSIBLE_INVENTORY=/path/to/inventory just ansible nas
+just ansible playbook bind9/setup.yaml
+```
+
+Keep credentials encrypted with SOPS even when the inventory repository is
+private. The Age private key must remain outside Git.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
