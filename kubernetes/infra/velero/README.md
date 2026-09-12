@@ -4,6 +4,26 @@ Velero stores Kubernetes metadata and weekly file-system backups in the external
 managed Backblaze B2 bucket `backup-talos-proxmox-cluster` through the
 `https://s3.us-west-001.backblazeb2.com` endpoint.
 
+## Backblaze plugin compatibility
+
+The AWS plugin is pinned to the `v1.14.3-rc.2` prerelease for its Backblaze B2
+compatibility fixes. Version `v1.14.2` sends an empty `x-amz-tagging` header that B2
+rejects, preventing backup metadata and log uploads even when the storage location
+reports `Available`.
+
+The prerelease [omits tagging when no tags are configured][aws-tagging-fix] and
+[disables checksum encapsulation when the checksum algorithm is empty][aws-checksum-fix].
+Keep `checksumAlgorithm: ""` in the backup storage location configuration.
+
+Move to a stable plugin release containing both fixes when available. Renovate uses
+SemVer for this image so the `-rc.2` suffix does not block future stable updates;
+prereleases are not enabled globally. Storage availability and Pod readiness alone
+do not prove backup writes work: verify successful metadata and log uploads from a
+backup after the update.
+
+[aws-tagging-fix]: https://github.com/velero-io/velero-plugin-for-aws/pull/309
+[aws-checksum-fix]: https://github.com/velero-io/velero-plugin-for-aws/pull/313
+
 ## Backup scope
 
 The weekly schedule uses FSB in opt-out mode so new mounted application PVCs are
