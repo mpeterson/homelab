@@ -48,6 +48,12 @@
       automerge: false,
     },
     {
+      description: "Use SemVer for Velero AWS plugin prerelease-to-stable updates",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["velero/velero-plugin-for-aws"],
+      versioning: "semver",
+    },
+    {
       description: "OCI Helm charts: disable digest pinning — version fields don't support digest format",
       matchPackageNames: [
         "ghcr.io/spegel-org/helm-charts/spegel",
