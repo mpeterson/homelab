@@ -1,0 +1,6 @@
+---
+qnetd:
+  hosts:
+    qnetd-01.local.example.com:
+      ansible_user: mpeterson
+      ansible_become: true
