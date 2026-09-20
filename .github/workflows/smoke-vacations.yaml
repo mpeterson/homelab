@@ -1,0 +1,75 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Smoke Vacations Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - kubernetes/apps/vacations/app.yaml
+      - kubernetes/apps/vacations/values.yaml
+  workflow_dispatch:
+    inputs:
+      expected_source_sha:
+        description: Expected 40-character vacations source SHA
+        required: false
+        type: string
+
+concurrency:
+  group: vacations-deployment-smoke
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Authenticated deployment smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Resolve expected source SHA
+        id: source
+        env:
+          REQUESTED_SHA: ${{ inputs.expected_source_sha }}
+        run: |
+          source_sha="$REQUESTED_SHA"
+          if [[ -z "$source_sha" ]]; then
+            source_sha=$(
+              awk '
+                /- name: Source/ {
+                  getline
+                  sub(/^[[:space:]]*value:[[:space:]]*/, "")
+                  print
+                  exit
+                }
+              ' kubernetes/apps/vacations/app.yaml
+            )
+          fi
+
+          if [[ "$source_sha" == "pending-first-publish" ]]; then
+            echo "The bootstrap manifest has no promoted image; smoke test skipped."
+            echo "promoted=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ ! "$source_sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::Expected source SHA is invalid: ${source_sha}"
+            exit 1
+          fi
+
+          echo "promoted=true" >> "$GITHUB_OUTPUT"
+          echo "source_sha=$source_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for reconciliation and verify deployment
+        if: steps.source.outputs.promoted == 'true'
+        env:
+          BASE_URL: https://vacations.peterson.com.ar
+          EXPECTED_SOURCE_SHA: ${{ steps.source.outputs.source_sha }}
+          CF_ACCESS_CLIENT_ID: ${{ secrets.VACATIONS_ACCESS_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.VACATIONS_ACCESS_CLIENT_SECRET }}
+        run: bash .github/scripts/smoke-vacations.sh

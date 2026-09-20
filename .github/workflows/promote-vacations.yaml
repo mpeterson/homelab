@@ -1,0 +1,200 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Promote Vacations Image
+
+on:
+  repository_dispatch:
+    types:
+      - vacations-image-published
+
+concurrency:
+  group: vacations-image-promotion
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  PROMOTION_BRANCH: automation/vacations-image
+  SOURCE_REPOSITORY: mpeterson/vacations
+  IMAGE: ghcr.io/mpeterson/vacations-site
+
+jobs:
+  promote:
+    name: Validate and promote
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate dispatch payload
+        id: payload
+        env:
+          EVENT_PATH: ${{ github.event_path }}
+        run: |
+          payload=$(jq -c '.client_payload' "$EVENT_PATH")
+          if ! jq -e \
+            --arg repository "$SOURCE_REPOSITORY" \
+            --arg image "$IMAGE" \
+            '
+              type == "object"
+              and .source_repository == $repository
+              and .image == $image
+              and (.source_sha | type == "string")
+              and (.digest | type == "string")
+              and (.source_sha | test("^[0-9a-f]{40}$"))
+              and (.digest | test("^sha256:[0-9a-f]{64}$"))
+              and (keys | sort == ["digest", "image", "source_repository", "source_sha"])
+            ' <<< "$payload" >/dev/null; then
+            echo "::error::Rejected repository_dispatch payload."
+            exit 1
+          fi
+
+          echo "source_sha=$(jq -r '.source_sha' <<< "$payload")" >> "$GITHUB_OUTPUT"
+          echo "digest=$(jq -r '.digest' <<< "$payload")" >> "$GITHUB_OUTPUT"
+
+      - name: Create least-privilege GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.VACATIONS_PROMOTER_APP_ID }}
+          private-key: ${{ secrets.VACATIONS_PROMOTER_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: homelab
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Checkout main
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Install tools
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+
+      - name: Verify private GHCR digest
+        env:
+          SOURCE_SHA: ${{ steps.payload.outputs.source_sha }}
+          DIGEST: ${{ steps.payload.outputs.digest }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "$GH_TOKEN" |
+            crane auth login ghcr.io \
+              --username "${{ github.actor }}" \
+              --password-stdin
+
+          tag_digest=$(crane digest "${IMAGE}:sha-${SOURCE_SHA}")
+          canonical_digest=$(crane digest "${IMAGE}@${DIGEST}")
+
+          if [[ "$tag_digest" != "$DIGEST" ]]; then
+            echo "::error::Tag resolved to ${tag_digest}, expected ${DIGEST}."
+            exit 1
+          fi
+          if [[ "$canonical_digest" != "$DIGEST" ]]; then
+            echo "::error::Canonical digest verification returned ${canonical_digest}."
+            exit 1
+          fi
+
+      - name: Create or update promotion branch
+        env:
+          SOURCE_SHA: ${{ steps.payload.outputs.source_sha }}
+          DIGEST: ${{ steps.payload.outputs.digest }}
+        run: |
+          git config user.name "vacations-promoter[bot]"
+          git config user.email "vacations-promoter[bot]@users.noreply.github.com"
+
+          if git fetch origin \
+            "refs/heads/${PROMOTION_BRANCH}:refs/remotes/origin/${PROMOTION_BRANCH}"; then
+            git checkout -B "$PROMOTION_BRANCH" "origin/$PROMOTION_BRANCH"
+            git merge --no-edit origin/main
+          else
+            git checkout -b "$PROMOTION_BRANCH" origin/main
+          fi
+
+          python3 .github/scripts/promote-vacations-image.py \
+            "$SOURCE_SHA" \
+            "$DIGEST"
+
+          unexpected=$(
+            git diff --name-only |
+              grep -vE '^kubernetes/apps/vacations/(app|values)\.yaml$' || true
+          )
+          if [[ -n "$unexpected" ]]; then
+            echo "::error::Promotion attempted to modify unexpected paths:"
+            echo "$unexpected"
+            exit 1
+          fi
+          if git diff --quiet; then
+            echo "Image is already promoted."
+            echo "PROMOTION_CHANGED=false" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          echo "PROMOTION_CHANGED=true" >> "$GITHUB_ENV"
+          git add \
+            kubernetes/apps/vacations/app.yaml \
+            kubernetes/apps/vacations/values.yaml
+          git commit -m "chore(vacations): promote ${SOURCE_SHA:0:12}"
+
+      - name: Lint repository
+        if: env.PROMOTION_CHANGED == 'true'
+        run: just lint
+
+      - name: Validate repository
+        if: env.PROMOTION_CHANGED == 'true'
+        run: just validate
+
+      - name: Push promotion branch
+        if: env.PROMOTION_CHANGED == 'true'
+        run: git push --set-upstream origin "$PROMOTION_BRANCH"
+
+      - name: Create or update pull request
+        if: env.PROMOTION_CHANGED == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          SOURCE_SHA: ${{ steps.payload.outputs.source_sha }}
+          DIGEST: ${{ steps.payload.outputs.digest }}
+        run: |
+          cat > /tmp/vacations-promotion.md <<EOF
+          Promotes the verified Travel Plans image built from
+          \`${SOURCE_REPOSITORY}@${SOURCE_SHA}\`.
+
+          Image: \`${IMAGE}:sha-${SOURCE_SHA}@${DIGEST}\`
+
+          The dispatch payload and private GHCR tag were verified before this
+          branch was updated. Auto-merge remains subject to the repository's
+          required checks and branch protections.
+          EOF
+
+          pr_number=$(
+            gh pr list \
+              --repo "$GITHUB_REPOSITORY" \
+              --head "$PROMOTION_BRANCH" \
+              --base main \
+              --state open \
+              --json number \
+              --jq '.[0].number // empty'
+          )
+
+          if [[ -z "$pr_number" ]]; then
+            pr_url=$(
+              gh pr create \
+                --repo "$GITHUB_REPOSITORY" \
+                --head "$PROMOTION_BRANCH" \
+                --base main \
+                --title "chore(vacations): promote ${SOURCE_SHA:0:12}" \
+                --body-file /tmp/vacations-promotion.md
+            )
+            pr_number="${pr_url##*/}"
+          else
+            gh pr edit "$pr_number" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "chore(vacations): promote ${SOURCE_SHA:0:12}" \
+              --body-file /tmp/vacations-promotion.md
+          fi
+
+          gh pr merge "$pr_number" \
+            --repo "$GITHUB_REPOSITORY" \
+            --auto \
+            --squash \
+            --delete-branch
