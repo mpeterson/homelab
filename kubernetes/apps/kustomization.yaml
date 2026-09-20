@@ -29,3 +29,4 @@ resources:
   - sonarr/app.yaml
   - tautulli/app.yaml
   - tqm/app.yaml
+  - trek/app.yaml
