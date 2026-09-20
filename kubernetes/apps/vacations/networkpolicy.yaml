@@ -1,0 +1,79 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-cloudflared-to-app
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/controller: vacations
+      app.kubernetes.io/instance: vacations
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/controller: cloudflared
+              app.kubernetes.io/instance: vacations
+      ports:
+        - port: 8080
+          protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cloudflared-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:app.kubernetes.io/controller: cloudflared
+      k8s:app.kubernetes.io/instance: vacations
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            k8s:app.kubernetes.io/controller: vacations
+            k8s:app.kubernetes.io/instance: vacations
+            k8s:io.kubernetes.pod.namespace: vacations
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - toFQDNs:
+        - matchName: region1.v2.argotunnel.com
+        - matchName: region2.v2.argotunnel.com
+        - matchName: cftunnel.com
+        - matchPattern: "*.cftunnel.com"
+      toPorts:
+        - ports:
+            - port: "7844"
+              protocol: TCP
+            - port: "7844"
+              protocol: UDP
+    - toFQDNs:
+        - matchPattern: "*.cloudflareaccess.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
