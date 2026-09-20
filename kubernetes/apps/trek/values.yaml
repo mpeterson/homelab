@@ -1,0 +1,119 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+---
+strategy: Recreate
+
+controllers:
+  trek:
+    replicas: 1
+
+    pod:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
+
+    containers:
+      app:
+        image:
+          repository: mauriceboe/trek
+          tag: 4.2.1@sha256:777f4d647e973fe7d87fecd957e854b86d57e8d977fd041763e0ca19b3c2e2c0
+        env:
+          NODE_ENV: production
+          PORT: &port 3000
+          TZ: Asia/Jerusalem
+          LOG_LEVEL: info
+          APP_URL: https://trek.peterson.com.ar
+          ALLOWED_ORIGINS: https://trek.peterson.com.ar
+          FORCE_HTTPS: "true"
+          TRUST_PROXY: "1"
+          MCP_RATE_LIMIT: "300"
+          MCP_MAX_SESSION_PER_USER: "20"
+          ENCRYPTION_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: trek-secret
+                key: ENCRYPTION_KEY
+        probes:
+          liveness: &probes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/health
+                port: *port
+              initialDelaySeconds: 15
+              periodSeconds: 30
+              timeoutSeconds: 10
+              failureThreshold: 3
+          readiness:
+            <<: *probes
+            spec:
+              httpGet:
+                path: /api/health
+                port: *port
+              initialDelaySeconds: 5
+              periodSeconds: 10
+              timeoutSeconds: 10
+              failureThreshold: 3
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+            add:
+              - CHOWN
+              - SETGID
+              - SETUID
+
+service:
+  app:
+    controller: trek
+    ports:
+      http:
+        port: *port
+
+route:
+  app:
+    enabled: true
+    kind: HTTPRoute
+    hostnames:
+      - trek.peterson.com.ar
+    parentRefs:
+      - kind: Gateway
+        name: public-gateway
+        namespace: network
+        sectionName: https
+    rules:
+      - backendRefs:
+          - name: trek
+            port: *port
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+persistence:
+  data:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    globalMounts:
+      - path: /app/data
+  uploads:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 5Gi
+    globalMounts:
+      - path: /app/uploads
+  tmp:
+    type: emptyDir
+    medium: Memory
+    sizeLimit: 128Mi
+    globalMounts:
+      - path: /tmp
