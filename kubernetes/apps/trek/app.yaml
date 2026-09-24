@@ -20,7 +20,7 @@ spec:
       value: app-template@4.6.2
     - name: Image
       # renovate: datasource=docker depName=mauriceboe/trek
-      value: mauriceboe/trek:4.2.1@sha256:777f4d647e973fe7d87fecd957e854b86d57e8d977fd041763e0ca19b3c2e2c0
+      value: mauriceboe/trek:4.3.2@sha256:0e6899b9070635a4f08242caa8c926d66cba7a3f9e8fa88c6ad88d09275969d1
 
   syncPolicy:
     syncOptions:
