@@ -4,9 +4,9 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 repo_root := source_directory() / "../../.."
 
 # renovate: datasource=docker depName=dagandersen/argocd-diff-preview
-_argocd_diff_preview_version := "v0.2.2@sha256:c1daee4c0a132feebf90126c3f19a21dc5a6ca09e3af9b14a701934ebe4ba346"
+_argocd_diff_preview_version := "v0.2.15@sha256:01c4712f945f9183ef1eacbaf5974ced42624b8bdfc6dab876a07ab89bd0cd83"
 # renovate: datasource=helm registryUrl=https://argoproj.github.io/argo-helm depName=argo-cd
-_argocd_chart_version := "10.9.0"
+_argocd_chart_version := "10.9.2"
 
 [private]
 default:
