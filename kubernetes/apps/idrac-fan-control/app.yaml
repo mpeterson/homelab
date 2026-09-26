@@ -17,7 +17,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
-      value: app-template@4.6.2
+      value: app-template@5.2.1
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/tigerblue77/dell_idrac_fan_controller
       value: ghcr.io/tigerblue77/dell_idrac_fan_controller:latest@sha256:0c49c525e9709e2a6efb9ef1ad04134087ee7444cad1f299a02054b255d116ca
