@@ -17,7 +17,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
-      value: app-template@4.6.2
+      value: app-template@5.2.1
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/home-operations/qbittorrent
       value: ghcr.io/home-operations/qbittorrent:5.2.4@sha256:9307627e03981d5473aa31175ea76ed56ea3752333ca49d601b6af45e281e7ba
