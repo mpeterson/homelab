@@ -1,0 +1,29 @@
+---
+- name: Install corosync-qnetd package
+  ansible.builtin.dnf:
+    name: corosync-qnetd
+    state: present
+
+- name: Open firewall for high-availability services (port {{ corosync_qnetd_port }})
+  ansible.posix.firewalld:
+    service: "{{ corosync_qnetd_firewall_service }}"
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: Check if NSS certificate database exists
+  ansible.builtin.stat:
+    path: "{{ corosync_qnetd_nss_db }}/cert9.db"
+  register: nss_db
+
+- name: Initialize NSS certificate database for qnetd
+  ansible.builtin.command: corosync-qnetd-certutil -i
+  when: not nss_db.stat.exists
+  changed_when: true
+  notify: Restart corosync-qnetd
+
+- name: Enable and start corosync-qnetd service
+  ansible.builtin.systemd:
+    name: corosync-qnetd
+    enabled: true
+    state: started
