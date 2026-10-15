@@ -1,0 +1,277 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/common-3.7.3/charts/library/common/values.schema.json
+---
+strategy: RollingUpdate
+
+controllers:
+  api:
+    replicas: 1
+    pod:
+      securityContext:
+        fsGroup: 33
+        fsGroupChangePolicy: OnRootMismatch
+    containers:
+      app:
+        image:
+          repository: barassistant/server
+          tag: 6.9.0@sha256:744beea928095cf9973a91ebb79df58725e41b8c0b1885b14783dfef9e0fb041
+        env:
+          ALLOW_REGISTRATION: "true"
+          APP_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: bar-assistant-secret
+                key: APP_KEY
+          APP_URL: https://bar-api.lan.peterson.com.ar
+          CACHE_DRIVER: redis
+          LOG_CHANNEL: stderr
+          LOG_LEVEL: warning
+          MEILISEARCH_HOST: http://bar-assistant-search.selfhosted.svc.cluster.local:7700
+          MEILISEARCH_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: bar-assistant-secret
+                key: MEILI_MASTER_KEY
+          REDIS_HOST: bar-assistant-cache.selfhosted.svc.cluster.local
+          SESSION_DRIVER: redis
+          SESSION_SECURE_COOKIE: "true"
+          TZ: Asia/Jerusalem
+        probes:
+          liveness: &apiProbes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/server/version
+                port: &apiPort 8080
+              periodSeconds: 10
+              timeoutSeconds: 5
+              failureThreshold: 6
+          readiness: *apiProbes
+          startup:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/server/version
+                port: *apiPort
+              periodSeconds: 5
+              timeoutSeconds: 5
+              failureThreshold: 30
+        resources:
+          requests:
+            cpu: 20m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+
+  app:
+    replicas: 1
+    containers:
+      app:
+        image:
+          repository: barassistant/salt-rim
+          tag: 5.8.0@sha256:fcb3496d26390bb31019fc768c1bb36c8d4cedf1e95d1609d94500e2eccf7bb5
+        env:
+          ALLOW_REGISTRATION: "true"
+          API_URL: https://bar-api.lan.peterson.com.ar
+          DEFAULT_LOCALE: en
+          MEILISEARCH_URL: https://bar-search.lan.peterson.com.ar
+          SALT_RIM_ENV: production
+        probes:
+          liveness: &appProbes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: &appPort 8080
+              periodSeconds: 10
+              timeoutSeconds: 5
+              failureThreshold: 3
+          readiness: *appProbes
+          startup:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: *appPort
+              periodSeconds: 5
+              timeoutSeconds: 5
+              failureThreshold: 12
+        resources:
+          requests:
+            cpu: 5m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+
+  search:
+    replicas: 1
+    pod:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    containers:
+      app:
+        image:
+          repository: getmeili/meilisearch
+          tag: v1.50.0@sha256:9694a59df43ee3f54b3fda9c5de381a3ee9852678e3e31cadf37d6bddea7fc1b
+        env:
+          MEILI_ENV: production
+          MEILI_MASTER_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: bar-assistant-secret
+                key: MEILI_MASTER_KEY
+          MEILI_NO_ANALYTICS: "true"
+        probes:
+          liveness: &searchProbes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /health
+                port: &searchPort 7700
+              periodSeconds: 10
+              timeoutSeconds: 5
+              failureThreshold: 3
+          readiness: *searchProbes
+          startup:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /health
+                port: *searchPort
+              periodSeconds: 5
+              timeoutSeconds: 5
+              failureThreshold: 12
+        resources:
+          requests:
+            cpu: 20m
+            memory: 128Mi
+          limits:
+            memory: 1Gi
+
+  cache:
+    replicas: 1
+    containers:
+      app:
+        image:
+          repository: valkey/valkey
+          tag: 9.0.4-alpine@sha256:107b203169a20ef7c87548c157f4e4a833dbbbd20fefd3a26740b7f98ac80216
+        probes:
+          liveness: &cacheProbes
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: &cachePort 6379
+              periodSeconds: 10
+              timeoutSeconds: 5
+              failureThreshold: 3
+          readiness: *cacheProbes
+        resources:
+          requests:
+            cpu: 5m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+
+service:
+  api:
+    controller: api
+    ports:
+      http:
+        port: *apiPort
+  app:
+    primary: true
+    controller: app
+    ports:
+      http:
+        port: *appPort
+  search:
+    controller: search
+    ports:
+      http:
+        port: *searchPort
+  cache:
+    controller: cache
+    ports:
+      redis:
+        port: *cachePort
+
+route:
+  api:
+    enabled: true
+    kind: HTTPRoute
+    hostnames:
+      - bar-api.lan.peterson.com.ar
+    parentRefs:
+      - kind: Gateway
+        name: internal-gateway
+        namespace: network
+        sectionName: https
+    rules:
+      - backendRefs:
+          - name: bar-assistant-api
+            port: *apiPort
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+  app:
+    enabled: true
+    kind: HTTPRoute
+    hostnames:
+      - bar.lan.peterson.com.ar
+    parentRefs:
+      - kind: Gateway
+        name: internal-gateway
+        namespace: network
+        sectionName: https
+    rules:
+      - backendRefs:
+          - name: bar-assistant-app
+            port: *appPort
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+  search:
+    enabled: true
+    kind: HTTPRoute
+    hostnames:
+      - bar-search.lan.peterson.com.ar
+    parentRefs:
+      - kind: Gateway
+        name: internal-gateway
+        namespace: network
+        sectionName: https
+    rules:
+      - backendRefs:
+          - name: bar-assistant-search
+            port: *searchPort
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+persistence:
+  data:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 5Gi
+    advancedMounts:
+      api:
+        app:
+          - path: /var/www/cocktails/storage/bar-assistant
+  search:
+    storageClass: zfs-generic-iscsi-csi-xfs
+    accessMode: ReadWriteOnce
+    size: 2Gi
+    advancedMounts:
+      search:
+        app:
+          - path: /meili_data

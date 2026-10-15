@@ -1,0 +1,47 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: &app bar-assistant
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: selfhosted
+
+  info:
+    - name: Chart
+      # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
+      value: app-template@4.6.2
+    - name: Server Image
+      # renovate: datasource=docker depName=barassistant/server
+      value: barassistant/server:6.9.0@sha256:744beea928095cf9973a91ebb79df58725e41b8c0b1885b14783dfef9e0fb041
+    - name: Web Image
+      # renovate: datasource=docker depName=barassistant/salt-rim
+      value: barassistant/salt-rim:5.8.0@sha256:fcb3496d26390bb31019fc768c1bb36c8d4cedf1e95d1609d94500e2eccf7bb5
+    - name: Search Image
+      # renovate: datasource=docker depName=getmeili/meilisearch
+      value: getmeili/meilisearch:v1.50.0@sha256:9694a59df43ee3f54b3fda9c5de381a3ee9852678e3e31cadf37d6bddea7fc1b
+    - name: Cache Image
+      # renovate: datasource=docker depName=valkey/valkey
+      value: valkey/valkey:9.0.4-alpine@sha256:107b203169a20ef7c87548c157f4e4a833dbbbd20fefd3a26740b7f98ac80216
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    automated:
+      selfHeal: true
+      prune: true
+
+  source:
+    repoURL: https://github.com/mpeterson/homelab
+    path: kubernetes/apps/bar-assistant/
+    targetRevision: main

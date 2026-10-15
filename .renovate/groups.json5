@@ -32,6 +32,11 @@
       groupName: "paperless",
     },
     {
+      description: "Group Bar Assistant components into a single PR",
+      matchFileNames: ["kubernetes/apps/bar-assistant/**"],
+      groupName: "bar-assistant",
+    },
+    {
       description: "Group ArgoCD server and KSOPS into a single PR",
       matchFileNames: ["kubernetes/bootstrap/argocd/**"],
       groupName: "argocd",
