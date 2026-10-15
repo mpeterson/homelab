@@ -38,6 +38,7 @@
     {
       description: "Tier 2: Automerge patch only for medium-risk apps",
       matchFileNames: [
+        "kubernetes/apps/bar-assistant/**",
         "kubernetes/apps/mosquitto/**",
         "kubernetes/apps/paperless/**",
       ],
