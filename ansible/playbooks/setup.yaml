@@ -4,3 +4,6 @@
 
 - name: Run bind9 setup playbook
   ansible.builtin.import_playbook: bind9/setup.yaml
+
+- name: Run corosync-qnetd setup playbook
+  ansible.builtin.import_playbook: corosync_qnetd/setup.yaml

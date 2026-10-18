@@ -1,0 +1,6 @@
+---
+- hosts: qnetd
+  name: Configure corosync-qnetd quorum device
+
+  roles:
+    - corosync_qnetd
