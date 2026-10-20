@@ -1,32 +1,18 @@
 ---
-operator:
-  runtimeClass: nvidia
-  upgradeCRD: false
+runtimeClassName: nvidia
 
-driver:
-  enabled: false
-
-toolkit:
-  enabled: false
-
-hostPaths:
-  driverInstallDir: /usr/local
+gfd:
+  enabled: true
 
 nfd:
   enabled: false
 
-devicePlugin:
-  config:
-    create: true
-    name: nvidia-device-plugin-config
-    default: default
-    data:
-      default: |-
-        version: v1
-        flags:
-          migStrategy: none
-        sharing:
-          timeSlicing:
-            resources:
-              - name: nvidia.com/gpu
-                replicas: 8
+config:
+  map:
+    config: |
+      version: v1
+      sharing:
+        timeSlicing:
+          resources:
+            - name: nvidia.com/gpu
+              replicas: 8
