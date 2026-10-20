@@ -18,12 +18,13 @@ spec:
 
   info:
     - name: Chart
-      # renovate: datasource=helm registryUrl=https://nvidia.github.io/k8s-device-plugin depName=nvidia-device-plugin
-      value: nvidia-device-plugin@0.20.0
+      # renovate: datasource=helm registryUrl=https://helm.ngc.nvidia.com/nvidia depName=gpu-operator
+      value: gpu-operator@v26.7.2
 
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
+      - PruneLast=true
       - ServerSideApply=true
     managedNamespaceMetadata:
       labels:
