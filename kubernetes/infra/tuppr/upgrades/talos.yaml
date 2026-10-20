@@ -3,10 +3,12 @@ apiVersion: tuppr.home-operations.com/v1alpha1
 kind: TalosUpgrade
 metadata:
   name: talos
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   talos:
     # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-    version: v1.12.6
+    version: v1.13.11
   policy:
     rebootMode: default
   healthChecks:

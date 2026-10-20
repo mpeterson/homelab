@@ -3,6 +3,8 @@ apiVersion: tuppr.home-operations.com/v1alpha1
 kind: KubernetesUpgrade
 metadata:
   name: kubernetes
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   kubernetes:
     # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet

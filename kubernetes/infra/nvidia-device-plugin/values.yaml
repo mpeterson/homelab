@@ -1,18 +1,26 @@
 ---
-runtimeClassName: nvidia
+driver:
+  enabled: false
 
-gfd:
-  enabled: true
+toolkit:
+  enabled: false
 
 nfd:
   enabled: false
 
-config:
-  map:
-    config: |
-      version: v1
-      sharing:
-        timeSlicing:
-          resources:
-            - name: nvidia.com/gpu
-              replicas: 8
+hostPaths:
+  driverInstallDir: /usr/local
+
+devicePlugin:
+  config:
+    create: true
+    name: time-slicing-config
+    default: default
+    data:
+      default: |-
+        version: v1
+        sharing:
+          timeSlicing:
+            resources:
+              - name: nvidia.com/gpu
+                replicas: 8
