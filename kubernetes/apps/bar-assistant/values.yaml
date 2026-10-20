@@ -116,7 +116,7 @@ controllers:
       app:
         image:
           repository: getmeili/meilisearch
-          tag: v1.50.0@sha256:9694a59df43ee3f54b3fda9c5de381a3ee9852678e3e31cadf37d6bddea7fc1b
+          tag: v1.55.0@sha256:ff546679970126f8822e15d1b6a06bfbff1f2ce2e43f810cfb5258012f92de5c
         env:
           MEILI_ENV: production
           MEILI_MASTER_KEY:
@@ -160,7 +160,7 @@ controllers:
       app:
         image:
           repository: valkey/valkey
-          tag: 9.0.4-alpine@sha256:107b203169a20ef7c87548c157f4e4a833dbbbd20fefd3a26740b7f98ac80216
+          tag: 9.1.2-alpine@sha256:48332870af354a799964c0012ae1194a0bf2bf894eb508f945810596dc2d8d11
         probes:
           liveness: &cacheProbes
             enabled: true
