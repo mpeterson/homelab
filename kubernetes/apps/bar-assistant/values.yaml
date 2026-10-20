@@ -125,6 +125,7 @@ controllers:
                 name: bar-assistant-secret
                 key: MEILI_MASTER_KEY
           MEILI_NO_ANALYTICS: "true"
+          MEILI_UPGRADE_DB: "true"
         probes:
           liveness: &searchProbes
             enabled: true
