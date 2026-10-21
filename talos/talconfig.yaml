@@ -92,6 +92,8 @@ worker:
         officialExtensions:
           - siderolabs/gasket-driver
           - siderolabs/iscsi-tools
+          # Quadro P2000 (Pascal) requires R580 LTS; R595+ is unsupported.
+          # Before Talos upgrades, verify both LTS extensions resolve to matching R580-compatible branches.
           - siderolabs/nonfree-kmod-nvidia-lts
           - siderolabs/nvidia-container-toolkit-lts
           - siderolabs/qemu-guest-agent

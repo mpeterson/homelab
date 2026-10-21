@@ -82,7 +82,7 @@
       description: "Warn and block: check Talos support matrix for K8s and kubectl compatibility",
       matchDepNames: ["aqua:siderolabs/talos"],
       prBodyNotes: [
-        "⚠️ **Coupled dependencies**: Before merging, check the [Talos support matrix](https://docs.siderolabs.com/talos/latest/getting-started/support-matrix/) for the new version's supported K8s range. Tuppr will also validate at runtime. Remove the `do-not-merge` label once verified.",
+        "⚠️ **Coupled dependencies**: Before merging, check the [Talos support matrix](https://docs.siderolabs.com/talos/latest/getting-started/support-matrix/) for the new version's supported K8s range. Also verify the target Talos release's `siderolabs/nonfree-kmod-nvidia-lts` extension resolves to an R580 driver and `siderolabs/nvidia-container-toolkit-lts` uses the matching branch; R595+ does not support the Quadro P2000/Pascal GPU workers. Tuppr will also validate at runtime. Remove the `do-not-merge` label only after both checks pass.",
       ],
       labels: ["do-not-merge", "manual-review"],
     },

@@ -94,6 +94,8 @@ Source of truth: `talos/talconfig.yaml` (processed by [talhelper](https://github
 
 Secrets in `talos/talsecret.sops.yaml` and `talos/talenv.sops.yaml`. Upgrades managed by Tuppr operator (`kubernetes/infra/tuppr/upgrades/`).
 
+GPU workers `talos-01` and `talos-02` use NVIDIA Quadro P2000 (Pascal). They require the R580 LTS driver branch because R595+ is unsupported. Keep `siderolabs/nonfree-kmod-nvidia-lts` and `siderolabs/nvidia-container-toolkit-lts` on matching branches, and verify the resolved driver remains R580-compatible before every Talos upgrade.
+
 ### Ansible
 
 `ansible/` handles Proxmox VM provisioning and DNS (bind9 submodule). Not used for in-cluster config.
