@@ -132,5 +132,16 @@
       ],
       labels: ["do-not-merge", "manual-review"],
     },
+    {
+      description: "Automerge trusted Home Operations digest rebuilds at any time",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/home-operations/**"],
+      matchUpdateTypes: ["digest"],
+      schedule: ["at any time"],
+      groupName: "Home Operations digest refresh",
+      automerge: true,
+      automergeType: "pr",
+      labels: [],
+    },
   ],
 }
