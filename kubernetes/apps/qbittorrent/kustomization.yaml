@@ -8,8 +8,8 @@ namespace: &ns media
 configMapGenerator:
   - name: qbittorrent-scripts
     files:
+      - scripts/configure-webui.py
       - scripts/xseed.sh
-
 
 helmCharts:
   - name: app-template
