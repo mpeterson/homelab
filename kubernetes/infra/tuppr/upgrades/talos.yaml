@@ -53,6 +53,28 @@ spec:
         (!has(status.numberUnavailable) || status.numberUnavailable == 0)
       timeout: 5m
 
+    # --- GPU: NVIDIA device plugin healthy on GPU nodes ---
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: nvidia-device-plugin
+      namespace: infra
+      expr: |-
+        status.desiredNumberScheduled > 0 &&
+        status.numberReady == status.desiredNumberScheduled &&
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0)
+      timeout: 10m
+
+    # --- GPU: NVIDIA GPU feature discovery healthy on GPU nodes ---
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: nvidia-device-plugin-gpu-feature-discovery
+      namespace: infra
+      expr: |-
+        status.desiredNumberScheduled > 0 &&
+        status.numberReady == status.desiredNumberScheduled &&
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0)
+      timeout: 10m
+
     # --- CSI: democratic-csi iSCSI node driver healthy ---
     - apiVersion: apps/v1
       kind: DaemonSet
