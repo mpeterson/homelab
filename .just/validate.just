@@ -249,21 +249,21 @@ images:
     pids=()
 
     while IFS= read -r image; do
-      image_ref="${image%%@sha256:*}"
-      expected_sha="${image#*@}"
-
       (
-        if ! actual_sha=$(crane digest "$image_ref" 2>/dev/null); then
-          _error "$image_ref" "Image not found"
+        if ! crane manifest "$image" > /dev/null 2>&1; then
+          if [[ "$image" == *@sha256:* ]]; then
+            _error "$image" "Pinned image manifest not found or unavailable"
+          else
+            _error "$image" "Image manifest not found or unavailable"
+          fi
           exit 1
         fi
 
-        if [ "$expected_sha" != "$image" ] && [ "$actual_sha" != "$expected_sha" ]; then
-          _error "$image_ref" "Digest mismatch: expected ${expected_sha}, got ${actual_sha}"
-          exit 1
+        if [[ "$image" == *@sha256:* ]]; then
+          echo -e "  \033[32m✓\033[0m pinned ${image}"
+        else
+          echo -e "  \033[32m✓\033[0m ${image}"
         fi
-
-        echo -e "  \033[32m✓\033[0m ${image_ref}"
       ) &
       pids+=($!)
       parallel_count=$((parallel_count + 1))
