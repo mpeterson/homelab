@@ -17,6 +17,41 @@ genconfig:
     cd "{{ talos_dir }}"
     talhelper genconfig
 
+    for config in clusterconfig/talos-proxmox-cluster-*.yaml; do
+      encryption_docs=$(yq eval-all '[select(.kind == "KubeEtcdEncryptionConfig")] | length' "$config")
+      if [ "$encryption_docs" = "0" ]; then
+        continue
+      fi
+      if [ "$encryption_docs" != "1" ]; then
+        echo "Error: expected one KubeEtcdEncryptionConfig in $config, found $encryption_docs" >&2
+        exit 1
+      fi
+
+      key_names=$(yq eval-all -o=json -I=0 \
+        'select(.kind == "KubeEtcdEncryptionConfig") | [.config.resources[0].providers[] | select(.secretbox != null) | .secretbox.keys[].name]' \
+        "$config")
+      providers=$(yq eval-all -o=json -I=0 \
+        'select(.kind == "KubeEtcdEncryptionConfig") | .config.resources[0].providers | map(keys | .[0])' \
+        "$config")
+
+      if [ "$key_names" = '["key2"]' ] && [ "$providers" = '["secretbox","identity"]' ]; then
+        continue
+      fi
+
+      if [ "$key_names" != '["key1"]' ] || [ "$providers" != '["secretbox"]' ]; then
+        echo "Error: unexpected KubeEtcdEncryptionConfig structure in $config" >&2
+        exit 1
+      fi
+
+      # Legacy Talos Secretbox configuration uses key2 and an identity fallback.
+      tmp=$(mktemp)
+      yq eval-all \
+        'with(select(.kind == "KubeEtcdEncryptionConfig"); .config.resources[0].providers[0].secretbox.keys[0].name = "key2" | .config.resources[0].providers += [{"identity": {}}])' \
+        "$config" > "$tmp"
+      chmod 600 "$tmp"
+      mv "$tmp" "$config"
+    done
+
 [doc('Diff generated config against running node config')]
 diff node: genconfig
     #!/usr/bin/env bash
