@@ -1,0 +1,17 @@
+---
+apiVersion: v1alpha1
+kind: KubeEtcdEncryptionConfig
+$patch: delete
+---
+apiVersion: v1alpha1
+kind: KubeEtcdEncryptionConfig
+config:
+  resources:
+    - resources:
+        - secrets
+      providers:
+        - secretbox:
+            keys:
+              - name: key2
+                secret: ref+sops://talos/talsecret.sops.yaml#/secrets/secretboxencryptionsecret
+        - identity: {}

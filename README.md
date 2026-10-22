@@ -43,6 +43,7 @@ Kubernetes-based homelab running on bare-metal, managed entirely through GitOps.
 ├── 📂 apps/         # Application workloads
 ├── 📂 bootstrap/    # Cluster bootstrap (ArgoCD)
 └── 📂 infra/        # Infrastructure services
+📂 talos/            # Talos configuration and render-only TOPF migration proof
 ```
 
 ## Getting Started
@@ -79,6 +80,14 @@ just ansible playbook bind9/setup.yaml
 
 Keep credentials encrypted with SOPS even when the inventory repository is
 private. The Age private key must remain outside Git.
+
+### TOPF migration proof
+
+The Talos configuration includes a non-mutating TOPF migration candidate.
+Talhelper remains the source of truth until a TOPF release includes Talos
+1.14.4 support. See
+[`docs/topf-migration-proof.md`](docs/topf-migration-proof.md) for the redacted
+comparison and verification command.
 
 ## License
 

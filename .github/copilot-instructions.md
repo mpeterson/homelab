@@ -68,7 +68,7 @@ When applying config to Talos nodes with `just talos apply <node>`, **wait for t
 kubectl get nodes -w
 ```
 
-See `talos/mod.just` for all Talos recipes (`genconfig`, `diff`, `apply`, `reset-node`, etc.).
+See `talos/mod.just` for all Talos recipes (`genconfig`, `verify-topf`, `diff`, `apply`, `reset-node`, etc.).
 
 ## Architecture
 
@@ -93,6 +93,13 @@ Each tier's `kustomization.yaml` lists all `app.yaml` files as resources. Browse
 Source of truth: `talos/talconfig.yaml` (processed by [talhelper](https://github.com/budimanjojo/talhelper)). Check that file for current node topology, schematics, and extensions.
 
 Secrets in `talos/talsecret.sops.yaml` and `talos/talenv.sops.yaml`. Upgrades managed by Tuppr operator (`kubernetes/infra/tuppr/upgrades/`).
+
+`talos/topf.yaml` and `talos/patches/` are a render-only TOPF migration proof,
+not the active source of truth. Run it with
+`TOPF_BIN=/path/to/verified/topf just talos verify-topf`; the recipe renders
+Talhelper and TOPF configs into a secure temporary directory, validates and
+compares them, then removes them. Do not use TOPF apply, upgrade, or reset
+commands until the migration proof is explicitly adopted.
 
 GPU workers `talos-01` and `talos-02` use NVIDIA Quadro P2000 (Pascal). They require the R580 LTS driver branch because R595+ is unsupported. Keep `siderolabs/nonfree-kmod-nvidia-lts` and `siderolabs/nvidia-container-toolkit-lts` on matching branches, and verify the resolved driver remains R580-compatible before every Talos upgrade.
 

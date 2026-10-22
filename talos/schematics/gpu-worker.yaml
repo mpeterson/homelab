@@ -1,0 +1,10 @@
+---
+customization:
+  systemExtensions:
+    officialExtensions:
+      - siderolabs/gasket-driver
+      - siderolabs/iscsi-tools
+      - siderolabs/nonfree-kmod-nvidia-lts
+      - siderolabs/nvidia-container-toolkit-lts
+      - siderolabs/qemu-guest-agent
+      - siderolabs/tailscale

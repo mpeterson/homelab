@@ -122,6 +122,14 @@ validate: genconfig
     done
     exit "$status"
 
+[doc('Verify the render-only TOPF migration proof')]
+verify-topf topf_bin=env("TOPF_BIN", ""):
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mise install --quiet
+    cd "{{ talos_dir }}/.."
+    TOPF_BIN="{{ topf_bin }}" mise exec -- ./talos/verify-topf-render.sh
+
 [doc('Reset a node (wipe STATE + EPHEMERAL)')]
 reset-node node mode="reboot": genconfig
     #!/usr/bin/env bash

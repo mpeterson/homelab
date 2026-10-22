@@ -1,0 +1,15 @@
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: ethSel0
+selector:
+  match: glob("virtio_net", link.driver)
+---
+apiVersion: v1alpha1
+kind: DHCPv4Config
+name: ethSel0
+---
+apiVersion: v1alpha1
+kind: Layer2VIPConfig
+name: 10.3.0.30
+link: ethSel0

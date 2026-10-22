@@ -78,7 +78,10 @@
     },
     {
       description: "Group Talos CLI (mise) into talos group",
-      matchDepNames: ["aqua:siderolabs/talos"],
+      matchDepNames: [
+        "aqua:siderolabs/talos",
+        "aqua:helmfile/vals",
+      ],
       groupName: "talos",
     },
     {
