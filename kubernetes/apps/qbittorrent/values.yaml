@@ -41,6 +41,13 @@ controllers:
         image:
           repository: *image
           tag: *tag
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - python3
+                - /config/scripts/configure-webui.py
+                - repair-download-paths
         env:
           TZ: Asia/Jerusalem
           QBT_WEBUI_PORT: &port 80
@@ -124,6 +131,11 @@ persistence:
     path: /nibbler/media/library/
     advancedMounts:
       qbittorrent:
+        configure-webui:
+          - path: /data/downloads/torrents
+            subPath: downloads/torrents
+          - path: /data/incomplete-downloads/torrents
+            subPath: incomplete-downloads/torrents
         app:
           - path: /data/downloads/torrents
             subPath: downloads/torrents
