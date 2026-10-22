@@ -12,35 +12,11 @@ controllers:
         fsGroup: 65534
         fsGroupChangePolicy: "OnRootMismatch"
 
-    initContainers:
-      configure-webui:
-        image:
-          repository: &image ghcr.io/home-operations/qbittorrent
-          tag: &tag 5.2.4@sha256:9307627e03981d5473aa31175ea76ed56ea3752333ca49d601b6af45e281e7ba
-        env:
-          QBT_USERNAME:
-            valueFrom:
-              secretKeyRef:
-                name: cross-seed-secret
-                key: qbt_username
-          QBT_PASSWORD:
-            valueFrom:
-              secretKeyRef:
-                name: cross-seed-secret
-                key: qbt_password
-        command:
-          - python3
-          - /scripts/configure-webui.py
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities: {drop: ["ALL"]}
-
     containers:
       app:
         image:
-          repository: *image
-          tag: *tag
+          repository: &image ghcr.io/home-operations/qbittorrent
+          tag: &tag 5.2.4@sha256:9307627e03981d5473aa31175ea76ed56ea3752333ca49d601b6af45e281e7ba
         env:
           TZ: Asia/Jerusalem
           QBT_WEBUI_PORT: &port 80
@@ -114,8 +90,6 @@ persistence:
     size: 1Gi
     advancedMounts:
       qbittorrent:
-        configure-webui:
-          - path: /config
         app:
           - path: /config
   downloads:
@@ -141,8 +115,5 @@ persistence:
     defaultMode: 0775
     advancedMounts:
       qbittorrent:
-        configure-webui:
-          - path: /scripts
-            readOnly: true
         app:
           - path: /config/scripts
