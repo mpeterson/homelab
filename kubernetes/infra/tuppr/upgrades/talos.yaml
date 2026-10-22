@@ -53,10 +53,10 @@ spec:
         (!has(status.numberUnavailable) || status.numberUnavailable == 0)
       timeout: 5m
 
-    # --- GPU: NVIDIA device plugin healthy on GPU nodes ---
+    # --- GPU: NVIDIA GPU Operator device plugin healthy on GPU nodes ---
     - apiVersion: apps/v1
       kind: DaemonSet
-      name: nvidia-device-plugin
+      name: nvidia-device-plugin-daemonset
       namespace: infra
       expr: |-
         status.desiredNumberScheduled > 0 &&
@@ -64,10 +64,21 @@ spec:
         (!has(status.numberUnavailable) || status.numberUnavailable == 0)
       timeout: 10m
 
-    # --- GPU: NVIDIA GPU feature discovery healthy on GPU nodes ---
+    # --- GPU: NVIDIA GPU Operator feature discovery healthy on GPU nodes ---
     - apiVersion: apps/v1
       kind: DaemonSet
-      name: nvidia-device-plugin-gpu-feature-discovery
+      name: gpu-feature-discovery
+      namespace: infra
+      expr: |-
+        status.desiredNumberScheduled > 0 &&
+        status.numberReady == status.desiredNumberScheduled &&
+        (!has(status.numberUnavailable) || status.numberUnavailable == 0)
+      timeout: 10m
+
+    # --- GPU: validator confirms the Talos /usr/local driver layout is usable ---
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: nvidia-operator-validator
       namespace: infra
       expr: |-
         status.desiredNumberScheduled > 0 &&
