@@ -13,7 +13,7 @@ controllers:
       app:
         image:
           repository: barassistant/server
-          tag: 6.9.0@sha256:744beea928095cf9973a91ebb79df58725e41b8c0b1885b14783dfef9e0fb041
+          tag: 6.9.1@sha256:ec018029059e3c4ed64c5acb5bc255d8918ba22ec01da89ec3012355e9d1cd41
         env:
           ALLOW_REGISTRATION: "true"
           APP_KEY:

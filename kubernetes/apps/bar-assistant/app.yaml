@@ -20,7 +20,7 @@ spec:
       value: app-template@4.6.2
     - name: Server Image
       # renovate: datasource=docker depName=barassistant/server
-      value: barassistant/server:6.9.0@sha256:744beea928095cf9973a91ebb79df58725e41b8c0b1885b14783dfef9e0fb041
+      value: barassistant/server:6.9.1@sha256:ec018029059e3c4ed64c5acb5bc255d8918ba22ec01da89ec3012355e9d1cd41
     - name: Web Image
       # renovate: datasource=docker depName=barassistant/salt-rim
       value: barassistant/salt-rim:5.8.0@sha256:fcb3496d26390bb31019fc768c1bb36c8d4cedf1e95d1609d94500e2eccf7bb5
