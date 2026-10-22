@@ -1,18 +1,90 @@
 ---
-runtimeClassName: nvidia
+operator:
+  runtimeClass: nvidia
+  cleanupCRD: false
+  upgradeCRD: false
 
-gfd:
-  enabled: true
+driver:
+  enabled: false
+
+toolkit:
+  enabled: false
+
+hostPaths:
+  driverInstallDir: /usr/local
 
 nfd:
   enabled: false
 
-config:
-  map:
-    config: |
-      version: v1
-      sharing:
-        timeSlicing:
-          resources:
-            - name: nvidia.com/gpu
-              replicas: 8
+clusterPolicy:
+  deployCR: true
+
+gpuCluster:
+  deployCR: false
+
+cdi:
+  enabled: false
+
+mig:
+  strategy: none
+
+migManager:
+  enabled: false
+
+nodeStatusExporter:
+  enabled: false
+
+sandboxWorkloads:
+  enabled: false
+
+sandboxDevicePlugin:
+  enabled: false
+
+kataSandboxDevicePlugin:
+  enabled: false
+
+kataManager:
+  enabled: false
+
+vgpuManager:
+  enabled: false
+
+vgpuDeviceManager:
+  enabled: false
+
+vfioManager:
+  enabled: false
+
+ccManager:
+  enabled: false
+
+gds:
+  enabled: false
+
+gdrcopy:
+  enabled: false
+
+dcgm:
+  enabled: false
+
+dcgmExporter:
+  enabled: true
+
+gfd:
+  enabled: true
+
+devicePlugin:
+  config:
+    create: true
+    name: nvidia-device-plugin-config
+    default: default
+    data:
+      default: |-
+        version: v1
+        flags:
+          migStrategy: none
+        sharing:
+          timeSlicing:
+            resources:
+              - name: nvidia.com/gpu
+                replicas: 8

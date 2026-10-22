@@ -9,10 +9,28 @@ resources:
   - runtimeclass.yaml
 
 helmCharts:
-  - name: nvidia-device-plugin
-    repo: https://nvidia.github.io/k8s-device-plugin
-    # renovate: datasource=helm registryUrl=https://nvidia.github.io/k8s-device-plugin depName=nvidia-device-plugin
-    version: 0.20.0
-    releaseName: nvidia-device-plugin
+  - name: gpu-operator
+    repo: https://helm.ngc.nvidia.com/nvidia
+    # renovate: datasource=helm registryUrl=https://helm.ngc.nvidia.com/nvidia depName=gpu-operator
+    version: v26.7.2
+    releaseName: gpu-operator
     namespace: *ns
+    includeCRDs: true
     valuesFile: values.yaml
+
+patches:
+  - patch: |-
+      $patch: delete
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: gpu-operator-cleanup-gpucluster
+        namespace: infra
+  - patch: |-
+      apiVersion: nvidia.com/v1
+      kind: ClusterPolicy
+      metadata:
+        name: cluster-policy
+      spec:
+        sandboxDevicePlugin:
+          enabled: false
