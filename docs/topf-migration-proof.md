@@ -60,10 +60,10 @@ TOPF uses Talos 1.14's dedicated configuration documents, including
 `UnattendedInstallConfig`, `KubeletConfig`, `KubeNodeConfig`,
 `KubeTalosAPIAccessConfig`, `EtcFileConfig`, `CRICustomizationConfig`,
 `UdevRulesConfig`, and the split CA and cluster identity documents.
-Talhelper 3.1.17 emits the older representation, including
-`machine.install` and `secretbox(key1)` without `identity`. The proof compares
-the equivalent values across those representations and explicitly asserts the
-required Talos 1.14 encryption-provider order in the TOPF output.
+Talhelper 3.1.17 emits the older representation, including `machine.install`.
+The repository's guarded Talhelper workflow normalizes its raw
+`secretbox(key1)` output to `secretbox(key2)`, then `identity`; the proof invokes
+that same helper and asserts the required order in both renderers.
 
 ## Residual risks
 

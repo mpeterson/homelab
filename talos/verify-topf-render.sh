@@ -54,6 +54,8 @@ talhelper genconfig \
   --secret-file "$repo_root/talos/talsecret.sops.yaml" \
   --out-dir "$workdir/talhelper" \
   --no-gitignore >/dev/null
+"$repo_root/talos/preserve-etcd-encryption.sh" \
+  "$workdir"/talhelper/talos-proxmox-cluster-*.yaml
 
 envfile=$(mktemp "$workdir/talenv.XXXXXX")
 sops --decrypt --output-type dotenv talos/talenv.sops.yaml > "$envfile"
@@ -220,10 +222,16 @@ for node in "${nodes[@]}"; do
     "$(first_document_json "$talhelper_config" | jq -c '.machine.certSANs')"
 
   if [[ "$node" == talos-cp-* ]]; then
+    talhelper_provider_names=$(document_json KubeEtcdEncryptionConfig "$talhelper_config" |
+      jq -c '[.config.resources[0].providers[] | keys | .[0]]')
+    talhelper_key_names=$(document_json KubeEtcdEncryptionConfig "$talhelper_config" |
+      jq -c '[.config.resources[0].providers[].secretbox.keys[]?.name]')
     provider_names=$(document_json KubeEtcdEncryptionConfig "$topf_config" |
       jq -c '[.config.resources[0].providers[] | keys | .[0]]')
     key_names=$(document_json KubeEtcdEncryptionConfig "$topf_config" |
       jq -c '[.config.resources[0].providers[].secretbox.keys[]?.name]')
+    assert_equal "$node Talhelper encryption provider order mismatch" "$talhelper_provider_names" '["secretbox","identity"]'
+    assert_equal "$node Talhelper encryption key name mismatch" "$talhelper_key_names" '["key2"]'
     assert_equal "$node encryption provider order mismatch" "$provider_names" '["secretbox","identity"]'
     assert_equal "$node encryption key name mismatch" "$key_names" '["key2"]'
 
