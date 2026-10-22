@@ -41,13 +41,6 @@ controllers:
         image:
           repository: *image
           tag: *tag
-        lifecycle:
-          postStart:
-            exec:
-              command:
-                - python3
-                - /config/scripts/configure-webui.py
-                - repair-download-paths
         env:
           TZ: Asia/Jerusalem
           QBT_WEBUI_PORT: &port 80
