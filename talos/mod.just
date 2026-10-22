@@ -17,6 +17,15 @@ genconfig:
     cd "{{ talos_dir }}"
     talhelper genconfig
 
+    tmp=
+    cleanup_tmp() {
+      if [ -n "$tmp" ]; then
+        rm -f -- "$tmp"
+      fi
+    }
+    trap cleanup_tmp EXIT
+    trap 'cleanup_tmp; exit 1' HUP INT TERM
+
     for config in clusterconfig/talos-proxmox-cluster-*.yaml; do
       encryption_docs=$(yq eval-all '[select(.kind == "KubeEtcdEncryptionConfig")] | length' "$config")
       if [ "$encryption_docs" = "0" ]; then
@@ -43,13 +52,14 @@ genconfig:
         exit 1
       fi
 
-      # Legacy Talos Secretbox configuration uses key2 and an identity fallback.
-      tmp=$(mktemp)
+      # Temporary Talhelper v3.1.17 compatibility shim; remove during the TOPF migration tracked in #1028.
+      tmp=$(mktemp "${config}.tmp.XXXXXX")
+      chmod 600 "$tmp"
       yq eval-all \
         'with(select(.kind == "KubeEtcdEncryptionConfig"); .config.resources[0].providers[0].secretbox.keys[0].name = "key2" | .config.resources[0].providers += [{"identity": {}}])' \
         "$config" > "$tmp"
-      chmod 600 "$tmp"
       mv "$tmp" "$config"
+      tmp=
     done
 
 [doc('Diff generated config against running node config')]
