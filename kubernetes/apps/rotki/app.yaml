@@ -20,7 +20,7 @@ spec:
       value: app-template@4.6.2
     - name: Image
       # renovate: datasource=docker depName=rotki/rotki
-      value: rotki/rotki:v1.44.2@sha256:4185270b93739fbb1f00fd124d549ec0153062327e504d5eff1bd2a599285353
+      value: rotki/rotki:v1.44.2@sha256:b9dba08f80c7676b7975eb0b1a78769fd6ac10e626fb435dfd40a7e2885dad02
 
   syncPolicy:
     syncOptions:
