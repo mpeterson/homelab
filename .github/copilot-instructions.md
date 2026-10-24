@@ -72,8 +72,9 @@ See `talos/mod.just` for all Talos recipes (`genconfig`, `diff`, `apply`, `reset
 Generation is offline and strictly validates every node before publishing private
 output. Apply sends the same validated in-memory payload through `talosctl`,
 requires exact-hostname confirmation, uses no-reboot mode, and checks sustained
-Talos/Kubernetes readiness using endpoint-verified private credentials. Diffs
-report document kinds only; do not expose raw diffs or rely on TOPF redaction.
+Talos/Kubernetes health using native server-side `talosctl health` with explicit
+node addresses and Kubernetes endpoint. Diffs report dry-run acceptance only;
+do not expose raw diffs or rely on TOPF redaction.
 Recovery recipes stay in Just and use existing client credentials without
 machine generation or version gates. Verify workload
 health separately before proceeding. Never bypass these gates or apply all nodes.
@@ -108,17 +109,16 @@ The existing cluster secrets bundle remains `talos/talsecret.sops.yaml`; Tailsca
 authentication is in `talos/patches/all/90-tailscale.sops.yaml`. The control-plane
 encryption document references the existing Secretbox secret through vals and
 must retain `key2` followed by `identity`. Never generate new cluster secrets.
-The Python standard-library guard enforces embedded TOPF/Talos compatibility
+Just recipes and the existing CLI tools enforce embedded TOPF/Talos compatibility
 (including the Tuppr upgrade target), private output, and exact-node targeting.
 The unconditional Talos CI job feeds the required `All validations passed` check.
-Migration-only legacy comparison tooling stays outside the repository.
-Generated configs/client credentials
-belong only in ignored private directories, never Git or CI artifacts.
+Generated configs/client credentials belong only in ignored private directories,
+never Git or CI artifacts.
 
 Upgrades remain managed by Tuppr (`kubernetes/infra/tuppr/upgrades/`), not TOPF.
 Do not advance Talos beyond TOPF's embedded supported machinery; new minor
-contracts require an explicit compatibility review. See `docs/talos-configuration.md`
-for generation, migration comparisons, and sequential rollout/rollback gates.
+contracts require an explicit compatibility review. Migration runbooks and
+one-off comparison tools are private operational artifacts, not repository docs.
 
 GPU workers `talos-01` and `talos-02` use NVIDIA Quadro P2000 (Pascal). They require the R580 LTS driver branch because R595+ is unsupported. Keep `siderolabs/nonfree-kmod-nvidia-lts` and `siderolabs/nvidia-container-toolkit-lts` on matching branches, and verify the resolved driver remains R580-compatible before every Talos upgrade.
 

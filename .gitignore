@@ -4,6 +4,4 @@ hack
 .local
 talos/clusterconfig
 talos/*.iso
-talos/__pycache__/
-talos/tests/__pycache__/
 .decrypted~*

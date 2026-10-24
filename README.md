@@ -64,8 +64,21 @@ just talos genconfig
 just talos diff talos-03
 ```
 
-See [Talos configuration operations](docs/talos-configuration.md) for compatibility
-checks, encrypted inputs, single-node application, and migration safety gates.
+`just talos versions` checks TOPF support for the inventory and Tuppr upgrade
+target without decrypting secrets. This runs on every PR and feeds the required
+`All validations passed` status. New Talos minor contracts require compatibility
+review.
+
+Generated machine configs and client credentials stay private in ignored
+`talos/clusterconfig/`. `just talos apply <node>` requires exact-hostname
+confirmation, sends the same strictly validated payload used by its no-reboot
+dry-run, and gates application on native Talos/Kubernetes health checks against
+the configured cluster. Dry-runs never display raw configuration values.
+Apply one node at a time and verify workload health before proceeding.
+
+Reset/reboot use existing `TALOSCONFIG` credentials without machine generation.
+VM reprovisioning delegates to the Ansible commands below and accepts any
+inventory through `ANSIBLE_INVENTORY`; no private repository checkout is required.
 
 ### Ansible inventory
 
