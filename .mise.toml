@@ -18,7 +18,7 @@ auto_install = true
 "aqua:siderolabs/talos" = "1.14.4"
 "aqua:budimanjojo/talhelper" = "3.1.17"
 "pipx:yamllint" = "1.38.0"
-"pipx:ansible-core" = "2.20.4"
+"pipx:ansible-core" = "2.21.5"
 "npm:markdownlint-cli2" = "0.24.0"
 "npm:json5" = "2.2.3"
 "npm:renovate" = { version = "44.175.0", trust_policy_excludes = ["@yarnpkg/libzip@3.2.2"] }
