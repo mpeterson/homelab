@@ -149,6 +149,14 @@ class GenerationTests(unittest.TestCase):
             with self.assertRaisesRegex(manage.ConfigError, "Required tool not found"):
                 manage.run(["topf"])
 
+    def test_tool_timeout_withholds_captured_private_output(self):
+        error = subprocess.TimeoutExpired(["talosctl"], 10, output="synthetic-private-value",
+                                          stderr="synthetic-private-diagnostic")
+        with patch("subprocess.run", side_effect=error):
+            with self.assertRaisesRegex(manage.ConfigError, "readiness timed out") as context:
+                manage.run(["talosctl"], timeout=10, context="Talos readiness")
+        self.assertNotIn("synthetic-private", str(context.exception))
+
     def test_partial_render_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             with self.assertRaisesRegex(manage.ConfigError, "incomplete"):
@@ -336,6 +344,8 @@ class ReadinessTests(unittest.TestCase):
         clock = [0]
 
         def invoke(args, **kwargs):
+            self.assertGreater(kwargs["timeout"], 0)
+            self.assertLessEqual(kwargs["timeout"], 300 - clock[0])
             if "machinestatus" in args:
                 ready = not never_ready and clock[0] != 12
                 value = {"spec": {"stage": "running", "status": {"ready": ready}}}

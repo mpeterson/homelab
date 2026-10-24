@@ -26,14 +26,16 @@ class ConfigError(Exception):
     pass
 
 
-def run(args, *, input=None, sensitive=True, context=None):
+def run(args, *, input=None, sensitive=True, context=None, timeout=None):
     try:
         result = subprocess.run(
             [str(arg) for arg in args], cwd=ROOT, input=input,
-            text=True, capture_output=True, check=False,
+            text=True, capture_output=True, check=False, timeout=timeout,
         )
     except FileNotFoundError as error:
         raise ConfigError(f"Required tool not found: {args[0]}") from error
+    except subprocess.TimeoutExpired as error:
+        raise ConfigError(f"{context or args[0]} timed out; diagnostics withheld") from error
     if result.returncode:
         detail = ("configuration-bearing diagnostics withheld" if sensitive
                   else (result.stderr or result.stdout).strip())
@@ -312,8 +314,10 @@ def wait_ready(connection, kubectl, name):
     deadline = time.monotonic() + 300
     stable_since = None
     while time.monotonic() < deadline:
-        status = json.loads(run([*connection, "get", "machinestatus", "-o", "json"], sensitive=False).stdout)["spec"]
-        node = json.loads(run([*kubectl, "get", "node", name, "-o", "json"], sensitive=False).stdout)
+        status = json.loads(run([*connection, "get", "machinestatus", "-o", "json"], sensitive=False,
+                                context=f"Talos readiness for {name}", timeout=deadline - time.monotonic()).stdout)["spec"]
+        node = json.loads(run([*kubectl, "get", "node", name, "-o", "json"], sensitive=False,
+                              context=f"Kubernetes readiness for {name}", timeout=deadline - time.monotonic()).stdout)
         ready = (status["stage"] == "running" and status["status"]["ready"]
                  and any(condition["type"] == "Ready" and condition["status"] == "True"
                          for condition in node["status"]["conditions"]))
