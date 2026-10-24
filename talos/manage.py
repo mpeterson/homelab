@@ -2,6 +2,7 @@
 """Guarded TOPF rendering and single-node operations."""
 
 import argparse
+from contextlib import contextmanager, nullcontext
 import fcntl
 import ipaddress
 import json
@@ -12,18 +13,20 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "talos/topf.yaml"
 OUTPUT = ROOT / "talos/clusterconfig"
+UPGRADE = ROOT / "kubernetes/infra/tuppr/upgrades/talos.yaml"
 
 
 class ConfigError(Exception):
     pass
 
 
-def run(args, *, accepted=(0,), input=None):
+def run(args, *, input=None, sensitive=True, context=None):
     try:
         result = subprocess.run(
             [str(arg) for arg in args], cwd=ROOT, input=input,
@@ -31,23 +34,21 @@ def run(args, *, accepted=(0,), input=None):
         )
     except FileNotFoundError as error:
         raise ConfigError(f"Required tool not found: {args[0]}") from error
-    if result.returncode not in accepted:
-        # Tool diagnostics can contain decrypted YAML or template values.
-        raise ConfigError(
-            f"{args[0]} failed (exit {result.returncode}); "
-            "configuration-bearing diagnostics were withheld"
-        )
+    if result.returncode:
+        detail = ("configuration-bearing diagnostics withheld" if sensitive
+                  else (result.stderr or result.stdout).strip())
+        raise ConfigError(f"{context or args[0]} failed (exit {result.returncode}); {detail}")
     return result
 
 
-def yaml_documents(path):
-    output = run(["yq", "-o=json", "-I=0", ".", path]).stdout
+def yaml_documents(path, *, input=None):
+    output = run(["yq", "-o=json", "-I=0", ".", path], input=input).stdout
     try:
         documents = [json.loads(line) for line in output.splitlines() if line]
     except json.JSONDecodeError as error:
-        raise ConfigError(f"Invalid YAML conversion: {path.name}") from error
+        raise ConfigError("Invalid YAML conversion (values withheld)") from error
     if not documents or any(not isinstance(doc, dict) for doc in documents):
-        raise ConfigError(f"Expected YAML mappings: {path.name}")
+        raise ConfigError("Expected YAML mappings (values withheld)")
     return documents
 
 
@@ -60,7 +61,7 @@ def stable_version(value):
     return tuple(map(int, match.groups()))
 
 
-def check_versions(config, topf_version, talosctl_version):
+def check_versions(config, topf_version, talosctl_version, upgrade_version):
     match = re.fullmatch(
         r"topf version (v?\d+\.\d+\.\d+) \(Talos (v?\d+\.\d+\.\d+)\)\s*",
         topf_version,
@@ -75,12 +76,23 @@ def check_versions(config, topf_version, talosctl_version):
     target = stable_version(config["talosVersion"])
     if stable_version(client[1]) != target:
         raise ConfigError("talosctl must exactly match the configured Talos version")
+    if stable_version(upgrade_version) != target:
+        raise ConfigError("Tuppr's Talos upgrade target must match the TOPF configuration contract")
     for node in config["nodes"]:
         version = stable_version(node.get("talosVersion", config["talosVersion"]))
         if version > supported or version[:2] != (1, 14) or version != target:
             raise ConfigError("Unsupported or mixed Talos configuration contract")
     if target > supported or target[:2] != (1, 14):
         raise ConfigError("Configured Talos version exceeds verified TOPF support")
+
+
+def repository_versions(config):
+    upgrade, = yaml_documents(UPGRADE)
+    if upgrade.get("kind") != "TalosUpgrade":
+        raise ConfigError("Expected the Tuppr TalosUpgrade configuration")
+    check_versions(config, run(["topf", "--version"], sensitive=False).stdout,
+                   run(["talosctl", "version", "--client"], sensitive=False).stdout,
+                   upgrade["spec"]["talos"]["version"])
 
 
 def inventory():
@@ -129,8 +141,6 @@ def topf(*args):
 
 
 def preflight(config):
-    check_versions(config, run(["topf", "--version"]).stdout,
-                   run(["talosctl", "version", "--client"]).stdout)
     bundle = CONFIG.parent / config["secretsPath"]
     if not bundle.is_file():
         raise ConfigError("Existing encrypted secrets bundle is missing")
@@ -169,11 +179,13 @@ def validate_render(config, directory, secrets):
     expected = {node["host"] + ".yaml" for node in config["nodes"]}
     if {path.name for path in directory.iterdir()} != expected:
         raise ConfigError("Render is incomplete or contains unexpected output")
+    payloads = {}
     for node in config["nodes"]:
         path = directory / (node["host"] + ".yaml")
         if path.is_symlink() or path.stat().st_mode & 0o077:
             raise ConfigError("Generated config permissions are not private")
-        docs = documents_by_id(yaml_documents(path))
+        payload = path.read_text()
+        docs = documents_by_id(yaml_documents("-", input=payload))
         hostname = docs.get(("HostnameConfig", ""), {}).get("hostname")
         if hostname != node["host"]:
             raise ConfigError("Rendered hostname does not match inventory")
@@ -214,7 +226,10 @@ def validate_render(config, directory, secrets):
                 raise ConfigError("Etcd encryption identity/providers do not match existing key2")
         elif ("KubeEtcdEncryptionConfig", "") in docs:
             raise ConfigError("Unexpected worker encryption configuration")
-        run(["talosctl", "validate", "--strict", "-m", "metal", "-c", path])
+        run(["talosctl", "validate", "--strict", "-m", "metal", "-c", "/dev/stdin"],
+            input=payload, context=f"Strict validation for {node['host']}")
+        payloads[node["host"]] = payload
+    return payloads
 
 
 def private_directory(parent, prefix):
@@ -224,168 +239,161 @@ def private_directory(parent, prefix):
     return Path(tempfile.mkdtemp(prefix=prefix, dir=parent))
 
 
-def generate(config):
+@contextmanager
+def generation(config):
+    repository_versions(config)
     secrets = preflight(config)
     staging = private_directory(ROOT / ".local/topf", "render-")
     try:
         run(topf("render", "--output", staging))
-        validate_render(config, staging, secrets)
+        payloads = validate_render(config, staging, secrets)
         credentials = run(topf("talosconfig")).stdout
         (staging / "talosconfig").write_text(credentials)
         (staging / "talosconfig").chmod(0o600)
-        # Only complete, validated generations are published.
+        yield staging, payloads
+    finally:
+        shutil.rmtree(staging)
+
+
+def generate(config):
+    with generation(config) as (staging, payloads):
         if OUTPUT.exists():
             if OUTPUT.is_symlink():
                 raise ConfigError("Refusing a symlink output directory")
             OUTPUT.chmod(0o700)
         else:
             OUTPUT.mkdir(mode=0o700)
+        for name, payload in payloads.items():
+            (staging / (name + ".yaml")).write_text(payload)
         for path in staging.iterdir():
             os.replace(path, OUTPUT / path.name)
-    finally:
-        shutil.rmtree(staging)
-    return secrets
 
 
 def node_operation(config, command, name):
     node = select_node(config, name)
-    generate(config)
-    endpoint = next(node["ip"] for node in config["nodes"] if node["role"] == "control-plane")
-    connection = ["talosctl", "--talosconfig", OUTPUT / "talosconfig",
-                  "-e", endpoint, "-n", node["ip"]]
-    live = run([*connection, "version"]).stdout
-    versions = re.findall(r"^\s*Tag:\s+(v?\d+\.\d+\.\d+)\s*$", live, re.M)
-    if len(versions) != 2 or any(
-        stable_version(version) != stable_version(config["talosVersion"]) for version in versions
-    ):
-        raise ConfigError("Live node version must match the reviewed Talos contract")
-    if command in ("reset-node", "reboot-node"):
-        prompt = f"{command} {name} ({node['ip']})"
-        if command == "reset-node":
-            prompt += " and wipe STATE + EPHEMERAL"
-        if input(prompt + "? Type the exact hostname to confirm: ") != name:
-            raise ConfigError("Operation not confirmed")
-        operation = (
-            ["reset", "--system-labels-to-wipe", "STATE", "--system-labels-to-wipe",
-             "EPHEMERAL", "--graceful=false", "--reboot"]
-            if command == "reset-node" else ["reboot", "-m", "powercycle"]
-        )
-        run([*connection, *operation])
-        return
-    pattern = "^" + re.escape(node["host"]) + "$"
-    # Only TOPF sees raw diffs; its redactor covers current and proposed secrets.
-    args = topf("--nodes-filter", pattern, "--confirm=true",
-                "apply", "--mode=no-reboot", "--auto-bootstrap=false",
-                "--skip-problematic-nodes=false", "--skip-post-apply-checks=false",
-                "--allow-not-ready=false", "--stabilization-duration=30s")
-    if command == "diff":
-        result = run([*args, "--dry-run"], accepted=(0, 2))
-        summary = "changes detected" if result.returncode == 2 else "no changes"
-        print(f"{node['host']}: {summary} (redacted diff follows)")
-        print(result.stdout, end="")
-        print(result.stderr, end="", file=sys.stderr)
-        return
-    run(["kubectl", "wait", "--for=condition=Ready", "node/" + name, "--timeout=120s"])
-    # Keep TOPF's interactive confirmation and post-apply stabilization checks.
-    result = subprocess.run(
-        [str(arg) for arg in [*args, "--dry-run=false"]], cwd=ROOT, check=False,
-    )
-    if result.returncode:
-        raise ConfigError(f"TOPF apply failed (exit {result.returncode})")
-    run(["kubectl", "wait", "--for=condition=Ready", "node/" + name, "--timeout=300s"])
+    with generation(config) as (directory, payloads):
+        payload = payloads[name]
+        connection = ["talosctl", "--talosconfig", directory / "talosconfig",
+                      "-e", node["ip"], "-n", node["ip"]]
+        current = json.loads(run([*connection, "get", "machineconfig", "persistent", "-o", "json"]).stdout)
+        before = documents_by_id(yaml_documents("-", input=current["spec"]))
+        after = documents_by_id(yaml_documents("-", input=payload))
+        changed = sorted({kind for kind, key in before.keys() | after.keys()
+                          if before.get((kind, key)) != after.get((kind, key))})
+        apply = [*connection, "apply-config", "--mode=no-reboot", "--file", "/dev/stdin"]
+        result = run([*apply, "--dry-run"], input=payload, context=f"Server-side dry-run for {name}")
+        if not re.search(r"^Applied configuration without a reboot \(skipped in dry-run\)\.?\s*$",
+                         result.stdout + "\n" + result.stderr, re.M):
+            raise ConfigError("Dry-run did not confirm a no-reboot application; output withheld")
+        print(f"{name}: server-side dry-run accepted without a reboot")
+        print("Changed document kinds: " + (", ".join(changed) if changed else "none") + " (values withheld)")
+        if command == "diff":
+            return
+        kubeconfig = directory / "kubeconfig"
+        kubeconfig.write_text(run(topf("kubeconfig")).stdout)
+        kubeconfig.chmod(0o600)
+        kube, = yaml_documents(kubeconfig)
+        if [cluster["cluster"]["server"] for cluster in kube["clusters"]] != [config["clusterEndpoint"]]:
+            raise ConfigError("Generated Kubernetes credentials target an unexpected endpoint")
+        kubectl = ["kubectl", "--kubeconfig", kubeconfig, "--server", config["clusterEndpoint"]]
+        if input(f"Apply to {name} ({node['ip']})? Type the exact hostname to confirm: ") != name:
+            raise ConfigError("Application not confirmed")
+        run([*kubectl, "wait", "--for=condition=Ready", "node/" + name, "--timeout=120s"],
+            sensitive=False, context=f"Kubernetes readiness before applying {name}")
+        status = json.loads(run([*connection, "get", "machinestatus", "-o", "json"], sensitive=False).stdout)["spec"]
+        if status["stage"] != "running" or not status["status"]["ready"]:
+            raise ConfigError(f"{name}: Talos is not ready; refusing application")
+        run(apply, input=payload, context=f"Configuration application for {name}")
+        wait_ready(connection, kubectl, name)
+        print(f"{name}: applied the validated payload; Talos and Kubernetes healthy for 30 seconds")
 
 
-def installer(node):
-    path = OUTPUT / (node["host"] + ".yaml")
-    docs = documents_by_id(yaml_documents(path))
-    image = docs[("UnattendedInstallConfig", "")]["installer"]["image"]
-    match = re.fullmatch(
-        r"factory\.talos\.dev/metal-installer/([a-f0-9]{64}):(v\d+\.\d+\.\d+)", image,
-    )
-    if not match:
-        raise ConfigError("Unexpected installer reference")
-    schematic, version = match.groups()
-    return (
-        f"talos-{version}-{schematic[:8]}.iso",
-        f"https://factory.talos.dev/image/{schematic}/{version}/metal-amd64.iso",
-    )
+def wait_ready(connection, kubectl, name):
+    deadline = time.monotonic() + 300
+    stable_since = None
+    while time.monotonic() < deadline:
+        status = json.loads(run([*connection, "get", "machinestatus", "-o", "json"], sensitive=False).stdout)["spec"]
+        node = json.loads(run([*kubectl, "get", "node", name, "-o", "json"], sensitive=False).stdout)
+        ready = (status["stage"] == "running" and status["status"]["ready"]
+                 and any(condition["type"] == "Ready" and condition["status"] == "True"
+                         for condition in node["status"]["conditions"]))
+        if not ready:
+            stable_since = None
+        elif stable_since is None:
+            stable_since = time.monotonic()
+        elif time.monotonic() - stable_since >= 30:
+            return
+        time.sleep(2)
+    raise ConfigError(f"{name}: sustained Talos/Kubernetes readiness timed out after 300 seconds")
 
 
-def reprovision(config, name, dry_run):
-    node = select_node(config, name)
-    image, url = installer(node)
-    inventory_path = Path(os.environ.get(
-        "ANSIBLE_INVENTORY", ROOT.parent / "homelab-private/ansible/inventories",
-    ))
-    if not inventory_path.exists():
-        raise ConfigError("Ansible inventory is missing; set ANSIBLE_INVENTORY")
-    if not dry_run and input(
-        f"Recreate {name}'s VM disk? Type the exact hostname to confirm: "
-    ) != name:
-        raise ConfigError("Reprovisioning not confirmed")
-    print(f"{name}: {url} (dry-run={dry_run})")
-    result = subprocess.run([
-        "ansible-playbook", "playbooks/utilities/reprovision-talos-vm.yaml",
-        "-i", str(inventory_path),
-        "-e", json.dumps({"target_vms": [name], "iso_file": image,
-                         "iso_url": url, "dry_run": dry_run}),
-    ], cwd=ROOT / "ansible", check=False)
-    if result.returncode:
-        raise ConfigError(f"Ansible reprovisioning failed (exit {result.returncode})")
+@contextmanager
+def operation_lock():
+    parent = ROOT / ".local/topf"
+    parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    if parent.is_symlink() or parent.stat().st_mode & 0o077:
+        raise ConfigError("Operation lock directory must have mode 0700")
+    with (parent / "operation.lock").open("a") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise ConfigError("Another generation/application is active; retry after it finishes") from error
+        try:
+            yield
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
 
 
 def main():
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=(
-        "versions", "check", "genconfig", "validate", "diff", "apply", "reset-node", "reboot-node",
-        "download-iso", "reprovision-node", "reprovision-cluster",
+        "versions", "check", "genconfig", "validate", "diff", "apply", "credentials",
     ))
     parser.add_argument("node", nargs="?")
-    parser.add_argument("--dry-run", choices=("true", "false"))
     args = parser.parse_args()
-    if args.dry_run is not None and args.command not in ("reprovision-node", "reprovision-cluster"):
-        parser.error("--dry-run is only valid for reprovisioning; use diff to preview config changes")
+    if (args.command in ("diff", "apply")) != (args.node is not None):
+        parser.error("diff/apply require one exact hostname; other commands take no hostname")
     try:
         config = inventory()
-        if args.command == "versions":
-            check_versions(config, run(["topf", "--version"]).stdout,
-                           run(["talosctl", "version", "--client"]).stdout)
-            print("Configured Talos contract is supported by TOPF and matches talosctl")
-        elif args.command in ("diff", "apply", "reset-node", "reboot-node"):
-            node_operation(config, args.command, args.node)
-        elif args.command == "check":
-            preflight(config)
-        elif args.command in ("download-iso", "reprovision-node", "reprovision-cluster"):
-            if args.command == "reprovision-node":
-                select_node(config, args.node)
-            generate(config)
-            if args.command == "download-iso":
-                images = {installer(node) for node in config["nodes"]}
-                for name, url in sorted(images):
-                    run(["curl", "-fL", "--retry", "5", "--retry-delay", "5",
-                         "--retry-all-errors", "-o", CONFIG.parent / name, url])
-                    print(name)
+        locked = args.command in ("genconfig", "validate", "apply", "credentials")
+        with operation_lock() if locked else nullcontext():
+            if args.command == "versions":
+                repository_versions(config)
+                print("TOPF supports the configured Talos version; talosctl and Tuppr targets match")
+            elif args.command in ("diff", "apply"):
+                node_operation(config, args.command, args.node)
+            elif args.command == "check":
+                repository_versions(config)
+                preflight(config)
+            elif args.command == "credentials":
+                preflight(config)
+                OUTPUT.mkdir(mode=0o700, exist_ok=True)
+                if OUTPUT.is_symlink() or OUTPUT.stat().st_mode & 0o077:
+                    raise ConfigError("Client configuration directory must have mode 0700")
+                with tempfile.NamedTemporaryFile(dir=OUTPUT, mode="w", delete=False) as file:
+                    path = Path(file.name)
+                    try:
+                        file.write(run(topf("talosconfig")).stdout)
+                        file.close()
+                        os.replace(path, OUTPUT / "talosconfig")
+                    finally:
+                        path.unlink(missing_ok=True)
             else:
-                names = ([args.node] if args.command == "reprovision-node"
-                         else [node["host"] for node in config["nodes"]])
-                for name in names:
-                    reprovision(config, name, args.dry_run == "true")
-        else:
-            generate(config)
-            print(f"Generated and strictly validated {len(config['nodes'])} node configs")
+                generate(config)
+                print(f"Generated and strictly validated {len(config['nodes'])} node configs")
     except (ConfigError, OSError, KeyError, ValueError) as error:
         # Never include values from YAML decoding exceptions.
-        message = str(error) if isinstance(error, ConfigError) else type(error).__name__
+        if isinstance(error, ConfigError):
+            message = str(error)
+        elif isinstance(error, OSError):
+            message = f"Private configuration I/O failed: {error.strerror}"
+        else:
+            message = f"Invalid configuration structure ({type(error).__name__}; values withheld)"
         print(f"ERROR: {message}", file=sys.stderr)
         return 1
     return 0
 
 
 if __name__ == "__main__":
-    os.umask(0o077)
-    lock_directory = ROOT / ".local/topf"
-    lock_directory.mkdir(mode=0o700, parents=True, exist_ok=True)
-    with (lock_directory / "operation.lock").open("w") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
-        sys.exit(main())
+    sys.exit(main())

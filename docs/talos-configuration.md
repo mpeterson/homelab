@@ -5,8 +5,11 @@
 TOPF v0.6.2 embeds Talos v1.14.4. The pinned `talosctl` version must match
 `talosVersion` exactly. All nodes must use the same verified Talos 1.14 contract;
 newer patch versions than TOPF supports, prereleases, and unreviewed minor
-versions are rejected. `just talos versions` checks this without decrypting secrets
-and runs in CI alongside `just talos test`.
+versions are rejected. Tuppr's `TalosUpgrade` target must match this contract too.
+`just talos versions` checks these inputs without decrypting secrets and runs on
+every PR alongside `just talos test`. The active `main` ruleset requires
+**All validations passed**, which fails unless the Talos guard succeeds. An
+unsupported bump therefore blocks normal PR merging, including a Tuppr-only bump.
 
 | Input | Purpose |
 | --- | --- |
@@ -60,25 +63,41 @@ just talos apply talos-03
 Generation is offline. Temporary outputs live in private ignored
 `.local/topf/` directories and are removed on success/failure. Only a complete,
 strictly validated generation is published to `talos/clusterconfig/`, with mode
-0700 directories and 0600 machine/client configs. A failed generation does not
-authorize use of older cached output; operational recipes always regenerate and
-stop on failure. Concurrent wrapper invocations are serialized locally.
+0700 directories and 0600 machine/client configs. Diff and apply use their own
+fresh private generation, not cached machine configs. Generation/application
+locks fail immediately on contention; help, version checks and independent
+dry-runs do not wait for them.
 
-Raw tool failure diagnostics may contain secret-bearing YAML and are withheld;
-the wrapper reports the failing tool and exit status instead. Do not enable shell
-tracing, disable redaction, paste machine configs, or upload generated output.
-CI runs only secret-free compatibility/regression checks.
+Configuration-bearing tool diagnostics are withheld with the operation context
+and exit status; ordinary readiness diagnostics remain available. Do not enable
+shell tracing, paste machine configs, or upload generated output. CI runs only
+secret-free compatibility/regression checks.
 
-Diff is an exact-node, redacted server-side dry-run. TOPF's exit code 2 means
-changes were found; other errors fail the recipe. Apply allows no arbitrary flag
-passthrough, requires the live node to match the reviewed version, forces
-no-reboot mode, and retains interactive confirmation and post-apply stabilization.
-It also waits for Kubernetes Ready status. Node readiness alone is not a workload
-health check; perform the additional gates below.
+Diff is an exact-node server-side dry-run through `talosctl`. It reports changed
+document kinds, never raw configuration diffs: TOPF's redactor is not relied on
+to hide old live secret values. Each payload is captured in memory, strictly
+validated through stdin, then sent unchanged through stdin for the server-side
+dry-run and application. TOPF does not rerender during application.
+
+Apply allows no arbitrary flag passthrough, requires exact-hostname confirmation
+and forces no-reboot mode. It checks readiness before application and requires
+30 continuous seconds of Talos health and Kubernetes Ready afterwards, with a
+five-minute deadline. Kubernetes checks use freshly generated private credentials
+whose endpoint is verified against `clusterEndpoint`, plus an explicit server
+override; the ambient kubeconfig/context is never used. Node readiness alone is
+not a workload health check; perform the additional gates below.
 
 `download-iso` deduplicates rendered installer references. `reset-node`,
 `reboot-node`, and non-dry-run reprovisioning require the exact hostname as
-confirmation and must only be used with explicit authorization.
+confirmation and must only be used with explicit authorization. Recovery recipes
+live in Just and use existing `TALOSCONFIG` credentials (default
+`talos/clusterconfig/talosconfig`), without regenerating machine configs or
+requiring all live versions to match during a staged upgrade. If credentials are
+missing, `just talos credentials` creates only client credentials from the
+existing encrypted bundle. `reset-node <node> no-reboot` preserves the optional
+non-reboot reset mode. Cluster reprovisioning adds an upfront all-node warning
+and confirmation before the individual confirmations.
+
 Reprovisioning uses the existing Ansible inventory convention; set
 `ANSIBLE_INVENTORY` when the private sibling inventory is elsewhere.
 
@@ -92,11 +111,8 @@ machine configs into ignored mode 0700 directories with mode 0600 files. Retain
 the existing client credentials and exact source/tool versions privately.
 The TOPF migration baseline uses the merged Talhelper encryption guard.
 
-```sh
-just talos compare .local/topf-migration/baseline \
-  talos/clusterconfig .local/topf-migration/live
-```
-
+The migration-only comparator and legacy normalization are retained privately,
+outside the repository; they are not a permanent recipe or compatibility layer.
 The comparison checks every document, including unknown/new documents, all
 remaining base fields, volumes, and exact private key/token values. It prints only
 node results or mismatching document identities, never values. Native document
@@ -112,9 +128,13 @@ Sysctl numbers and their live string serialization are compared equivalently.
 Any other unmapped field or changed document blocks migration.
 
 Talos v1.14.4 generation introduces defaults absent from this existing cluster.
-The patches deliberately remove the generated secure EPHEMERAL volume and
-workload-isolation documents instead of changing volume/security policy.
+The patches explicitly preserve `VolumeConfig` EPHEMERAL `mount.secure: false`
+and `SecurityProfileConfig` `workloadIsolation: false`, instead of inheriting new
+generator defaults. The private comparison treats legacy absence as these false
+policies. `mount.secure` controls mount hardening, not disk encryption.
 The generated Flannel CNI document is removed because Cilium owns networking.
+The encryption document is deleted and replaced to avoid merging provider
+arrays; these are native document-patch operations, not live resource deletion.
 Explicit virtio DHCP/VIP documents remain control-plane-only; workers retain
 their existing automatic networking.
 

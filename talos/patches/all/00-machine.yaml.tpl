@@ -2,11 +2,12 @@
 apiVersion: v1alpha1
 kind: VolumeConfig
 name: EPHEMERAL
-$patch: delete
+mount:
+  secure: false
 ---
 apiVersion: v1alpha1
 kind: SecurityProfileConfig
-$patch: delete
+workloadIsolation: false
 ---
 apiVersion: v1alpha1
 kind: UnattendedInstallConfig

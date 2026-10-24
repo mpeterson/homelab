@@ -103,11 +103,11 @@ jobs:
   validate-success:
     name: All validations passed
     if: ${{ !cancelled() }}
-    needs: [kustomize, helm, images, talos]
+    needs: [filter-changes, kustomize, helm, images, talos]
     runs-on: ubuntu-latest
     steps:
       - name: Check validation results
-        if: ${{ contains(needs.*.result, 'failure') }}
+        if: ${{ needs.filter-changes.result != 'success' || needs.talos.result != 'success' || contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || (needs.filter-changes.outputs.changed-files != '[]' && contains(needs.*.result, 'skipped')) }}
         run: |
           echo "::error::One or more validation jobs failed"
           exit 1
