@@ -1,0 +1,11 @@
+---
+customization:
+  systemExtensions:
+    officialExtensions:
+      - siderolabs/gasket-driver
+      - siderolabs/iscsi-tools
+      # Quadro P2000 requires the paired R580 LTS extensions.
+      - siderolabs/nonfree-kmod-nvidia-lts
+      - siderolabs/nvidia-container-toolkit-lts
+      - siderolabs/qemu-guest-agent
+      - siderolabs/tailscale

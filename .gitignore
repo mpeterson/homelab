@@ -3,4 +3,5 @@
 hack
 .local
 talos/clusterconfig
+talos/*.iso
 .decrypted~*
