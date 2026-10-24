@@ -102,7 +102,7 @@ jobs:
 
   validate-success:
     name: All validations passed
-    if: ${{ !cancelled() }}
+    if: ${{ always() }}
     needs: [filter-changes, kustomize, helm, images, talos]
     runs-on: ubuntu-latest
     steps:
