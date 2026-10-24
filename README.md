@@ -53,6 +53,20 @@ List all available commands:
 just
 ```
 
+### Talos configuration
+
+[TOPF](https://github.com/postfinance/topf) renders the six-node inventory in
+`talos/topf.yaml` using compact native Talos patches and the existing SOPS-encrypted
+cluster identity. Tuppr remains responsible for Talos and Kubernetes upgrades.
+
+```sh
+just talos genconfig
+just talos diff talos-03
+```
+
+See [Talos configuration operations](docs/talos-configuration.md) for compatibility
+checks, encrypted inputs, single-node application, and migration safety gates.
+
 ### Ansible inventory
 
 Operational inventories are intentionally excluded from this public repository.

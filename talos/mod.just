@@ -9,301 +9,61 @@ export SOPS_AGE_KEY_FILE := env("SOPS_AGE_KEY_FILE", env("HOME") / ".config/sops
 default:
     @just --unstable --list talos
 
-[doc('Generate Talos configs from talconfig.yaml')]
+[doc('Check TOPF/Talos compatibility and the existing encrypted secrets bundle')]
+check:
+    mise exec -- python3 "{{ talos_dir }}/manage.py" check
+
+[doc('Check the configured version contract without decrypting secrets')]
+versions:
+    mise exec -- python3 "{{ talos_dir }}/manage.py" versions
+
+[doc('Generate and strictly validate all TOPF node configs locally')]
 genconfig:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    mise install --quiet
-    cd "{{ talos_dir }}"
-    talhelper genconfig
+    mise exec -- python3 "{{ talos_dir }}/manage.py" genconfig
 
-    tmp=
-    cleanup_tmp() {
-      if [ -n "$tmp" ]; then
-        rm -f -- "$tmp"
-      fi
-    }
-    trap cleanup_tmp EXIT
-    trap 'cleanup_tmp; exit 1' HUP INT TERM
+[doc('Strictly validate a fresh complete TOPF generation')]
+validate:
+    mise exec -- python3 "{{ talos_dir }}/manage.py" validate
 
-    for config in clusterconfig/talos-proxmox-cluster-*.yaml; do
-      encryption_docs=$(yq eval-all '[select(.kind == "KubeEtcdEncryptionConfig")] | length' "$config")
-      if [ "$encryption_docs" = "0" ]; then
-        continue
-      fi
-      if [ "$encryption_docs" != "1" ]; then
-        echo "Error: expected one KubeEtcdEncryptionConfig in $config, found $encryption_docs" >&2
-        exit 1
-      fi
+[doc('Show a redacted, node-specific server-side config dry-run')]
+[positional-arguments]
+diff node:
+    mise exec -- python3 "{{ talos_dir }}/manage.py" diff "$1"
 
-      key_names=$(yq eval-all -o=json -I=0 \
-        'select(.kind == "KubeEtcdEncryptionConfig") | [.config.resources[0].providers[] | select(.secretbox != null) | .secretbox.keys[].name]' \
-        "$config")
-      providers=$(yq eval-all -o=json -I=0 \
-        'select(.kind == "KubeEtcdEncryptionConfig") | .config.resources[0].providers | map(keys | .[0])' \
-        "$config")
+[doc('Apply one exact node with confirmation, no reboot, and readiness gates')]
+[positional-arguments]
+apply node:
+    mise exec -- python3 "{{ talos_dir }}/manage.py" apply "$1"
 
-      if [ "$key_names" = '["key2"]' ] && [ "$providers" = '["secretbox","identity"]' ]; then
-        continue
-      fi
+[doc('Reset one node and wipe STATE + EPHEMERAL (hostname confirmation required)')]
+[positional-arguments]
+reset-node node:
+    mise exec -- python3 "{{ talos_dir }}/manage.py" reset-node "$1"
 
-      if [ "$key_names" != '["key1"]' ] || [ "$providers" != '["secretbox"]' ]; then
-        echo "Error: unexpected KubeEtcdEncryptionConfig structure in $config" >&2
-        exit 1
-      fi
+[doc('Power-cycle one node (hostname confirmation required)')]
+[positional-arguments]
+reboot-node node:
+    mise exec -- python3 "{{ talos_dir }}/manage.py" reboot-node "$1"
 
-      # Temporary Talhelper v3.1.17 compatibility shim; remove during the TOPF migration tracked in #1028.
-      tmp=$(mktemp "${config}.tmp.XXXXXX")
-      chmod 600 "$tmp"
-      yq eval-all \
-        'with(select(.kind == "KubeEtcdEncryptionConfig"); .config.resources[0].providers[0].secretbox.keys[0].name = "key2" | .config.resources[0].providers += [{"identity": {}}])' \
-        "$config" > "$tmp"
-      mv "$tmp" "$config"
-      tmp=
-    done
-
-[doc('Diff generated config against running node config')]
-diff node: genconfig
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd "{{ talos_dir }}"
-
-    ip=$(yq '.nodes[] | select(.hostname == "{{ node }}") | .ipAddress' talconfig.yaml)
-    if [ -z "$ip" ]; then
-      echo "Error: node '{{ node }}' not found in talconfig.yaml" >&2
-      exit 1
-    fi
-
-    ep=$(yq '.nodes[] | select(.controlPlane == true) | .ipAddress' talconfig.yaml | head -1)
-    config_file="clusterconfig/talos-proxmox-cluster-{{ node }}.yaml"
-
-    echo "Diffing generated config against running config on {{ node }} ($ip)..."
-    talosctl --talosconfig clusterconfig/talosconfig \
-      -e "$ep" -n "$ip" \
-      apply-config --file "$config_file" --dry-run 2>&1 \
-      | sed -e 's/^-.*$/\x1b[31m&\x1b[0m/' -e 's/^+.*$/\x1b[32m&\x1b[0m/' -e 's/^@@.*$/\x1b[36m&\x1b[0m/' \
-      || true
-
-[doc('Apply generated config to a node')]
-apply node *flags: genconfig
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd "{{ talos_dir }}"
-
-    ip=$(yq '.nodes[] | select(.hostname == "{{ node }}") | .ipAddress' talconfig.yaml)
-    if [ -z "$ip" ]; then
-      echo "Error: node '{{ node }}' not found in talconfig.yaml" >&2
-      exit 1
-    fi
-
-    ep=$(yq '.nodes[] | select(.controlPlane == true) | .ipAddress' talconfig.yaml | head -1)
-    config_file="clusterconfig/talos-proxmox-cluster-{{ node }}.yaml"
-
-    echo "Applying config to {{ node }} ($ip)..."
-    talosctl --talosconfig clusterconfig/talosconfig \
-      -e "$ep" -n "$ip" \
-      apply-config --file "$config_file" {{ flags }}
-
-[doc('Validate all generated Talos configs')]
-validate: genconfig
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd "{{ talos_dir }}"
-
-    status=0
-    for f in clusterconfig/talos-proxmox-cluster-*.yaml; do
-      name=$(basename "$f" .yaml | sed 's/talos-proxmox-cluster-//')
-      if talosctl validate -m metal -c "$f" 2>&1; then
-        printf "  \033[32m✓\033[0m %s\n" "$name"
-      else
-        printf "  \033[31m✗\033[0m %s\n" "$name"
-        status=1
-      fi
-    done
-    exit "$status"
-
-[doc('Reset a node (wipe STATE + EPHEMERAL)')]
-reset-node node mode="reboot": genconfig
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd "{{ talos_dir }}"
-
-    ip=$(yq '.nodes[] | select(.hostname == "{{ node }}") | .ipAddress' talconfig.yaml)
-    if [ -z "$ip" ]; then
-      echo "Error: node '{{ node }}' not found in talconfig.yaml" >&2
-      exit 1
-    fi
-
-    ep=$(yq '.nodes[] | select(.controlPlane == true) | .ipAddress' talconfig.yaml | head -1)
-
-    read -r -p "Reset node {{ node }} ($ip)? This will wipe STATE and EPHEMERAL. [y/N] " confirm
-    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-      echo "Aborted."
-      exit 0
-    fi
-
-    reboot_flag=""
-    if [ "{{ mode }}" = "reboot" ]; then
-      reboot_flag="--reboot"
-    fi
-
-    talosctl --talosconfig clusterconfig/talosconfig \
-      -e "$ep" -n "$ip" \
-      reset --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL \
-      --graceful=false $reboot_flag
-
-[doc('Reboot a node')]
-reboot-node node: genconfig
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd "{{ talos_dir }}"
-
-    ip=$(yq '.nodes[] | select(.hostname == "{{ node }}") | .ipAddress' talconfig.yaml)
-    if [ -z "$ip" ]; then
-      echo "Error: node '{{ node }}' not found in talconfig.yaml" >&2
-      exit 1
-    fi
-
-    ep=$(yq '.nodes[] | select(.controlPlane == true) | .ipAddress' talconfig.yaml | head -1)
-
-    read -r -p "Reboot node {{ node }} ($ip)? [y/N] " confirm
-    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-      echo "Aborted."
-      exit 0
-    fi
-
-    talosctl --talosconfig clusterconfig/talosconfig \
-      -e "$ep" -n "$ip" \
-      reboot -m powercycle
-
-[doc('Download factory ISOs for all unique schematics in talconfig.yaml')]
+[doc('Download the existing factory ISOs for all unique rendered schematics')]
 download-iso:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd "{{ talos_dir }}"
+    mise exec -- python3 "{{ talos_dir }}/manage.py" download-iso
 
-    version=$(yq '.talosVersion' talconfig.yaml)
+[doc('Reprovision one VM using its rendered schematic (destructive unless dry_run=true)')]
+[positional-arguments]
+reprovision-node node dry_run="false":
+    mise exec -- python3 "{{ talos_dir }}/manage.py" reprovision-node "$1" --dry-run="$2"
 
-    # Collect unique schematics: controlPlane, worker, and per-node overrides
-    declare -A schematics
-
-    cp_schematic=$(yq '.controlPlane.schematic' talconfig.yaml -o json 2>/dev/null || echo "null")
-    if [ "$cp_schematic" != "null" ]; then
-      schematics["controlPlane"]="$cp_schematic"
-    fi
-
-    worker_schematic=$(yq '.worker.schematic' talconfig.yaml -o json 2>/dev/null || echo "null")
-    if [ "$worker_schematic" != "null" ]; then
-      schematics["worker"]="$worker_schematic"
-    fi
-
-    for node in $(yq '.nodes[].hostname' talconfig.yaml); do
-      node_schematic=$(yq ".nodes[] | select(.hostname == \"$node\") | .schematic" talconfig.yaml -o json 2>/dev/null || echo "null")
-      if [ "$node_schematic" != "null" ] && [ "$node_schematic" != "{}" ]; then
-        schematics["$node"]="$node_schematic"
-      fi
-    done
-
-    if [ ${#schematics[@]} -eq 0 ]; then
-      echo "No schematics found in talconfig.yaml"
-      exit 1
-    fi
-
-    # Deduplicate by schematic ID and download ISOs
-    declare -A seen_ids
-    for label in "${!schematics[@]}"; do
-      schematic_json="${schematics[$label]}"
-      schematic_yaml=$(echo "$schematic_json" | yq -P)
-
-      schematic_id=$(echo "$schematic_yaml" | curl -sX POST --data-binary @- "https://factory.talos.dev/schematics" | yq '.id')
-      if [ -z "$schematic_id" ] || [ "$schematic_id" = "null" ]; then
-        echo "Error: failed to get schematic ID for $label" >&2
-        continue
-      fi
-
-      if [ -n "${seen_ids[$schematic_id]+x}" ]; then
-        echo "Skipping $label (same schematic as ${seen_ids[$schematic_id]})"
-        continue
-      fi
-      seen_ids["$schematic_id"]="$label"
-
-      short_id="${schematic_id:0:8}"
-      iso_file="talos-${version}-${short_id}.iso"
-
-      echo "Downloading ISO for $label (schematic: ${short_id}...)..."
-      curl -sfL --retry 5 --retry-delay 5 --retry-all-errors \
-        -o "$iso_file" \
-        "https://factory.talos.dev/image/${schematic_id}/${version}/metal-amd64.iso"
-      printf "  \033[32m✓\033[0m %s\n" "$iso_file"
-    done
-
-[doc('Reprovision a Talos VM via ansible (resolves correct ISO from schematic)')]
-reprovision-node node dry_run="false": genconfig
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd "{{ talos_dir }}"
-
-    version=$(yq '.talosVersion' talconfig.yaml)
-    is_cp=$(yq ".nodes[] | select(.hostname == \"{{ node }}\") | .controlPlane" talconfig.yaml)
-    if [ -z "$is_cp" ]; then
-      echo "Error: node '{{ node }}' not found in talconfig.yaml" >&2
-      exit 1
-    fi
-
-    # Resolve schematic: per-node override > group default
-    node_schematic=$(yq ".nodes[] | select(.hostname == \"{{ node }}\") | .schematic" talconfig.yaml -o json 2>/dev/null)
-    if [ "$node_schematic" != "null" ] && [ -n "$node_schematic" ]; then
-      schematic_yaml=$(echo "$node_schematic" | yq -P)
-    elif [ "$is_cp" = "true" ]; then
-      schematic_yaml=$(yq '.controlPlane.schematic' talconfig.yaml -o json | yq -P)
-    else
-      schematic_yaml=$(yq '.worker.schematic' talconfig.yaml -o json | yq -P)
-    fi
-
-    schematic_id=$(echo "$schematic_yaml" | curl -sX POST --data-binary @- "https://factory.talos.dev/schematics" | yq '.id')
-    short_id="${schematic_id:0:8}"
-    iso_file="talos-${version}-${short_id}.iso"
-    iso_url="https://factory.talos.dev/image/${schematic_id}/${version}/metal-amd64.iso"
-
-    echo "Node: {{ node }} ($([ "$is_cp" = "true" ] && echo "controlplane" || echo "worker"))"
-    echo "ISO:  $iso_file (schematic: ${short_id}...)"
-    echo ""
-
-    if [ "{{ dry_run }}" != "true" ]; then
-      read -r -p "Reprovision {{ node }}? This will wipe and recreate the VM disk. [y/N] " confirm
-      if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-        echo "Aborted."
-        exit 0
-      fi
-    fi
-
-    cd "{{ talos_dir }}/../ansible"
-    ansible-playbook playbooks/utilities/reprovision-talos-vm.yaml \
-      -e '{"target_vms":["{{ node }}"]}' -e "iso_file=$iso_file" -e "iso_url=$iso_url" -e "dry_run={{ dry_run }}"
-
-[doc('Reprovision ALL Talos VMs (discovers nodes from talconfig.yaml)')]
+[doc('Reprovision inventory VMs with per-node confirmation (destructive unless dry_run=true)')]
+[positional-arguments]
 reprovision-cluster dry_run="false":
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd "{{ talos_dir }}"
+    mise exec -- python3 "{{ talos_dir }}/manage.py" reprovision-cluster --dry-run="$1"
 
-    nodes=$(yq '.nodes[].hostname' talconfig.yaml)
-    echo "Nodes to reprovision:"
-    echo "$nodes" | sed 's/^/  - /'
-    echo ""
+[doc('Compare every baseline/TOPF/live document privately; print only pass/fail identities')]
+[positional-arguments]
+compare baseline candidate live:
+    mise exec -- python3 "{{ talos_dir }}/compare.py" "$1" "$2" --live "$3"
 
-    if [ "{{ dry_run }}" != "true" ]; then
-      read -r -p "Reprovision ALL nodes listed above? This is destructive! [y/N] " confirm
-      if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-        echo "Aborted."
-        exit 0
-      fi
-    fi
-
-    for node in $nodes; do
-      echo ""
-      echo "========================================="
-      echo "Reprovisioning $node..."
-      echo "========================================="
-      just talos reprovision-node "$node" "{{ dry_run }}"
-    done
+[doc('Run secret-free TOPF workflow regression tests')]
+test:
+    mise exec -- python3 -m unittest discover -s "{{ talos_dir }}/tests" -v

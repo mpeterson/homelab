@@ -83,10 +83,27 @@ jobs:
       - name: Validate
         run: just validate images
 
+  talos:
+    name: Talos generator guards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Install tools
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+
+      - name: Check version compatibility and secret-free regression tests
+        run: |
+          just talos versions
+          just talos test
+
   validate-success:
     name: All validations passed
     if: ${{ !cancelled() }}
-    needs: [kustomize, helm, images]
+    needs: [kustomize, helm, images, talos]
     runs-on: ubuntu-latest
     steps:
       - name: Check validation results
