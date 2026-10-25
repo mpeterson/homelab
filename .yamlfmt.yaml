@@ -15,5 +15,6 @@ exclude:
   # SOPS-encrypted files
   - "**/*.sops.yaml"
   - "**/*.sops.yml"
+  - "talos/secrets.yaml"
   # Git submodule
   - "ansible/roles/bind9/**"

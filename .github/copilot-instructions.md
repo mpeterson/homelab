@@ -105,15 +105,17 @@ Source of truth: `talos/topf.yaml`, compact native Talos documents/templates und
 [TOPF](https://github.com/postfinance/topf). Patches merge global, role, then
 per-node; filenames order patches within a layer.
 
-The existing cluster secrets bundle remains `talos/talsecret.sops.yaml`; Tailscale
+The existing cluster secrets bundle is SOPS-encrypted in TOPF's default
+`talos/secrets.yaml`; Tailscale
 authentication is in `talos/patches/all/90-tailscale.sops.yaml`. The control-plane
 encryption document references the existing Secretbox secret through vals and
 must retain `key2` followed by `identity`. Never generate new cluster secrets.
 Just recipes and the existing CLI tools enforce embedded TOPF/Talos compatibility
 (including the Tuppr upgrade target), private output, and exact-node targeting.
 The unconditional Talos CI job feeds the required `All validations passed` check.
-Generated configs/client credentials belong only in ignored private directories,
-never Git or CI artifacts.
+Generated configs/client credentials belong only in ignored private
+`talos/output/`, never Git or CI artifacts. Legacy `talos/clusterconfig/` stays
+ignored while private migration baselines are retained.
 
 Upgrades remain managed by Tuppr (`kubernetes/infra/tuppr/upgrades/`), not TOPF.
 Do not advance Talos beyond TOPF's embedded supported machinery; new minor

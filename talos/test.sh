@@ -75,6 +75,13 @@ YAML
 yq 'select(.kind != "KubeEtcdEncryptionConfig") |
   with(select(.version == "v1alpha1"); .machine.ca.key = "") |
   with(select(.kind == "HostnameConfig"); .hostname = "worker-01")' "$work/cp.yaml" >"$work/worker.yaml"
+cat >>"$work/worker.yaml" <<'YAML'
+---
+apiVersion: v1alpha1
+kind: SysctlConfig
+params:
+  net.core.bpf_jit_harden: "1"
+YAML
 cp "$work/worker.yaml" "$work/worker-original.yaml"
 cat >"$work/bin/mise" <<'SH'
 #!/usr/bin/env bash
@@ -101,6 +108,8 @@ case " $* " in
     [[ "${PARTIAL_RENDER:-false}" == true ]] || cp "$TEST_ROOT/worker.yaml" "$2/worker-01.yaml"
     [[ "${BAD_ENCRYPTION:-false}" != true ]] || yq -i 'with(select(.kind == "KubeEtcdEncryptionConfig"); .config.resources[0].providers[0].secretbox.keys[0].name = "key1")' "$2/cp-01.yaml"
     [[ "${BAD_AUTH:-false}" != true ]] || yq -i 'with(select(.kind == "ExtensionServiceConfig"); .environment += ["TS_AUTHKEY="])' "$2/cp-01.yaml"
+    [[ "${BAD_SYSCTL:-false}" != true ]] || yq -i 'with(select(.kind == "SysctlConfig"); .params["net.core.bpf_jit_harden"] = "0")' "$2/worker-01.yaml"
+    [[ "${BAD_MODULES:-false}" != true ]] || yq -i 'select(.kind != "KernelModuleConfig")' "$2/worker-01.yaml"
     ;;
   *" talosconfig "*) echo synthetic-client ;;
   *) exit 98 ;;
@@ -163,12 +172,30 @@ yq -i '.talosVersion = "v1.14.4" | .nodes[1].talosVersion = "v1.14.5"' talos/top
 expect_failure just talos versions
 yq -i 'del(.nodes[1].talosVersion)' talos/topf.yaml
 just talos genconfig >state/output 2>&1
-cp talos/clusterconfig/worker-01.yaml state/published
+cp talos/output/worker-01.yaml state/published
 PARTIAL_RENDER=true expect_failure just talos genconfig
-cmp -s state/published talos/clusterconfig/worker-01.yaml || fail "Failed generation replaced published output"
+cmp -s state/published talos/output/worker-01.yaml || fail "Failed generation replaced published output"
 FAIL_VALIDATE=true expect_failure just talos genconfig
 BAD_ENCRYPTION=true expect_failure just talos genconfig
 BAD_AUTH=true expect_failure just talos genconfig
+BAD_SYSCTL=true expect_failure just talos genconfig
+for module in nvidia nvidia_uvm nvidia_drm nvidia_modeset; do
+  printf '%s\n' '---' 'apiVersion: v1alpha1' 'kind: KernelModuleConfig' "name: $module" >>worker.yaml
+done
+expect_failure just talos genconfig
+yq -i '.nodes[1].data.gpu = true' talos/topf.yaml
+just talos genconfig >state/output 2>&1
+BAD_MODULES=true expect_failure just talos genconfig
+cp worker-original.yaml worker.yaml
+expect_failure just talos genconfig
+yq -i 'del(.nodes[1].data)' talos/topf.yaml
+cp worker.yaml state/native-worker
+yq -i 'with(select(.version == "v1alpha1"); .machine.sysctls["net.core.bpf_jit_harden"] = "1")' worker.yaml
+expect_failure just talos genconfig
+cp state/native-worker worker.yaml
+yq -i 'with(select(.version == "v1alpha1"); .machine.kernel.modules = [{"name": "nvidia"}])' worker.yaml
+expect_failure just talos genconfig
+cp state/native-worker worker.yaml
 cp state/rendered state/before-invalid-bundle
 mv talos/bundle.yaml talos/saved-bundle.yaml
 expect_failure just talos genconfig
@@ -178,6 +205,11 @@ yq -i '.certs.os.key = ""' talos/bundle.yaml
 expect_failure just talos genconfig
 cp state/bundle talos/bundle.yaml
 cmp -s state/before-invalid-bundle state/rendered || fail "Invalid/missing secrets reached TOPF"
+mv talos/bundle.yaml talos/secrets.yaml
+yq -i 'del(.secretsPath)' talos/topf.yaml
+just talos genconfig >state/output 2>&1
+just talos credentials >state/output 2>&1
+grep -Fxq synthetic-client talos/output/talosconfig || fail "Credentials did not use the TOPF output directory"
 expect_failure just talos diff '.*'
 REBOOT_REQUIRED=true expect_failure just talos diff worker-01
 just talos diff worker-01 >state/output 2>&1
@@ -209,4 +241,4 @@ touch portable-inventory
 ANSIBLE_INVENTORY="$work/portable-inventory" just talos reprovision-node worker-01 true >state/output 2>&1
 grep -Fxq "$work/portable-inventory" state/ansible-args || fail "An arbitrary inventory was not accepted"
 grep -Fxq '{"target_vms":["worker-01"]}' state/ansible-args || fail "Ansible arguments lost their quoting"
-echo "Talos shell guards passed: versions, secrets, complete render, strict validation, immutable payload, private output, native health, recovery and portable inventory"
+echo "Talos shell guards passed: versions, secrets, native worker settings, complete render, strict validation, immutable payload, private output, native health, recovery and portable inventory"

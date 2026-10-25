@@ -46,7 +46,7 @@ _secrets output:
     #!/usr/bin/env bash
     set -euo pipefail
     umask 077
-    bundle=$(mise exec -- yq -er '.secretsPath' "{{ talos_dir }}/topf.yaml")
+    bundle=$(mise exec -- yq -er '.secretsPath // "secrets.yaml"' "{{ talos_dir }}/topf.yaml")
     [[ -s "{{ talos_dir }}/$bundle" ]] || { echo "Existing encrypted secrets bundle is missing" >&2; exit 1; }
     if ! mise exec -- sops --decrypt "{{ talos_dir }}/$bundle" >"$1" 2>"$1.errors"; then
       echo "Cannot decrypt existing secrets; private diagnostics withheld" >&2
@@ -66,8 +66,9 @@ _validate node secrets:
     set -euo pipefail
     payload=$(cat)
     role=$(NODE="$1" mise exec -- yq -er '.nodes[] | select(.host == strenv(NODE)) | .role' "{{ talos_dir }}/topf.yaml")
+    gpu=$(NODE="$1" mise exec -- yq -r '.nodes[] | select(.host == strenv(NODE)) | .data.gpu // false' "{{ talos_dir }}/topf.yaml")
     if ! printf '%s\n' "$payload" | mise exec -- yq -o=json -I=0 '.' - 2>"$2.errors" |
-      mise exec -- jq -se --arg node "$1" --arg role "$role" --slurpfile bundle "$2.json" '
+      mise exec -- jq -se --arg node "$1" --arg role "$role" --argjson gpu "$gpu" --slurpfile bundle "$2.json" '
       . as $docs | $bundle[0] as $s |
       ($docs | map(select(.version == "v1alpha1")) | .[0]) as $base |
       ($docs | map(select(.kind == "DiscoveryIdentityConfig")) | .[0]) as $identity |
@@ -81,6 +82,13 @@ _validate node secrets:
        (($role == "control-plane") and ($base.machine.ca.key == $s.certs.os.key))) and
       ($base.machine.token == $s.trustdinfo.token) and ($base.cluster.token == $s.secrets.bootstraptoken) and
       ($identity.clusterID == $s.cluster.id) and ($identity.clusterSecret == $s.cluster.secret) and
+      (($role != "worker") or (
+        ($base.machine | has("sysctls") or (.kernel // {} | has("modules")) | not) and
+        ($docs | map(select(.kind == "SysctlConfig")) | length == 1) and
+        ($docs | map(select(.kind == "SysctlConfig")) | .[0].params["net.core.bpf_jit_harden"] == "1") and
+        (($docs | map(select(.kind == "KernelModuleConfig") | .name) | sort) ==
+          (if $gpu then ["nvidia", "nvidia_drm", "nvidia_modeset", "nvidia_uvm"] else [] end))
+      )) and
       ($auth | length == 1) and ($auth[0] | test("^TS_AUTHKEY=.+$")) and
       ((($role == "worker") and ($encryption | length == 0)) or
        (($role == "control-plane") and ($encryption | length == 1) and
@@ -88,7 +96,7 @@ _validate node secrets:
           {"secretbox": {"keys": [{"name": "key2", "secret": $s.secrets.secretboxencryptionsecret}]}},
           {"identity": {}}]}])))
       ' >/dev/null 2>"$2.errors"; then
-      echo "$1: generated identity, Tailscale or encryption invariant failed; values withheld" >&2
+      echo "$1: generated identity, worker, Tailscale or encryption invariant failed; values withheld" >&2
       exit 1
     fi
     if ! printf '%s\n' "$payload" | mise exec -- talosctl validate --strict -m metal -c /dev/stdin >"$2.errors" 2>&1; then
@@ -140,10 +148,10 @@ genconfig:
     just talos _generate "$work"
     mkdir "{{ talos_dir }}/../.local/topf/publish.lock" || { echo "Another generation is publishing output" >&2; exit 1; }
     lock="{{ talos_dir }}/../.local/topf/publish.lock"
-    [[ ! -L "{{ talos_dir }}/clusterconfig" ]] || { echo "Refusing symlink output directory" >&2; exit 1; }
-    mkdir -p "{{ talos_dir }}/clusterconfig"
-    chmod 700 "{{ talos_dir }}/clusterconfig"
-    mv "$work/render/"* "{{ talos_dir }}/clusterconfig/"
+    [[ ! -L "{{ talos_dir }}/output" ]] || { echo "Refusing symlink output directory" >&2; exit 1; }
+    mkdir -p "{{ talos_dir }}/output"
+    chmod 700 "{{ talos_dir }}/output"
+    mv "$work/render/"* "{{ talos_dir }}/output/"
     echo "Generated and strictly validated every inventory node"
 
 [doc('Strictly validate a fresh complete TOPF generation')]
@@ -228,10 +236,10 @@ credentials:
       echo "Client credential generation failed; private diagnostics withheld" >&2
       exit 1
     fi
-    [[ ! -L "{{ talos_dir }}/clusterconfig" ]] || { echo "Refusing symlink output directory" >&2; exit 1; }
-    mkdir -p "{{ talos_dir }}/clusterconfig"
-    chmod 700 "{{ talos_dir }}/clusterconfig"
-    mv "$work/talosconfig" "{{ talos_dir }}/clusterconfig/talosconfig"
+    [[ ! -L "{{ talos_dir }}/output" ]] || { echo "Refusing symlink output directory" >&2; exit 1; }
+    mkdir -p "{{ talos_dir }}/output"
+    chmod 700 "{{ talos_dir }}/output"
+    mv "$work/talosconfig" "{{ talos_dir }}/output/talosconfig"
 
 [private]
 [positional-arguments]
@@ -248,7 +256,7 @@ reset-node node mode="reboot":
     #!/usr/bin/env bash
     set -euo pipefail
     ip=$(just talos _node-address "$1")
-    config="${TALOSCONFIG:-{{ talos_dir }}/clusterconfig/talosconfig}"
+    config="${TALOSCONFIG:-{{ talos_dir }}/output/talosconfig}"
     [[ -s "$config" ]] || { echo "Missing client credentials; run just talos credentials" >&2; exit 1; }
     flags=(--system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL --graceful=false)
     case "$2" in
@@ -266,7 +274,7 @@ reboot-node node:
     #!/usr/bin/env bash
     set -euo pipefail
     ip=$(just talos _node-address "$1")
-    config="${TALOSCONFIG:-{{ talos_dir }}/clusterconfig/talosconfig}"
+    config="${TALOSCONFIG:-{{ talos_dir }}/output/talosconfig}"
     [[ -s "$config" ]] || { echo "Missing client credentials; run just talos credentials" >&2; exit 1; }
     read -r -p "Power-cycle $1 ($ip)? Type the hostname: " confirm
     [[ "$confirm" == "$1" ]] || { echo "Reboot not confirmed" >&2; exit 1; }
@@ -278,7 +286,7 @@ _iso node:
     #!/usr/bin/env bash
     set -euo pipefail
     just talos _node-address "$1" >/dev/null
-    image=$(mise exec -- yq -er 'select(.kind == "UnattendedInstallConfig") | .installer.image' "{{ talos_dir }}/clusterconfig/$1.yaml")
+    image=$(mise exec -- yq -er 'select(.kind == "UnattendedInstallConfig") | .installer.image' "{{ talos_dir }}/output/$1.yaml")
     if [[ ! "$image" =~ ^factory\.talos\.dev/metal-installer/([a-f0-9]{64}):(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
       echo "Unexpected installer reference" >&2
       exit 1
