@@ -208,6 +208,9 @@ cmp -s state/before-invalid-bundle state/rendered || fail "Invalid/missing secre
 mv talos/bundle.yaml talos/secrets.yaml
 yq -i 'del(.secretsPath)' talos/topf.yaml
 just talos genconfig >state/output 2>&1
+mv talos/secrets.yaml talos/secrets.sops.yaml
+yq -i '.secretsPath = "secrets.sops.yaml"' talos/topf.yaml
+just talos genconfig >state/output 2>&1
 just talos credentials >state/output 2>&1
 grep -Fxq synthetic-client talos/output/talosconfig || fail "Credentials did not use the TOPF output directory"
 expect_failure just talos diff '.*'

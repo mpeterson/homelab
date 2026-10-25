@@ -105,8 +105,8 @@ Source of truth: `talos/topf.yaml`, compact native Talos documents/templates und
 [TOPF](https://github.com/postfinance/topf). Patches merge global, role, then
 per-node; filenames order patches within a layer.
 
-The existing cluster secrets bundle is SOPS-encrypted in TOPF's default
-`talos/secrets.yaml`; Tailscale
+The existing cluster secrets bundle is SOPS-encrypted in
+`talos/secrets.sops.yaml`, selected through `secretsPath`; Tailscale
 authentication is in `talos/patches/all/90-tailscale.sops.yaml`. The control-plane
 encryption document references the existing Secretbox secret through vals and
 must retain `key2` followed by `identity`. Never generate new cluster secrets.

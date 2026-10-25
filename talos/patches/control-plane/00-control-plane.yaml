@@ -49,5 +49,5 @@ config:
         - secretbox:
             keys:
               - name: key2
-                secret: ref+sops://talos/secrets.yaml#/secrets/secretboxencryptionsecret
+                secret: ref+sops://talos/secrets.sops.yaml#/secrets/secretboxencryptionsecret
         - identity: {}

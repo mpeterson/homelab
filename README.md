@@ -57,7 +57,7 @@ just
 
 [TOPF](https://github.com/postfinance/topf) renders the six-node inventory in
 `talos/topf.yaml` using compact native Talos patches and the existing SOPS-encrypted
-cluster identity in `talos/secrets.yaml`. Tuppr remains responsible for Talos and
+cluster identity in `talos/secrets.sops.yaml`. Tuppr remains responsible for Talos and
 Kubernetes upgrades.
 
 ```sh

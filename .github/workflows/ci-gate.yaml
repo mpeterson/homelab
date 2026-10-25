@@ -52,7 +52,7 @@ jobs:
 
       - name: Check SOPS files were properly re-encrypted
         run: |
-          changed_sops=$(git diff --name-only "origin/${{ github.event.pull_request.base.ref }}...HEAD" -- '*.sops.yaml' '*.sops.yml' 'talos/secrets.yaml')
+          changed_sops=$(git diff --name-only "origin/${{ github.event.pull_request.base.ref }}...HEAD" -- '*.sops.yaml' '*.sops.yml')
           if [ -z "$changed_sops" ]; then
             echo "No SOPS files changed — skipping"
             exit 0

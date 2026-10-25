@@ -15,6 +15,5 @@ ignore:
   # SOPS-encrypted files contain binary data that won't lint cleanly
   - "**/*.sops.yaml"
   - "**/*.sops.yml"
-  - "talos/secrets.yaml"
   # Git submodule — not maintained in this repo
   - "ansible/roles/bind9/**"
