@@ -53,6 +53,35 @@ List all available commands:
 just
 ```
 
+### Talos configuration
+
+[TOPF](https://github.com/postfinance/topf) renders the six-node inventory in
+`talos/topf.yaml` using compact native Talos patches and the existing SOPS-encrypted
+cluster identity in `talos/secrets.sops.yaml`. Tuppr remains responsible for Talos and
+Kubernetes upgrades.
+
+```sh
+just talos genconfig
+just talos diff talos-03
+```
+
+`just talos versions` checks TOPF support for the inventory and Tuppr upgrade
+target without decrypting secrets. This runs on every PR and feeds the required
+`All validations passed` status. New Talos minor contracts require compatibility
+review.
+
+Generated machine configs and client credentials stay private in ignored
+`talos/output/`. Any pre-migration `talos/clusterconfig/` remains ignored.
+`just talos apply <node>` requires exact-hostname
+confirmation, sends the same strictly validated payload used by its no-reboot
+dry-run, and gates application on native Talos/Kubernetes health checks against
+the configured cluster. Dry-runs never display raw configuration values.
+Apply one node at a time and verify workload health before proceeding.
+
+Reset/reboot use existing `TALOSCONFIG` credentials without machine generation.
+VM reprovisioning delegates to the Ansible commands below and accepts any
+inventory through `ANSIBLE_INVENTORY`; no private repository checkout is required.
+
 ### Ansible inventory
 
 Operational inventories are intentionally excluded from this public repository.

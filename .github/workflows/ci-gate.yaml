@@ -70,6 +70,10 @@ jobs:
             fi
 
             lastmod=$(grep 'lastmodified:' "$file" | awk '{print $2}' | tr -d '"')
+            if ! git cat-file -e "origin/${{ github.event.pull_request.base.ref }}:$file" 2>/dev/null; then
+              echo "  $file: new encrypted file (no previous timestamp)"
+              continue
+            fi
             old_lastmod=$(git show "origin/${{ github.event.pull_request.base.ref }}:$file" 2>/dev/null | grep 'lastmodified:' | awk '{print $2}' | tr -d '"')
 
             if [ "$lastmod" = "$old_lastmod" ]; then
