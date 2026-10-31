@@ -13,7 +13,7 @@ controllers:
       app:
         image:
           repository: barassistant/server
-          tag: 6.9.1@sha256:ec018029059e3c4ed64c5acb5bc255d8918ba22ec01da89ec3012355e9d1cd41
+          tag: 6.10.1@sha256:19baac04e5b8db79c36797426deaf7f1e817cc081211ab92b23cc9d4a5a8131a
         env:
           ALLOW_REGISTRATION: "true"
           APP_KEY:
@@ -70,7 +70,7 @@ controllers:
       app:
         image:
           repository: barassistant/salt-rim
-          tag: 5.8.0@sha256:fcb3496d26390bb31019fc768c1bb36c8d4cedf1e95d1609d94500e2eccf7bb5
+          tag: 5.9.0@sha256:cd943a2c9453ff5496f5a1cffd4b3163b0e8a01b1b060f8e7bbd520895a79c5e
         env:
           ALLOW_REGISTRATION: "true"
           API_URL: https://bar-api.lan.peterson.com.ar
@@ -116,7 +116,7 @@ controllers:
       app:
         image:
           repository: getmeili/meilisearch
-          tag: v1.55.0@sha256:ff546679970126f8822e15d1b6a06bfbff1f2ce2e43f810cfb5258012f92de5c
+          tag: v1.56.0@sha256:1f578fa865f8251894b3bf38d6668d6209a3f451f8f65ab953e129d4c1db5ef4
         env:
           MEILI_ENV: production
           MEILI_MASTER_KEY:
@@ -161,7 +161,7 @@ controllers:
       app:
         image:
           repository: valkey/valkey
-          tag: 9.1.2-alpine@sha256:48332870af354a799964c0012ae1194a0bf2bf894eb508f945810596dc2d8d11
+          tag: 9.1.3-alpine@sha256:bf09d58e96d6b4524a15396b65b242bbe18beebbcc15a04d8ee75ddac62fae0b
         probes:
           liveness: &cacheProbes
             enabled: true
