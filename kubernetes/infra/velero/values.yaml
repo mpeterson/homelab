@@ -15,6 +15,11 @@ metrics:
     enabled: true
 
 configuration:
+  repositoryMaintenanceJob:
+    repositoryConfigData:
+      global:
+        keepLatestMaintenanceJobs: 24
+
   backupStorageLocation:
     - name: cloud
       provider: aws
@@ -45,6 +50,7 @@ schedules:
     template:
       ttl: "240h"
       storageLocation: cloud
+      csiSnapshotTimeout: 30m
       resourcePolicy:
         kind: ConfigMap
         name: velero-daily-volume-policies

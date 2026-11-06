@@ -59,6 +59,10 @@ kubeControllerManager:
 kubeEtcd:
   enabled: false
 
+kube-state-metrics:
+  metricLabelsAllowlist:
+    - jobs=[velero.io/repo-name]
+
 kubelet:
   serviceMonitor:
     metricRelabelings:

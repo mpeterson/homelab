@@ -15,6 +15,17 @@ spec:
     groupInterval: 5m
     repeatInterval: 6h
     routes:
+      - receiver: "null"
+        matchers:
+          - name: alertname
+            matchType: "="
+            value: KubeJobFailed
+          - name: namespace
+            matchType: "="
+            value: velero
+          - name: job_name
+            matchType: "=~"
+            value: ".*-maintain-job-.*"
       - receiver: healthcheck-canary
         matchers:
           - name: alertname

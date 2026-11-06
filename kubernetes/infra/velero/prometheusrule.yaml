@@ -8,6 +8,57 @@ spec:
   groups:
     - name: velero.rules
       rules:
+        - record: velero_repository_maintenance_job_created_timestamp
+          expr: |-
+            max by (namespace, job_name, repository) (
+              label_replace(
+                kube_job_created{namespace="velero"}
+                * on (namespace, job_name) group_left (label_velero_io_repo_name)
+                kube_job_labels{namespace="velero",label_velero_io_repo_name!=""},
+                "repository", "$1", "label_velero_io_repo_name", "(.+)"
+              )
+            )
+        - record: velero_repository_maintenance_job_completed_timestamp
+          expr: |-
+            max by (namespace, job_name, repository) (
+              label_replace(
+                kube_job_status_completion_time{namespace="velero"}
+                * on (namespace, job_name) group_left (label_velero_io_repo_name)
+                kube_job_labels{namespace="velero",label_velero_io_repo_name!=""},
+                "repository", "$1", "label_velero_io_repo_name", "(.+)"
+              )
+            )
+        - record: velero_repository_maintenance_last_failure_timestamp
+          expr: |-
+            max by (namespace, repository) (
+              velero_repository_maintenance_job_created_timestamp
+              and on (namespace, job_name)
+              (kube_job_failed{namespace="velero"} > 0)
+            )
+        - alert: VeleroDailyBackupFailed
+          expr: |-
+            increase(velero_backup_failure_total{schedule="velero-daily-backups"}[1h]) > 0
+            or
+            increase(velero_backup_partial_failure_total{schedule="velero-daily-backups"}[1h]) > 0
+            or
+            increase(velero_backup_validation_failure_total{schedule="velero-daily-backups"}[1h]) > 0
+          for: 5m
+          annotations:
+            summary: The daily Velero CSI backup failed or partially failed
+          labels:
+            severity: warning
+        - alert: VeleroDailyBackupStale
+          expr: |-
+            (
+              time() - velero_backup_last_successful_timestamp{schedule="velero-daily-backups"} > 93600
+            )
+            or
+            absent(velero_backup_last_successful_timestamp{schedule="velero-daily-backups"})
+          for: 1h
+          annotations:
+            summary: No successful daily Velero CSI backup exists in the last 26 hours
+          labels:
+            severity: critical
         - alert: VeleroWeeklyBackupFailed
           expr: |-
             increase(velero_backup_failure_total{schedule="velero-weekly-offsite"}[15m]) > 0
@@ -50,10 +101,34 @@ spec:
             severity: critical
         - alert: VeleroRepositoryMaintenanceFailed
           expr: |-
-            kube_job_status_failed{namespace="velero",job_name=~".*-maintain-job-.*"} > 0
-          for: 5m
+            (
+              velero_repository_maintenance_last_failure_timestamp
+              unless on (namespace, repository)
+              (
+                max by (namespace, repository) (velero_repository_maintenance_job_completed_timestamp)
+                >= on (namespace, repository) velero_repository_maintenance_last_failure_timestamp
+              )
+            )
+            or
+            (
+              max by (namespace, job_name) (
+                kube_job_failed{namespace="velero",job_name=~".*-maintain-job-.*"} > 0
+              )
+              unless on (namespace, job_name) velero_repository_maintenance_job_created_timestamp
+            )
+          for: 30m
           annotations:
-            summary: A Velero Kopia repository maintenance job failed
+            summary: A Velero Kopia repository maintenance failure has not recovered for 30 minutes
+          labels:
+            severity: critical
+        - alert: VeleroRepositoryMaintenanceStale
+          expr: |-
+            time() - max by (namespace, repository) (
+              velero_repository_maintenance_job_completed_timestamp
+            ) > 10800
+          for: 30m
+          annotations:
+            summary: A Velero Kopia repository has had no successful maintenance for more than three hours
           labels:
             severity: critical
         - alert: VeleroWeeklyBackupTooSlow

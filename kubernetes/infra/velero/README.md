@@ -33,6 +33,11 @@ volumes from reaching FSB.
 The daily schedule references a separate policy that sends CSI volumes through local
 snapshots instead of FSB.
 
+The iSCSI CSI snapshotter allows ten minutes per RPC, and the daily schedule allows
+30 minutes for CSI snapshot reconciliation. Detached snapshots of large volumes can
+take several minutes; shorter RPC deadlines cause retries to encounter the original
+operation's lock and back off past Velero's deadline.
+
 The `velero-weekly-volume-policies` resource policy provides defense in depth:
 
 - all NFS volumes are skipped;
@@ -56,6 +61,34 @@ snapshot. Workloads with live databases must retain their application-native bac
 files inside the approved config volume, and restores must include the application's
 integrity checks. Daily CSI snapshots remain the primary crash-consistent local
 recovery point.
+
+## Maintenance and alerts
+
+Velero retains the latest 24 maintenance Jobs per repository, including their Pod
+logs. With hourly successful maintenance, this provides approximately one day of
+diagnostic history. Repeated failures retry sooner and shorten that window; retention
+is not a substitute for durable log collection.
+
+Kube-state-metrics exposes the `velero.io/repo-name` Job label so maintenance rules
+can correlate failed Jobs with successful retries in the same repository. A later
+successful completion clears earlier failures even while failed Jobs remain retained.
+Failures are grouped by repository so failed retries do not reset the alert's pending
+period. Unrecovered failures page after 30 minutes, and repositories with no successful
+maintenance for three hours page after a further 30 minutes.
+
+Alertmanager discards generic `KubeJobFailed` notifications only for Velero maintenance
+Jobs; the recovery-aware Velero rules own these notifications. Other failed Jobs
+remain covered by the generic alert.
+
+Daily backups alert on failure, partial failure, or validation failure. A missing
+successful daily backup for 26 hours raises a critical alert after one hour. Weekly
+backup coverage and alerts remain unchanged.
+
+Run backup policy checks and alert rule regression tests with:
+
+```sh
+mise exec -- just validate velero
+```
 
 ## Restore canary
 
