@@ -2,6 +2,11 @@
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   packageRules: [
     {
+      description: "Group TOPF with its supported Talos configuration contract",
+      matchDepNames: ["github:postfinance/topf"],
+      groupName: "talos",
+    },
+    {
       description: "Group Velero Helm chart and plugins into a single PR",
       matchFileNames: ["kubernetes/infra/velero/**"],
       groupName: "velero",
@@ -92,12 +97,12 @@
       groupName: "sops",
     },
     {
-      description: "Group Talos installer versions (Tuppr CRD + talconfig) with talosctl CLI",
+      description: "Group Talos installer versions (Tuppr CRD + TOPF) with talosctl CLI",
       matchPackageNames: ["ghcr.io/siderolabs/installer"],
       groupName: "talos",
     },
     {
-      description: "Group Kubernetes kubelet versions (Tuppr CRD + talconfig) with kubectl CLI",
+      description: "Group Kubernetes kubelet versions (Tuppr CRD + TOPF) with kubectl CLI",
       matchPackageNames: ["ghcr.io/siderolabs/kubelet"],
       groupName: "kubernetes-version",
     },

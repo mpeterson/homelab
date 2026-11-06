@@ -60,8 +60,8 @@
     },
     {
       customType: "regex",
-      description: "Track Talos version in talconfig.yaml",
-      managerFilePatterns: ["/talos/talconfig\\.yaml$/"],
+      description: "Track Talos version in topf.yaml",
+      managerFilePatterns: ["/talos/topf\\.yaml$/"],
       matchStrings: [
         "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>ghcr\\.io/siderolabs/installer)\\ntalosVersion:\\s*(?<currentValue>v\\S+)",
       ],
@@ -69,8 +69,8 @@
     },
     {
       customType: "regex",
-      description: "Track Kubernetes version in talconfig.yaml",
-      managerFilePatterns: ["/talos/talconfig\\.yaml$/"],
+      description: "Track Kubernetes version in topf.yaml",
+      managerFilePatterns: ["/talos/topf\\.yaml$/"],
       matchStrings: [
         "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>ghcr\\.io/siderolabs/kubelet)\\nkubernetesVersion:\\s*(?<currentValue>v\\S+)",
       ],

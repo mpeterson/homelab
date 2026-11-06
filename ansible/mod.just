@@ -37,8 +37,14 @@ inventory: (_require "ansible-inventory") _inventory
     cd "{{ ansible_dir }}" && ansible-inventory -i "{{ inventory }}" --graph
 
 [doc('Run a playbook by path relative to ansible/playbooks')]
+[positional-arguments]
 playbook name *args: (_require "ansible-playbook") _inventory
-    cd "{{ ansible_dir }}" && ansible-playbook -i "{{ inventory }}" "playbooks/{{ name }}" {{ args }}
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{ ansible_dir }}"
+    name="$1"
+    shift
+    ansible-playbook -i "{{ inventory }}" "playbooks/$name" "$@"
 
 [doc('Configure the NAS nodes')]
 nas *args: (_require "ansible-playbook") _inventory

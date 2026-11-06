@@ -1,0 +1,21 @@
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: ENC[AES256_GCM,data:aCY5UWmAX4id,iv:J+1VSqdUpDOzpugA+AYSja8CvPjea6DHRLvGMkkHA1o=,tag:QfCUUPT/mVA5Ygg3WUmDIQ==,type:str]
+environment:
+    - ENC[AES256_GCM,data:w5YmIu6tUrGitCTnqBePT8hPfXyrtfgmLak1lNKbCTCNXJ3Xc4CVSz5ZNGTclJNEf3ZE3/pXoAdEY1RT+PSqbH5p16ve86e34qzG2RUZtv1iVsKFCyaZKyo+VEgwmIKwLg9Z9vffIFSTATTW0qGBY585g2dk/wylqKogRM8n9f2g3sJomi4YqJ2udIwozhXkQlPfEp+sUlIIRuYEggVgZfgXg1sKmCNL77KS5YKQjFpIaj2iD2GhzecpaXn0c+Wl6TzIUp42QYFsg5lI4d8QHlUIcYkngSiXniGI4Pn2zCqWTwOI7XhTSSvWQoDam6qHjZWGecyt9kYgEwBXILp7/C7ywqVp3g8g154eJUzl5sOAIQq+XwkmJkx8L2eHGXzke+htkrZ8CgVnt3BE6onEBe5oQkOakg+KT4T9rPFG4FxuZpoTUEgf6A4sPV2O7CDulv2bp2Zn2hxa6DQiJWXc,iv:uzWYauYu7vACmMX8O45a/TOQzesZLb7JkMIMicEPoYQ=,tag:FJCt9Kvmkrwi3AqnxsJp8g==,type:str]
+    - ENC[AES256_GCM,data:wG8lZuUXMxlzf8ssiSUPuPg=,iv:7jH8B2ide4CM4KCZ9L3AQDhnYn5atMiyfvEpDlQG414=,tag:WLRmOpNgOXKyPTz2y9AEYg==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBFRzRlR3hsa044czJTaEQy
+            QUprWUxaa1c0LzhtR2dPV2k5RUloSElJMTBRCkxzWjYrbzN5Q0FzcGFjeTBGYkRq
+            OXZPa0RMVlhLcnlXVDNXOUhPNC9tRlkKLS0tIHZDejlrMkMza1dQYndzZzE3Z0ZD
+            R1NWUGJldjhjVlZTR2ExbW5yd3Bwb1kKzWTS41avXWSIsmdobmBlKLzMi6mSWhkM
+            pH5OEeFNqoppbedmz0JpzKpPzILnlngvEJaGpl6pYUqHCEhT3GAQdg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664
+    lastmodified: "2026-10-24T11:57:38Z"
+    mac: ENC[AES256_GCM,data:C7mME8ybn9a/prDNjklCcLHDyErP/1B+lG4Z0rtFUCwsXbgszdEXLg+aLIi4cq9SVZSm8U97gqAMfv4I7DfJ6CAX3tbJtDekoMymfeglG919N+2ZwUH7klEnj63m87qjuiCrutLQNqWaWNLduPAi2bkk0i/or9jD+3tTYfEiAbA=,iv:CC6GmzNcEC5S/Rijb2Hcip8xUH3WnnZ4Cg8GOcCZYvY=,tag:OUXOxlK9OeDWwRNxncVX2Q==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
+    version: 3.13.3
