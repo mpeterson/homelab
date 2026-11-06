@@ -1,0 +1,262 @@
+---
+rule_files: []
+evaluation_interval: 1m
+
+tests:
+  - name: A successful retry clears retained failed jobs in the same repository
+    interval: 1m
+    input_series:
+      - series: 'kube_job_failed{namespace="velero",job_name="repo-maintain-job-failed",condition="true"}'
+        values: '1+0x60'
+      - series: 'kube_job_created{namespace="velero",job_name="repo-maintain-job-failed"}'
+        values: '100+0x60'
+      - series: 'kube_job_labels{namespace="velero",job_name="repo-maintain-job-failed",label_velero_io_repo_name="canary-cloud-kopia"}'
+        values: '1+0x60'
+      - series: 'kube_job_status_completion_time{namespace="velero",job_name="repo-maintain-job-retry"}'
+        values: '_x9 600+0x50'
+      - series: 'kube_job_labels{namespace="velero",job_name="repo-maintain-job-retry",label_velero_io_repo_name="canary-cloud-kopia"}'
+        values: '1+0x60'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: VeleroRepositoryMaintenanceFailed
+        exp_alerts: []
+      - eval_time: 40m
+        alertname: VeleroRepositoryMaintenanceFailed
+        exp_alerts: []
+    promql_expr_test:
+      - expr: velero_repository_maintenance_job_completed_timestamp
+        eval_time: 15m
+        exp_samples:
+          - labels: 'velero_repository_maintenance_job_completed_timestamp{namespace="velero",job_name="repo-maintain-job-retry",repository="canary-cloud-kopia"}'
+            value: 600
+
+  - name: A failure newer than the last successful maintenance pages after 30 minutes
+    interval: 1m
+    input_series:
+      - series: 'kube_job_failed{namespace="velero",job_name="smarthome-cloud-kopia-maintain-job-failed",condition="true"}'
+        values: '1+0x60'
+      - series: 'kube_job_created{namespace="velero",job_name="smarthome-cloud-kopia-maintain-job-failed"}'
+        values: '100+0x60'
+      - series: 'kube_job_labels{namespace="velero",job_name="smarthome-cloud-kopia-maintain-job-failed",label_velero_io_repo_name="smarthome-cloud-kopia"}'
+        values: '1+0x60'
+      - series: 'kube_job_status_completion_time{namespace="velero",job_name="smarthome-cloud-kopia-maintain-job-old"}'
+        values: '50+0x60'
+      - series: 'kube_job_labels{namespace="velero",job_name="smarthome-cloud-kopia-maintain-job-old",label_velero_io_repo_name="smarthome-cloud-kopia"}'
+        values: '1+0x60'
+    alert_rule_test:
+      - eval_time: 29m
+        alertname: VeleroRepositoryMaintenanceFailed
+        exp_alerts: []
+      - eval_time: 30m
+        alertname: VeleroRepositoryMaintenanceFailed
+        exp_alerts:
+          - exp_labels:
+              namespace: velero
+              repository: smarthome-cloud-kopia
+              severity: critical
+            exp_annotations:
+              summary: A Velero Kopia repository maintenance failure has not recovered for 30 minutes
+
+  - name: Success in another repository does not mask a failure
+    interval: 1m
+    input_series:
+      - series: 'kube_job_failed{namespace="velero",job_name="repo-maintain-job-failed",condition="true"}'
+        values: '1+0x60'
+      - series: 'kube_job_created{namespace="velero",job_name="repo-maintain-job-failed"}'
+        values: '100+0x60'
+      - series: 'kube_job_labels{namespace="velero",job_name="repo-maintain-job-failed",label_velero_io_repo_name="canary-cloud-kopia"}'
+        values: '1+0x60'
+      - series: 'kube_job_status_completion_time{namespace="velero",job_name="media-cloud-kopia-maintain-job-success"}'
+        values: '600+0x60'
+      - series: 'kube_job_labels{namespace="velero",job_name="media-cloud-kopia-maintain-job-success",label_velero_io_repo_name="media-cloud-kopia"}'
+        values: '1+0x60'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: VeleroRepositoryMaintenanceFailed
+        exp_alerts:
+          - exp_labels:
+              namespace: velero
+              repository: canary-cloud-kopia
+              severity: critical
+            exp_annotations:
+              summary: A Velero Kopia repository maintenance failure has not recovered for 30 minutes
+
+  - name: Missing repository labels do not silently hide failed jobs
+    interval: 1m
+    input_series:
+      - series: 'kube_job_failed{namespace="velero",job_name="repo-maintain-job-unlabeled",condition="true"}'
+        values: '1+0x60'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: VeleroRepositoryMaintenanceFailed
+        exp_alerts:
+          - exp_labels:
+              namespace: velero
+              job_name: repo-maintain-job-unlabeled
+              severity: critical
+            exp_annotations:
+              summary: A Velero Kopia repository maintenance failure has not recovered for 30 minutes
+
+  - name: A recovered alert resolves even while its failed job is retained
+    interval: 1m
+    input_series:
+      - series: 'kube_job_failed{namespace="velero",job_name="repo-maintain-job-failed",condition="true"}'
+        values: '1+0x90'
+      - series: 'kube_job_created{namespace="velero",job_name="repo-maintain-job-failed"}'
+        values: '100+0x90'
+      - series: 'kube_job_labels{namespace="velero",job_name="repo-maintain-job-failed",label_velero_io_repo_name="canary-cloud-kopia"}'
+        values: '1+0x90'
+      - series: 'kube_job_status_completion_time{namespace="velero",job_name="repo-maintain-job-retry"}'
+        values: '_x39 2400+0x50'
+      - series: 'kube_job_labels{namespace="velero",job_name="repo-maintain-job-retry",label_velero_io_repo_name="canary-cloud-kopia"}'
+        values: '1+0x90'
+    alert_rule_test:
+      - eval_time: 35m
+        alertname: VeleroRepositoryMaintenanceFailed
+        exp_alerts:
+          - exp_labels:
+              namespace: velero
+              repository: canary-cloud-kopia
+              severity: critical
+            exp_annotations:
+              summary: A Velero Kopia repository maintenance failure has not recovered for 30 minutes
+      - eval_time: 45m
+        alertname: VeleroRepositoryMaintenanceFailed
+        exp_alerts: []
+
+  - name: Repeated failed retries do not reset the repository alert pending period
+    interval: 1m
+    input_series:
+      - series: 'kube_job_failed{namespace="velero",job_name="repo-maintain-job-first",condition="true"}'
+        values: '1+0x9 0+0x50'
+      - series: 'kube_job_created{namespace="velero",job_name="repo-maintain-job-first"}'
+        values: '100+0x60'
+      - series: 'kube_job_labels{namespace="velero",job_name="repo-maintain-job-first",label_velero_io_repo_name="canary-cloud-kopia"}'
+        values: '1+0x60'
+      - series: 'kube_job_failed{namespace="velero",job_name="repo-maintain-job-retry",condition="true"}'
+        values: '0+0x9 1+0x50'
+      - series: 'kube_job_created{namespace="velero",job_name="repo-maintain-job-retry"}'
+        values: '600+0x60'
+      - series: 'kube_job_labels{namespace="velero",job_name="repo-maintain-job-retry",label_velero_io_repo_name="canary-cloud-kopia"}'
+        values: '1+0x60'
+    alert_rule_test:
+      - eval_time: 29m
+        alertname: VeleroRepositoryMaintenanceFailed
+        exp_alerts: []
+      - eval_time: 30m
+        alertname: VeleroRepositoryMaintenanceFailed
+        exp_alerts:
+          - exp_labels:
+              namespace: velero
+              repository: canary-cloud-kopia
+              severity: critical
+            exp_annotations:
+              summary: A Velero Kopia repository maintenance failure has not recovered for 30 minutes
+
+  - name: Maintenance staleness waits three hours plus the pending period
+    interval: 1m
+    input_series:
+      - series: 'kube_job_status_completion_time{namespace="velero",job_name="media-cloud-kopia-maintain-job-success"}'
+        values: '0+0x240'
+      - series: 'kube_job_labels{namespace="velero",job_name="media-cloud-kopia-maintain-job-success",label_velero_io_repo_name="media-cloud-kopia"}'
+        values: '1+0x240'
+    alert_rule_test:
+      - eval_time: 180m
+        alertname: VeleroRepositoryMaintenanceStale
+        exp_alerts: []
+      - eval_time: 210m
+        alertname: VeleroRepositoryMaintenanceStale
+        exp_alerts: []
+      - eval_time: 211m
+        alertname: VeleroRepositoryMaintenanceStale
+        exp_alerts:
+          - exp_labels:
+              namespace: velero
+              repository: media-cloud-kopia
+              severity: critical
+            exp_annotations:
+              summary: A Velero Kopia repository has had no successful maintenance for more than three hours
+
+  - name: Partial daily backup failure is reported without affecting the weekly failure alert
+    interval: 1m
+    input_series:
+      - series: 'velero_backup_partial_failure_total{schedule="velero-daily-backups"}'
+        values: '0+0x9 1+0x60'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: VeleroDailyBackupFailed
+        exp_alerts:
+          - exp_labels:
+              schedule: velero-daily-backups
+              severity: warning
+            exp_annotations:
+              summary: The daily Velero CSI backup failed or partially failed
+      - eval_time: 15m
+        alertname: VeleroWeeklyBackupFailed
+        exp_alerts: []
+
+  - name: Daily validation failures are reported
+    interval: 1m
+    input_series:
+      - series: 'velero_backup_validation_failure_total{schedule="velero-daily-backups"}'
+        values: '0+0x9 1+0x60'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: VeleroDailyBackupFailed
+        exp_alerts:
+          - exp_labels:
+              schedule: velero-daily-backups
+              severity: warning
+            exp_annotations:
+              summary: The daily Velero CSI backup failed or partially failed
+
+  - name: Daily hard failures are reported
+    interval: 1m
+    input_series:
+      - series: 'velero_backup_failure_total{schedule="velero-daily-backups"}'
+        values: '0+0x9 1+0x60'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: VeleroDailyBackupFailed
+        exp_alerts:
+          - exp_labels:
+              schedule: velero-daily-backups
+              severity: warning
+            exp_annotations:
+              summary: The daily Velero CSI backup failed or partially failed
+
+  - name: Daily backup staleness waits 26 hours plus the pending period
+    interval: 1m
+    input_series:
+      - series: 'velero_backup_last_successful_timestamp{schedule="velero-daily-backups"}'
+        values: '0+0x1650'
+    alert_rule_test:
+      - eval_time: 26h
+        alertname: VeleroDailyBackupStale
+        exp_alerts: []
+      - eval_time: 27h
+        alertname: VeleroDailyBackupStale
+        exp_alerts: []
+      - eval_time: 1621m
+        alertname: VeleroDailyBackupStale
+        exp_alerts:
+          - exp_labels:
+              schedule: velero-daily-backups
+              severity: critical
+            exp_annotations:
+              summary: No successful daily Velero CSI backup exists in the last 26 hours
+
+  - name: Missing daily backup success metrics are reported
+    interval: 1m
+    alert_rule_test:
+      - eval_time: 59m
+        alertname: VeleroDailyBackupStale
+        exp_alerts: []
+      - eval_time: 1h
+        alertname: VeleroDailyBackupStale
+        exp_alerts:
+          - exp_labels:
+              schedule: velero-daily-backups
+              severity: critical
+            exp_annotations:
+              summary: No successful daily Velero CSI backup exists in the last 26 hours

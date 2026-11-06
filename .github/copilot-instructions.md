@@ -22,6 +22,9 @@ This catches most CI failures before they hit the PR. Run `just` to list all ava
 
 Use `gh` for all GitHub operations (PRs, issues, labels, etc.).
 
+`just validate velero` checks backup policies and runs Prometheus alert regression
+tests with the mise-managed `promtool`; CI runs the same recipe.
+
 ### Creating issues
 
 Always apply relevant labels. Use `gh label list` to see current labels. The repo uses:

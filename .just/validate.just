@@ -143,7 +143,7 @@ helm:
 
     exit "$status"
 
-[doc('Validate Velero file-system backup allowlist and safety policy')]
+[doc('Validate Velero backup policies and Prometheus alert rules')]
 velero:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -214,6 +214,24 @@ velero:
 
     if grep -R -E -q "^[[:space:]]*['\"]?backup\\.velero\\.io/backup-volumes['\"]?[[:space:]]*:" kubernetes/; then
       _error "$policy" "FSB inclusion annotations can omit unlisted volumes"
+      status=1
+    fi
+
+    if ! yq -e '."kube-state-metrics".metricLabelsAllowlist[] == "jobs=[velero.io/repo-name]"' \
+      kubernetes/infra/prometheus-operator/values.yaml > /dev/null; then
+      _error "kubernetes/infra/prometheus-operator/values.yaml" "maintenance alerts require the Velero repository Job label"
+      status=1
+    fi
+
+    rules_file=$(mktemp)
+    tests_file=$(mktemp)
+    trap 'rm -f "$rules_file" "$tests_file"' EXIT
+    yq '.spec' kubernetes/infra/velero/prometheusrule.yaml > "$rules_file"
+    RULES_FILE="$rules_file" yq '.rule_files = [strenv(RULES_FILE)]' \
+      kubernetes/infra/velero/tests/prometheusrule.test.yaml > "$tests_file"
+
+    if ! promtool check rules "$rules_file" || ! promtool test rules "$tests_file"; then
+      _error "kubernetes/infra/velero/prometheusrule.yaml" "Velero alert rule validation failed"
       status=1
     fi
 
