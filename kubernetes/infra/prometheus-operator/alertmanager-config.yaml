@@ -35,10 +35,43 @@ spec:
         groupInterval: 1m
       - receiver: pushover
         matchers:
+          - name: alertname
+            matchType: "=~"
+            value: "KubeJobFailed|KubeJobNotCompleted"
+          - name: namespace
+            matchType: "="
+            value: media
+          - name: job_name
+            matchType: "=~"
+            value: "kometa-.+"
+        routes:
+          - receiver: pushover
+            matchers:
+              - name: severity
+                matchType: "="
+                value: critical
+          - receiver: pushover
+            activeTimeIntervals:
+              - normal-hours
+      - receiver: pushover
+        matchers:
           - name: severity
             matchType: "="
             value: critical
         continue: true
+
+  muteTimeIntervals:
+    - name: normal-hours
+      timeIntervals:
+        # UTC: winter 09:00/10:00-21:00; summer 10:00/11:00-22:00.
+        - weekdays: ["sunday:thursday"]
+          times:
+            - startTime: "07:00"
+              endTime: "19:00"
+        - weekdays: ["friday:saturday"]
+          times:
+            - startTime: "08:00"
+              endTime: "19:00"
 
   inhibitRules:
     - equal:
