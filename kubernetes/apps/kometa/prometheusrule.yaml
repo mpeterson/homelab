@@ -28,7 +28,6 @@ spec:
           for: 5m
           labels:
             severity: warning
-            incident_severity: sev3
             cronjob: kometa
           annotations:
             summary: Kometa failed to finish a clean overlay run
@@ -53,7 +52,6 @@ spec:
           for: 15m
           labels:
             severity: warning
-            incident_severity: sev3
           annotations:
             summary: Kometa has no successful daily run within 36 hours or its CronJob is missing
             description: Kometa in media has not completed successfully within 36 hours, or its CronJob is missing. Check scheduling, suspension, active Jobs, and application logs.

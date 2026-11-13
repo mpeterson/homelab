@@ -4,17 +4,17 @@
 additional Helm values. Native time intervals support an IANA timezone; the
 installed `AlertmanagerConfig` CRD does not expose that field.
 
-## Opt-in incident severity
+## Severity and normal hours
 
-Incident severity and notification delivery priority are independent.
+The Kometa route uses the existing `severity` label. Severity and notification
+delivery priority are independent.
 
-| Label | Notification window |
+| Kometa severity | Notification window |
 | --- | --- |
-| `incident_severity: sev1` or `sev2` | Anytime |
-| `incident_severity: sev3` and higher numbered severities | Business hours |
-| No `incident_severity` label | Existing routing, unchanged |
+| `critical` | Anytime |
+| `warning`, `info`, or any other noncritical severity | Normal hours |
 
-Business hours use `Asia/Jerusalem`, including daylight-saving transitions:
+Normal hours use `Asia/Jerusalem`, including daylight-saving transitions:
 
 - Sunday–Thursday: 09:00–22:00.
 - Friday–Saturday: 10:00–22:00.
@@ -22,17 +22,18 @@ Business hours use `Asia/Jerusalem`, including daylight-saving transitions:
 Opening times are inclusive; closing times are exclusive. Notification grouping
 can add up to the configured group interval after a window opens.
 
-Only Kometa currently opts in. Do not infer incident severity from existing
-`severity: critical` or `warning` labels; those continue to serve the existing
-inhibition policy. Review other alerts separately before opting them in.
+The policy currently applies only to `KometaRunFailed` and `KometaRunStale` in
+the `media` namespace. Other alerts retain their existing routing. Review other
+alerts separately before extending this policy. The existing severity-based
+inhibition policy is unchanged.
 
-Scheduled routes stop further matching, so an opted-in Sev3 alert cannot fall
-through to an anytime route outside business hours.
+Scheduled routes stop further matching, so a noncritical Kometa alert cannot
+fall through to an anytime route outside normal hours.
 
 ## Native scheduling limitations
 
 Alertmanager does not provide a durable queue of every alert event. An alert
-outside business hours is delivered at the next window only if it still fires.
+outside normal hours is delivered at the next window only if it still fires.
 An alert that resolves beforehand may never notify. Recovery notifications are
 also subject to the route's window.
 
@@ -43,8 +44,8 @@ behaviors explicitly rather than silently extending native scheduling.
 ## Pushover and iOS
 
 The existing Pushover receiver sends firing notifications at high priority (`1`)
-and recovery notifications at normal priority (`0`). This is independent of both
-severity labels. Pushover emergency priority (`2`), which requires retries and
+and recovery notifications at normal priority (`0`). This is independent of the
+severity label. Pushover emergency priority (`2`), which requires retries and
 acknowledgement, is not used.
 
 Enable Pushover's **Critical Alerts for high-priority** setting and the iOS
@@ -74,8 +75,3 @@ Secret mount to the single Alertmanager instance. Deployment can roll its pod,
 briefly interrupt notification delivery, and cause notification resends. Obtain
 explicit approval before rollout and pruning the retired object. Do not disable
 Watchdog or change unrelated alert severities as part of this migration.
-
-`just validate kometa` checks the rendered configuration with `amtool`, exercises
-route selection, and checks business-window boundaries in standard and
-daylight-saving time. It also tests Kometa failures and their natural recovery
-with `promtool`.

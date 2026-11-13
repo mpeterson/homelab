@@ -10,6 +10,10 @@ for SQLite cache migrations and other temporary files. Without it, Kometa can lo
 `disk I/O error` during cache initialization and exit zero without processing
 either library.
 
+Kometa v2.5.5 has no fail-on-error flag. Its
+[run handler](https://github.com/Kometa-Team/Kometa/blob/1ec206b4c9dd0e9f9ea7b9e7a4e2e56b349e68d0/kometa.py#L760-L761)
+catches and logs runtime exceptions without returning a failing exit status.
+
 The mounted `config/run.py` runner preserves subprocess failures and also fails
 the Job when the current main log contains an `ERROR` or `CRITICAL` record, lacks
 run completion, or lacks overlay completion for a configured library. Warnings
@@ -53,15 +57,13 @@ daily schedule plus 12 hours for a long library run; a new, never-successful
 CronJob receives the same grace period. A manual run does not update the
 CronJob controller's last-success timestamp.
 
-These alerts use `severity: warning` and `incident_severity: sev3`. Pushover
-notifications are restricted to the business hours documented in
+These alerts use `severity: warning`. Pushover notifications are restricted to
+the normal hours documented in
 [the Alertmanager policy](../../infra/prometheus-operator/README.md).
+Kometa alerts classified as `critical` notify anytime.
 Generic Kometa `KubeJobFailed` and `KubeJobNotCompleted` notifications are
 suppressed to avoid bypassing that policy; the Kometa rules provide failure and
 staleness coverage.
-
-Run `just validate kometa` to exercise the runner, alert rules, and notification
-routing.
 
 ## Investigation
 

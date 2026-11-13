@@ -28,19 +28,22 @@ alertmanager:
           group_interval: 1m
         - receiver: monitoring/alertmanager/pushover
           matchers:
-            - incident_severity=~"sev[12]"
-        - receiver: monitoring/alertmanager/pushover
-          matchers:
-            - incident_severity=~"sev([3-9]|[1-9][0-9]+)"
-          active_time_intervals:
-            - business-hours
+            - alertname=~"KometaRunFailed|KometaRunStale"
+            - namespace="media"
+          routes:
+            - receiver: monitoring/alertmanager/pushover
+              matchers:
+                - severity="critical"
+            - receiver: monitoring/alertmanager/pushover
+              active_time_intervals:
+                - normal-hours
         - receiver: monitoring/alertmanager/pushover
           matchers:
             - severity="critical"
           continue: true
 
     time_intervals:
-      - name: business-hours
+      - name: normal-hours
         time_intervals:
           - weekdays: ["sunday:thursday"]
             times:

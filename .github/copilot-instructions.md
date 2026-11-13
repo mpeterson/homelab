@@ -25,12 +25,11 @@ Use `gh` for all GitHub operations (PRs, issues, labels, etc.).
 `just validate velero` checks backup policies and runs Prometheus alert regression
 tests with the mise-managed `promtool`; CI runs the same recipe.
 
-`just validate kometa` tests Kometa's failure-detecting runner and alert rules,
-and validates the rendered native Alertmanager configuration and opt-in routing.
 Alertmanager Helm values live in `kubernetes/infra/prometheus-operator/alertmanager-config.yaml`.
-Only alerts labeled `incident_severity` opt into the Sev1–2 anytime / Sev3+ business-hours
-policy; existing unlabeled alerts keep their routing. Incident severity is independent
-of Pushover priority. Native scheduling does not queue failures resolved outside business hours.
+Only Kometa's failure/staleness alerts use the normal-hours policy: `critical`
+notifies anytime; other severities notify during normal hours in `Asia/Jerusalem`.
+Other alerts keep their routing. Severity is independent of Pushover priority.
+Native scheduling does not queue failures resolved outside normal hours.
 
 ### Creating issues
 
