@@ -1,0 +1,189 @@
+---
+rule_files: []
+evaluation_interval: 1m
+
+tests:
+  - name: A zero-exit application error converted into a failed Job alerts after five minutes
+    interval: 1m
+    input_series:
+      - series: 'kube_job_created{namespace="media",job_name="kometa-123"}'
+        values: '100+0x15'
+      - series: 'kube_job_failed{namespace="media",job_name="kometa-123",condition="true"}'
+        values: '1+0x15'
+      - series: 'kube_cronjob_info{namespace="media",cronjob="kometa"}'
+        values: '1+0x15'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: KometaRunFailed
+        exp_alerts: []
+      - eval_time: 5m
+        alertname: KometaRunFailed
+        exp_alerts:
+          - exp_labels:
+              namespace: media
+              cronjob: kometa
+              severity: warning
+              incident_severity: sev3
+            exp_annotations:
+              summary: Kometa failed to finish a clean overlay run
+              description: Kometa in media logged application errors or failed to finish overlay processing. Inspect the latest Job and /config/logs/meta.log; a successful retry clears this alert.
+
+  - name: A successful manual retry clears retained failures without a latch
+    interval: 1m
+    input_series:
+      - series: 'kube_job_created{namespace="media",job_name="kometa-123"}'
+        values: '100+0x20'
+      - series: 'kube_job_failed{namespace="media",job_name="kometa-123",condition="true"}'
+        values: '1+0x20'
+      - series: 'kube_job_status_completion_time{namespace="media",job_name="kometa-122"}'
+        values: '50+0x20'
+      - series: 'kube_job_status_completion_time{namespace="media",job_name="kometa-manual-retry"}'
+        values: '_x9 600+0x10'
+      - series: 'kube_cronjob_info{namespace="media",cronjob="kometa"}'
+        values: '1+0x20'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: KometaRunFailed
+        exp_alerts:
+          - exp_labels:
+              namespace: media
+              cronjob: kometa
+              severity: warning
+              incident_severity: sev3
+            exp_annotations:
+              summary: Kometa failed to finish a clean overlay run
+              description: Kometa in media logged application errors or failed to finish overlay processing. Inspect the latest Job and /config/logs/meta.log; a successful retry clears this alert.
+      - eval_time: 11m
+        alertname: KometaRunFailed
+        exp_alerts: []
+
+  - name: Unrelated Jobs and false failure conditions neither trigger nor mask Kometa failure
+    interval: 1m
+    input_series:
+      - series: 'kube_job_created{namespace="media",job_name="kometa-123"}'
+        values: '100+0x10'
+      - series: 'kube_job_failed{namespace="media",job_name="kometa-123",condition="false"}'
+        values: '1+0x10'
+      - series: 'kube_job_created{namespace="media",job_name="kometa-storage-check"}'
+        values: '200+0x10'
+      - series: 'kube_job_failed{namespace="media",job_name="kometa-storage-check",condition="true"}'
+        values: '1+0x10'
+      - series: 'kube_job_status_completion_time{namespace="media",job_name="unrelated"}'
+        values: '300+0x10'
+      - series: 'kube_cronjob_info{namespace="media",cronjob="kometa"}'
+        values: '1+0x10'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: KometaRunFailed
+        exp_alerts: []
+
+  - name: Success in another workload cannot mask a new Kometa failure
+    interval: 1m
+    input_series:
+      - series: 'kube_job_created{namespace="media",job_name="kometa-123"}'
+        values: '100+0x10'
+      - series: 'kube_job_failed{namespace="media",job_name="kometa-123",condition="true"}'
+        values: '1+0x10'
+      - series: 'kube_job_status_completion_time{namespace="media",job_name="unrelated"}'
+        values: '300+0x10'
+      - series: 'kube_job_status_completion_time{namespace="other",job_name="kometa-124"}'
+        values: '400+0x10'
+      - series: 'kube_cronjob_info{namespace="media",cronjob="kometa"}'
+        values: '1+0x10'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: KometaRunFailed
+        exp_alerts:
+          - exp_labels:
+              namespace: media
+              cronjob: kometa
+              severity: warning
+              incident_severity: sev3
+            exp_annotations:
+              summary: Kometa failed to finish a clean overlay run
+              description: Kometa in media logged application errors or failed to finish overlay processing. Inspect the latest Job and /config/logs/meta.log; a successful retry clears this alert.
+
+  - name: Daily success becomes stale only after 36 hours plus the pending interval and resolves on recovery
+    interval: 1m
+    input_series:
+      - series: 'kube_cronjob_info{namespace="media",cronjob="kometa"}'
+        values: '1+0x2250'
+      - series: 'kube_cronjob_created{namespace="media",cronjob="kometa"}'
+        values: '1+0x2250'
+      - series: 'kube_cronjob_status_last_successful_time{namespace="media",cronjob="kometa"}'
+        values: '1+0x2219 133200+0x30'
+    alert_rule_test:
+      - eval_time: 36h
+        alertname: KometaRunStale
+        exp_alerts: []
+      - eval_time: 36h15m
+        alertname: KometaRunStale
+        exp_alerts: []
+      - eval_time: 36h16m
+        alertname: KometaRunStale
+        exp_alerts:
+          - exp_labels:
+              namespace: media
+              cronjob: kometa
+              severity: warning
+              incident_severity: sev3
+            exp_annotations:
+              summary: Kometa has no successful daily run within 36 hours or its CronJob is missing
+              description: Kometa in media has not completed successfully within 36 hours, or its CronJob is missing. Check scheduling, suspension, active Jobs, and application logs.
+      - eval_time: 37h1m
+        alertname: KometaRunStale
+        exp_alerts: []
+
+  - name: Never-successful CronJobs with a zero or absent success timestamp alert after the grace period
+    interval: 1m
+    input_series:
+      - series: 'kube_cronjob_info{namespace="media",cronjob="kometa"}'
+        values: '1+0x2250'
+      - series: 'kube_cronjob_created{namespace="media",cronjob="kometa"}'
+        values: '1+0x2250'
+      - series: 'kube_cronjob_status_last_successful_time{namespace="media",cronjob="kometa"}'
+        values: '0+0x2179 stale'
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: KometaRunStale
+        exp_alerts: []
+      - eval_time: 36h16m
+        alertname: KometaRunStale
+        exp_alerts:
+          - exp_labels:
+              namespace: media
+              cronjob: kometa
+              severity: warning
+              incident_severity: sev3
+            exp_annotations:
+              summary: Kometa has no successful daily run within 36 hours or its CronJob is missing
+              description: Kometa in media has not completed successfully within 36 hours, or its CronJob is missing. Check scheduling, suspension, active Jobs, and application logs.
+      - eval_time: 37h
+        alertname: KometaRunStale
+        exp_alerts:
+          - exp_labels:
+              namespace: media
+              cronjob: kometa
+              severity: warning
+              incident_severity: sev3
+            exp_annotations:
+              summary: Kometa has no successful daily run within 36 hours or its CronJob is missing
+              description: Kometa in media has not completed successfully within 36 hours, or its CronJob is missing. Check scheduling, suspension, active Jobs, and application logs.
+
+  - name: A missing CronJob alerts after 15 minutes
+    interval: 1m
+    alert_rule_test:
+      - eval_time: 14m
+        alertname: KometaRunStale
+        exp_alerts: []
+      - eval_time: 15m
+        alertname: KometaRunStale
+        exp_alerts:
+          - exp_labels:
+              namespace: media
+              cronjob: kometa
+              severity: warning
+              incident_severity: sev3
+            exp_annotations:
+              summary: Kometa has no successful daily run within 36 hours or its CronJob is missing
+              description: Kometa in media has not completed successfully within 36 hours, or its CronJob is missing. Check scheduling, suspension, active Jobs, and application logs.

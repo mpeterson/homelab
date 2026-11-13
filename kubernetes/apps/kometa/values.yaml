@@ -28,12 +28,9 @@ controllers:
           repository: kometateam/kometa
           tag: v2.5.5@sha256:864cec57d099c71a26a5a5ce2784d34d9b53874c91269c3a12df3949eab96562
         command:
-          - /bin/sh
-          - -c
+          - python3
         args:
-          - |
-            mkdir /config/assets 2>/dev/null || true;
-            python3 kometa.py --run --read-only-config
+          - /config/run.py
         env:
           TZ: *tz
         envFrom:
@@ -64,7 +61,10 @@ persistence:
       - path: /config/config.yml
         subPath: config.yml
         readOnly: true
-  logs:
+      - path: /config/run.py
+        subPath: run.py
+        readOnly: true
+  tmp:
     type: emptyDir
     globalMounts:
-      - path: /config/logs
+      - path: /tmp

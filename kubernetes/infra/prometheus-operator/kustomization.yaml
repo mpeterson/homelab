@@ -7,7 +7,6 @@ namespace: &ns monitoring
 
 resources:
   - scrapeconfigs/node-exporter.yaml
-  - alertmanager-config.yaml
 
 generators:
   - secret-generator.yaml
@@ -26,3 +25,5 @@ helmCharts:
     releaseName: kube-prometheus-stack
     namespace: *ns
     valuesFile: values.yaml
+    additionalValuesFiles:
+      - alertmanager-config.yaml

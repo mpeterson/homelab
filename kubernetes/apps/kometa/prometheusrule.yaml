@@ -1,0 +1,59 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kometa-rules
+spec:
+  groups:
+    - name: kometa.rules
+      rules:
+        - record: kometa_last_failure_timestamp
+          expr: |-
+            max by (namespace) (
+              kube_job_created{namespace="media",job_name=~"kometa-[0-9]+|kometa-manual-.+"}
+              and on (namespace, job_name)
+              (kube_job_failed{namespace="media",condition="true"} > 0)
+            )
+        - record: kometa_last_success_timestamp
+          expr: |-
+            max by (namespace) (
+              kube_job_status_completion_time{namespace="media",job_name=~"kometa-[0-9]+|kometa-manual-.+"}
+            )
+        - alert: KometaRunFailed
+          expr: |-
+            (kometa_last_failure_timestamp > on (namespace) kometa_last_success_timestamp)
+            or
+            (kometa_last_failure_timestamp unless on (namespace) kometa_last_success_timestamp)
+          for: 5m
+          labels:
+            severity: warning
+            incident_severity: sev3
+            cronjob: kometa
+          annotations:
+            summary: Kometa failed to finish a clean overlay run
+            description: Kometa in media logged application errors or failed to finish overlay processing. Inspect the latest Job and /config/logs/meta.log; a successful retry clears this alert.
+        - alert: KometaRunStale
+          expr: |-
+            max by (namespace, cronjob) (
+              (
+                (time() - kube_cronjob_status_last_successful_time{namespace="media",cronjob="kometa"} > 129600)
+                and
+                (kube_cronjob_status_last_successful_time{namespace="media",cronjob="kometa"} > 0)
+              )
+              or
+              (
+                (time() - kube_cronjob_created{namespace="media",cronjob="kometa"} > 129600)
+                unless on (namespace, cronjob)
+                (kube_cronjob_status_last_successful_time{namespace="media",cronjob="kometa"} > 0)
+              )
+            )
+            or
+            absent(kube_cronjob_info{namespace="media",cronjob="kometa"})
+          for: 15m
+          labels:
+            severity: warning
+            incident_severity: sev3
+          annotations:
+            summary: Kometa has no successful daily run within 36 hours or its CronJob is missing
+            description: Kometa in media has not completed successfully within 36 hours, or its CronJob is missing. Check scheduling, suspension, active Jobs, and application logs.

@@ -15,6 +15,9 @@ default:
     @printf "\033[1;34m==> Validating Velero backup policy...\033[0m \033[2m(just validate velero)\033[0m\n"
     @just validate velero
     @echo ""
+    @printf "\033[1;34m==> Validating Kometa and notification routing...\033[0m \033[2m(just validate kometa)\033[0m\n"
+    @just validate kometa
+    @echo ""
     @printf "\033[1;34m==> Verifying container images...\033[0m \033[2m(just validate images)\033[0m\n"
     @just validate images
 
@@ -236,6 +239,38 @@ velero:
     fi
 
     exit "$status"
+
+[doc('Validate Kometa failure detection, alert rules, and Alertmanager routing')]
+kometa:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mise install --quiet
+    cd "{{ repo_root }}"
+
+    python3 -B -m unittest discover -s kubernetes/apps/kometa/tests -p 'test_*.py'
+
+    rules_file=$(mktemp)
+    tests_file=$(mktemp)
+    config_file=$(mktemp)
+    trap 'rm -f "$rules_file" "$tests_file" "$config_file"' EXIT
+
+    yq '.spec' kubernetes/apps/kometa/prometheusrule.yaml > "$rules_file"
+    RULES_FILE="$rules_file" yq '.rule_files = [strenv(RULES_FILE)]' \
+      kubernetes/apps/kometa/tests/prometheusrule.test.yaml > "$tests_file"
+    promtool check rules "$rules_file"
+    promtool test rules "$tests_file"
+
+    version=$(yq '.helmCharts[] | select(.name == "kube-prometheus-stack") | .version' \
+      kubernetes/infra/prometheus-operator/kustomization.yaml)
+    helm template kube-prometheus-stack kube-prometheus-stack \
+      --repo https://prometheus-community.github.io/helm-charts --version "$version" \
+      --namespace monitoring --show-only templates/alertmanager/secret.yaml \
+      -f kubernetes/infra/prometheus-operator/values.yaml \
+      -f kubernetes/infra/prometheus-operator/alertmanager-config.yaml \
+      | yq -r '.data."alertmanager.yaml"' | base64 --decode > "$config_file"
+    amtool check-config "$config_file"
+    ALERTMANAGER_CONFIG="$config_file" python3 -B -m unittest discover \
+      -s kubernetes/infra/prometheus-operator/tests -p 'test_*.py'
 
 [doc('Verify all container images exist in their registries')]
 images:
