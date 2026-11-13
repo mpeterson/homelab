@@ -12,7 +12,7 @@ spec.loader.exec_module(runner)
 
 
 def record(level, message):
-    return f"[2026-11-13 14:53:09,000] kometa.py                   {level:10} | {message} |\n"
+    return f"[2026-11-13 14:53:09,000] [kometa.py:497]             [{level}]     | {message} |\n"
 
 
 SUCCESS = (
@@ -66,6 +66,10 @@ class RunTests(unittest.TestCase):
     def test_a_new_successful_run_replaces_historical_errors(self):
         self.log.write_text(record("ERROR", "Historical failure"))
         self.assertEqual(self.execute(SUCCESS), 0)
+
+    def test_unbracketed_log_levels_also_detect_errors(self):
+        plain = "[2026-11-13 14:53:09,000] cache.py                    CRITICAL   | disk I/O error |\n"
+        self.assertEqual(self.execute(plain + SUCCESS), 1)
 
 
 if __name__ == "__main__":

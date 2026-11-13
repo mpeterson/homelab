@@ -20,6 +20,27 @@ The normal run retains the existing collection, rating, playlist, and overlay
 configuration. Recovery does not require deleting the cache, clearing poster
 backups, or forcing every overlay to be reapplied.
 
+## MDBList-dependent ribbon badges
+
+The default ribbon overlays for Rotten Tomatoes Verified Hot, Rotten Tomatoes
+Certified Fresh, Metacritic Must See, and Commonsense Selection use MDBList.
+MDBList list requests now require authentication; without an API key they return
+HTTP 401 and those badges cannot be built.
+
+Obtain an API key from [MDBList preferences](https://mdblist.com/preferences/).
+Add `KOMETA_MDBLISTAPIKEY` to `secret.sops.yaml` with SOPS, then configure the
+root mapping in `config/config.yml`:
+
+```yaml
+mdblist:
+  apikey: <<MDBLISTAPIKEY>>
+  cache_expiration: 60
+```
+
+Never paste the key into chat or commit plaintext. Do not silently disable these
+badges to hide authentication errors. Kometa can still apply other overlays, but
+the runner correctly marks a run with MDBList errors as failed.
+
 ## Alerts
 
 `KometaRunFailed` fires after five minutes when a scheduled Job or a

@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-RECORD = re.compile(r"^\[[^\]]+\]\s+\S+\s+(DEBUG|INFO|WARNING|ERROR|CRITICAL)\s+(.*)")
+RECORD = re.compile(r"^\[[^\]]+\]\s+\S+\s+\[?(DEBUG|INFO|WARNING|ERROR|CRITICAL)\]?\s+(.*)")
 
 
 def log_signature(path):
