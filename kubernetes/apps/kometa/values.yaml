@@ -32,7 +32,8 @@ controllers:
           - -c
         args:
           - |
-            mkdir -p /config/assets && exec python3 kometa.py --run --read-only-config
+            mkdir /config/assets 2>/dev/null || true;
+            python3 kometa.py --run --read-only-config
         env:
           TZ: *tz
         envFrom:

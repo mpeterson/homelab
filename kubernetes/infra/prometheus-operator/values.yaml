@@ -22,14 +22,8 @@ alertmanager:
           sectionName: https
 
   alertmanagerSpec:
-    secrets:
-      - alertmanager-secrets
-    alertmanagerConfigSelector:
-      matchExpressions:
-        - key: app.kubernetes.io/instance
-          operator: NotIn
-          values:
-            - kube-prometheus-stack
+    alertmanagerConfiguration:
+      name: alertmanager
     externalUrl: "https://alertmanager.lan.peterson.com.ar"
     storage:
       volumeClaimTemplate:
