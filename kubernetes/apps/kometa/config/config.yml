@@ -163,6 +163,10 @@ tmdb:
   cache_expiration: 60
   region:
 
+mdblist:
+  apikey: <<MDBLISTAPIKEY>>
+  cache_expiration: 60
+
 tautulli:
   url: http://tautulli.media.svc.cluster.local:8181
   apikey: <<TAUTULLIAPIKEY>>
