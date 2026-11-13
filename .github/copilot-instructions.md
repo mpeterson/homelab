@@ -26,7 +26,7 @@ Use `gh` for all GitHub operations (PRs, issues, labels, etc.).
 tests with the mise-managed `promtool`; CI runs the same recipe.
 
 Alertmanager Helm values live in `kubernetes/infra/prometheus-operator/alertmanager-config.yaml`.
-Only Kometa's failure/staleness alerts use the normal-hours policy: `critical`
+Only bundled Job alerts for Kometa in `media` use the normal-hours policy: `critical`
 notifies anytime; other severities notify during normal hours in `Asia/Jerusalem`.
 Other alerts keep their routing. Severity is independent of Pushover priority.
 Native scheduling does not queue failures resolved outside normal hours.

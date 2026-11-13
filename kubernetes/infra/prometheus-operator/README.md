@@ -22,10 +22,11 @@ Normal hours use `Asia/Jerusalem`, including daylight-saving transitions:
 Opening times are inclusive; closing times are exclusive. Notification grouping
 can add up to the configured group interval after a window opens.
 
-The policy currently applies only to `KometaRunFailed` and `KometaRunStale` in
-the `media` namespace. Other alerts retain their existing routing. Review other
-alerts separately before extending this policy. The existing severity-based
-inhibition policy is unchanged.
+The policy currently applies only to the bundled `KubeJobFailed` and
+`KubeJobNotCompleted` alerts for `kometa-*` Jobs in the `media` namespace.
+Both currently have `severity: warning`. Other alerts retain their existing
+routing. Review other alerts separately before extending this policy.
+The existing severity-based inhibition policy is unchanged.
 
 Scheduled routes stop further matching, so a noncritical Kometa alert cannot
 fall through to an anytime route outside normal hours.

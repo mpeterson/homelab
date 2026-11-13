@@ -16,11 +16,6 @@ alertmanager:
             - alertname="KubeJobFailed"
             - namespace="velero"
             - job_name=~".*-maintain-job-.*"
-        - receiver: monitoring/alertmanager/null
-          matchers:
-            - alertname=~"KubeJobFailed|KubeJobNotCompleted"
-            - namespace="media"
-            - job_name=~"kometa-.+"
         - receiver: monitoring/alertmanager/healthcheck-canary
           matchers:
             - alertname="Watchdog"
@@ -28,8 +23,9 @@ alertmanager:
           group_interval: 1m
         - receiver: monitoring/alertmanager/pushover
           matchers:
-            - alertname=~"KometaRunFailed|KometaRunStale"
+            - alertname=~"KubeJobFailed|KubeJobNotCompleted"
             - namespace="media"
+            - job_name=~"kometa-.+"
           routes:
             - receiver: monitoring/alertmanager/pushover
               matchers:

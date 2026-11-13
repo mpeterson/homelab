@@ -5,9 +5,6 @@ kind: Kustomization
 
 namespace: &ns media
 
-resources:
-  - prometheusrule.yaml
-
 generators:
   - secret-generator.yaml
 
@@ -15,7 +12,6 @@ configMapGenerator:
   - name: kometa-configmap
     files:
       - config.yml=./config/config.yml
-      - run.py=./config/run.py
 
 helmCharts:
   - name: app-template
