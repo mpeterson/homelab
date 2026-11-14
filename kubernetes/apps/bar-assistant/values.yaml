@@ -41,7 +41,7 @@ controllers:
             custom: true
             spec:
               httpGet:
-                path: /api/server/version
+                path: /healthcheck
                 port: &apiPort 8080
               periodSeconds: 10
               timeoutSeconds: 5
@@ -52,7 +52,7 @@ controllers:
             custom: true
             spec:
               httpGet:
-                path: /api/server/version
+                path: /healthcheck
                 port: *apiPort
               periodSeconds: 5
               timeoutSeconds: 5

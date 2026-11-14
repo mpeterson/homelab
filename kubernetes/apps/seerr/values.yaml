@@ -27,7 +27,7 @@ controllers:
             custom: true
             spec:
               httpGet:
-                path: /api/v1/status
+                path: /api/v1/status?checkUpdateAvailable=false
                 port: *port
               initialDelaySeconds: 0
               periodSeconds: 10
