@@ -64,6 +64,10 @@ persistence:
       - path: /config/config.yml
         subPath: config.yml
         readOnly: true
+  logs:
+    type: emptyDir
+    globalMounts:
+      - path: /config/logs
   tmp:
     type: emptyDir
     globalMounts:
