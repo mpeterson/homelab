@@ -26,10 +26,10 @@ Use `gh` for all GitHub operations (PRs, issues, labels, etc.).
 tests with the mise-managed `promtool`; CI runs the same recipe.
 
 Alertmanager uses the `AlertmanagerConfig` in `kubernetes/infra/prometheus-operator/alertmanager-config.yaml`.
-Only bundled Job alerts for Kometa in `media` use the normal-hours policy: `critical`
-notifies anytime; other severities notify Sunday–Thursday 07:00–19:00 UTC and
-Friday–Saturday 08:00–19:00 UTC. Intervals have no automatic DST adjustment.
-Other alerts keep their routing. Severity is independent of Pushover priority.
+All Pushover alerts use the normal-hours policy: `critical` notifies anytime; other
+severities notify Sunday–Thursday 07:00–19:00 UTC and Friday–Saturday 08:00–19:00 UTC.
+Intervals have no automatic DST adjustment. Watchdog and existing suppressions retain
+their routing. Firing Pushover notifications retain priority `1` regardless of severity.
 Native scheduling does not queue failures resolved outside normal hours.
 
 ### Creating issues
