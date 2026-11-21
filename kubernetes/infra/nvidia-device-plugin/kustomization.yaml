@@ -12,7 +12,7 @@ helmCharts:
   - name: gpu-operator
     repo: https://helm.ngc.nvidia.com/nvidia
     # renovate: datasource=helm registryUrl=https://helm.ngc.nvidia.com/nvidia depName=gpu-operator
-    version: v26.7.2
+    version: v26.7.3
     releaseName: gpu-operator
     namespace: *ns
     includeCRDs: true
