@@ -20,16 +20,16 @@ spec:
       value: app-template@4.6.2
     - name: Server Image
       # renovate: datasource=docker depName=barassistant/server
-      value: barassistant/server:6.9.1@sha256:ec018029059e3c4ed64c5acb5bc255d8918ba22ec01da89ec3012355e9d1cd41
+      value: barassistant/server:6.12.1@sha256:2c52dd9858d7b4206159bb36f9febf22d19b025fda0b7d4fb9f2482a7d361a0b
     - name: Web Image
       # renovate: datasource=docker depName=barassistant/salt-rim
-      value: barassistant/salt-rim:5.8.0@sha256:fcb3496d26390bb31019fc768c1bb36c8d4cedf1e95d1609d94500e2eccf7bb5
+      value: barassistant/salt-rim:5.11.0@sha256:7aa57a94f7cd8b2456c44881254937d28e0b5ed897e299b05a4624ca7d822317
     - name: Search Image
       # renovate: datasource=docker depName=getmeili/meilisearch
-      value: getmeili/meilisearch:v1.55.0@sha256:ff546679970126f8822e15d1b6a06bfbff1f2ce2e43f810cfb5258012f92de5c
+      value: getmeili/meilisearch:v1.57.0@sha256:91bf09897482c17205c8faeca8daa8d57999fb9de20d862763cdfa92ba4ec790
     - name: Cache Image
       # renovate: datasource=docker depName=valkey/valkey
-      value: valkey/valkey:9.1.2-alpine@sha256:48332870af354a799964c0012ae1194a0bf2bf894eb508f945810596dc2d8d11
+      value: valkey/valkey:9.2.0-alpine@sha256:c8e2d17498838af5d91e12eb7c11220b3434a7b7131a333e3af52ad5e0b80882
 
   syncPolicy:
     syncOptions:
