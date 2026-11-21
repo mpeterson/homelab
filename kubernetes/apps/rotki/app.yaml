@@ -17,7 +17,7 @@ spec:
   info:
     - name: Chart
       # renovate: datasource=helm registryUrl=https://bjw-s-labs.github.io/helm-charts depName=app-template
-      value: app-template@4.6.2
+      value: app-template@5.3.0
     - name: Image
       # renovate: datasource=docker depName=rotki/rotki
       value: rotki/rotki:v1.44.3@sha256:4f07e8114b4450665b64a964ffa106dfb3c36a50e3664c93b8aafe1c1e1a0735
