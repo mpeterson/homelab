@@ -17,7 +17,7 @@ spec:
       # No CP toleration — iSCSI CSI driver only runs on worker nodes
       containers:
         - name: probe
-          image: busybox:1.37.0@sha256:9db7b59979c38555a39def84a31fb98b5296952f9e3afd4f6f11f05b07adfab0
+          image: busybox:1.38.0@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4
           command:
             - sh
             - -c
