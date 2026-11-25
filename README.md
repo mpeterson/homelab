@@ -80,6 +80,41 @@ just ansible playbook bind9/setup.yaml
 Keep credentials encrypted with SOPS even when the inventory repository is
 private. The Age private key must remain outside Git.
 
+### Home Assistant and Music Assistant external access
+
+The public HTTPRoutes in `kubernetes/infra/cilium/` expose Home Assistant at
+`https://hass.peterson.com.ar` and its Music Assistant add-on at
+`https://music-assistant.peterson.com.ar` through the existing HTTPS gateway.
+ExternalDNS manages their DNS records, and the gateway terminates TLS with the
+existing wildcard certificate. Backend Services and endpoint configuration live
+in `external-backends.sops.yaml`, encrypted with SOPS and rendered by KSOPS, so
+their private addresses are not published in plaintext.
+
+Home Assistant's existing Service, Endpoints, and HTTPRoute are adopted unchanged
+into GitOps. Its legacy Endpoints resource is retained to avoid disrupting the
+existing mirrored EndpointSlice; new external backends use explicit EndpointSlices.
+ArgoCD's resource exclusions allow both Endpoints and EndpointSlice resources so
+these manually configured backends are reconciled.
+Only these two application endpoints are exposed, not HA Supervisor or other
+infrastructure interfaces. Encryption conceals backend configuration in Git;
+authentication and network segmentation must still enforce access at runtime.
+
+In Music Assistant's **Settings > System > Webserver**, enable advanced settings
+and set **External URL** to `https://music-assistant.peterson.com.ar`. Keep its
+listening port at `8095` and backend TLS disabled; the gateway provides HTTPS.
+Use the HTTPS URL as the server address in the Music Assistant app.
+Direct access uses Music Assistant authentication, not Home Assistant Ingress
+authentication; configure an MA login before exposing the endpoint. If signing
+in through Home Assistant, use its public URL (`https://hass.peterson.com.ar`)
+in MA's Home Assistant connection settings so remote clients can complete login.
+
+The route supports WebSockets and disables the HTTP request timeout for
+long-lived connections. No Nabu Casa subscription or separate public port is
+needed. Leave the streamserver's published IP and port at their LAN settings for
+local speakers; do not replace its published IP with the public hostname.
+CI's keyless manifest validation and diff preview omit KSOPS-generated resources;
+changes to encrypted backends also need a local decrypted build and validation.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

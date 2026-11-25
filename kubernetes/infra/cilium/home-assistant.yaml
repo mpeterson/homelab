@@ -1,0 +1,17 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hass-route
+  namespace: network
+spec:
+  parentRefs:
+    - name: public-gateway
+      namespace: network
+      sectionName: https
+  hostnames:
+    - hass.peterson.com.ar
+  rules:
+    - backendRefs:
+        - name: hass-external
+          port: 8123

@@ -2,8 +2,8 @@
 # Helm values for the ephemeral ArgoCD used by argocd-diff-preview.
 # Installs a fake KSOPS plugin that returns empty output, allowing
 # kustomize builds to succeed without the real SOPS decryption key.
-# Secret resources are omitted from both branches equally, so the diff
-# accurately reflects changes to all non-secret resources.
+# All KSOPS-generated resources are omitted from both branches, including
+# encrypted external backends. Their changes need local decrypted validation.
 
 configs:
   cm:

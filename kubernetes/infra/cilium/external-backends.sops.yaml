@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: music-assistant-external
+    namespace: network
+spec:
+    ports:
+        - name: ENC[AES256_GCM,data:FJyARg==,iv:eIA2sUtMDenEuy342w6/3jaylJZZ7plt9Dw89Vg8sDE=,tag:UAmUeGGJlCjk8BJyz3d3Jg==,type:str]
+          port: ENC[AES256_GCM,data:FPXaqA==,iv:2APj9eBNAb5VDbloOQ0qbR9U0mza3hhrH2yXLUrNWPs=,tag:8zK1lIJCHhqC7h0Jq1sbsw==,type:int]
+          targetPort: ENC[AES256_GCM,data:WE1hpQ==,iv:5wiKiY/jJNIHcFgbzoKDjWFGHkf3L6yRWgoMUVbG78o=,tag:xQRi2VZkfiH7TGXxLdIKwg==,type:int]
+          protocol: ENC[AES256_GCM,data:e+GD,iv:u15tEWgDOUrcEjJP1eN3aVct82QNtKPIoy14il/uFY4=,tag:DU0KwVhgRDgIZ9EXuymIFw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBuVHpIc0NmQTJqYUFSVXZK
+            Q21iL25uVEtER0pWbHRLMTU1MURPN1pIRGhVCk0wSG5RelFQTnkwc1hZUHRYcnBM
+            ZHZ0Zk42bGJUTklRaFBEcGV1YThaRXcKLS0tIG1ZZFlkZmNJVUx5ajd6NitteVpp
+            YkVmYmpRMEVydVFpSWF1N1gxbldiMTQKmR43nhFe6R/2pFUXC616JV9Fi8qvY81O
+            eVdUAgJ940KJKnfYc5coywnckTUSMgicv5rqujzvaFFks8FI8poKZA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664
+    lastmodified: "2026-11-24T13:45:14Z"
+    mac: ENC[AES256_GCM,data:7mtb6CPud2c+VO0PnbRvGOQBjL2zWw22mVbuZe7LnvGLkVf4EXT0A5ByJKCg6lMArP0BWNl5NcL/rCLq42ifzv0ynVvXKOF6pmxI+Q0MNk0QH5zND2WoxAsaSUsf6O2KODRBBbrtX8BncDcwcQfuKC8/bUeq0dvEd3amZLwuZ4E=,iv:vp4tIJdZ8A/JJbn7sP/R1TDURTQFa4UhvNOHShAtfWY=,tag:8Dr9N3rhLBNOTg4JTr2YHg==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
+    version: 3.13.3
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+    name: music-assistant-external
+    namespace: network
+    labels:
+        kubernetes.io/service-name: music-assistant-external
+        endpointslice.kubernetes.io/managed-by: homelab
+addressType: ENC[AES256_GCM,data:EMqXXA==,iv:Y2oGDIdVi6ICXv3v7WzUyhDVGeZu0gskwC4+mohq2GQ=,tag:POk3NB8QwhBrzyX9k/K63Q==,type:str]
+ports:
+    - name: ENC[AES256_GCM,data:NiC9Gw==,iv:gSaONEJ+wT0V0ZcHRilFOJecYppPjgSal94E8NS1CkQ=,tag:xSOKejxMf5qcPgqGqZZZvg==,type:str]
+      port: ENC[AES256_GCM,data:RZ+gjg==,iv:hdbKYnfD6Gkgkjxkn8Ao+2BfttkNuyNKPdVox1sf984=,tag:vK/0k3ivG4R89e06+MFHpQ==,type:int]
+      protocol: ENC[AES256_GCM,data:gAlf,iv:tDGS7ea3DJHFnDiCWkQ2QzkUWZgAf9mV8c16vo5uUUI=,tag:WlfvXPvoEOa9BjF1SWn1IQ==,type:str]
+endpoints:
+    - addresses:
+        - ENC[AES256_GCM,data:Nok9r5eycjg=,iv:54vyxYB1f9T55FiSs3jR0XcZANQFXifL3UUgbQgarzc=,tag:gxhr3KogN+CiLpkH1AykwQ==,type:str]
+      conditions:
+        ready: ENC[AES256_GCM,data:OlMbtw==,iv:IZCAeN1cIIzXFORFWZngxIw66neRyCOcBi+MA0WTphs=,tag:VABAserCJ8Yk2GtEKWMutQ==,type:bool]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBuVHpIc0NmQTJqYUFSVXZK
+            Q21iL25uVEtER0pWbHRLMTU1MURPN1pIRGhVCk0wSG5RelFQTnkwc1hZUHRYcnBM
+            ZHZ0Zk42bGJUTklRaFBEcGV1YThaRXcKLS0tIG1ZZFlkZmNJVUx5ajd6NitteVpp
+            YkVmYmpRMEVydVFpSWF1N1gxbldiMTQKmR43nhFe6R/2pFUXC616JV9Fi8qvY81O
+            eVdUAgJ940KJKnfYc5coywnckTUSMgicv5rqujzvaFFks8FI8poKZA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664
+    lastmodified: "2026-11-24T13:45:14Z"
+    mac: ENC[AES256_GCM,data:7mtb6CPud2c+VO0PnbRvGOQBjL2zWw22mVbuZe7LnvGLkVf4EXT0A5ByJKCg6lMArP0BWNl5NcL/rCLq42ifzv0ynVvXKOF6pmxI+Q0MNk0QH5zND2WoxAsaSUsf6O2KODRBBbrtX8BncDcwcQfuKC8/bUeq0dvEd3amZLwuZ4E=,iv:vp4tIJdZ8A/JJbn7sP/R1TDURTQFa4UhvNOHShAtfWY=,tag:8Dr9N3rhLBNOTg4JTr2YHg==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
+    version: 3.13.3
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: hass-external
+    namespace: network
+spec:
+    ports:
+        - port: ENC[AES256_GCM,data:OkgKfg==,iv:IbSpkf0/76lIN91P0q+6FYBkgeCaspG3eo8sSMpLtu8=,tag:1Up8tJKBOfRAk3OBpc1deQ==,type:int]
+          targetPort: ENC[AES256_GCM,data:Q8ww0A==,iv:MOpjXgiTv58LTlB2G3LDc7/xxc08q0B8jwiyT8MxkHE=,tag:Sm3CtKFHphgkDyYcmrtslQ==,type:int]
+          protocol: ENC[AES256_GCM,data:OUsD,iv:T8hG4W5d3P0ndkbFpSWYQDchJpJUBRcfVINXv5I5/Fc=,tag:qQYd4hhCJo37ahheDHg79w==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBuVHpIc0NmQTJqYUFSVXZK
+            Q21iL25uVEtER0pWbHRLMTU1MURPN1pIRGhVCk0wSG5RelFQTnkwc1hZUHRYcnBM
+            ZHZ0Zk42bGJUTklRaFBEcGV1YThaRXcKLS0tIG1ZZFlkZmNJVUx5ajd6NitteVpp
+            YkVmYmpRMEVydVFpSWF1N1gxbldiMTQKmR43nhFe6R/2pFUXC616JV9Fi8qvY81O
+            eVdUAgJ940KJKnfYc5coywnckTUSMgicv5rqujzvaFFks8FI8poKZA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664
+    lastmodified: "2026-11-24T13:45:14Z"
+    mac: ENC[AES256_GCM,data:7mtb6CPud2c+VO0PnbRvGOQBjL2zWw22mVbuZe7LnvGLkVf4EXT0A5ByJKCg6lMArP0BWNl5NcL/rCLq42ifzv0ynVvXKOF6pmxI+Q0MNk0QH5zND2WoxAsaSUsf6O2KODRBBbrtX8BncDcwcQfuKC8/bUeq0dvEd3amZLwuZ4E=,iv:vp4tIJdZ8A/JJbn7sP/R1TDURTQFa4UhvNOHShAtfWY=,tag:8Dr9N3rhLBNOTg4JTr2YHg==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
+    version: 3.13.3
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+    name: hass-external
+    namespace: network
+subsets:
+    - addresses:
+        - ip: ENC[AES256_GCM,data:f3RkHXgwpYc=,iv:FGPJOLJ/FlbhlbvyEHyulPTvwBukVZb6lCq3wiYmmfw=,tag:oUDggeoacVu6eleIXMK4Zw==,type:str]
+      ports:
+        - port: ENC[AES256_GCM,data:Z+YSTg==,iv:Mn+p9LkMD7W16zkcVLhO18Nr/8cbYiys3iBPOdrHPtc=,tag:fQibKYg/IA7qVWyV14ZeOg==,type:int]
+          protocol: ENC[AES256_GCM,data:bhlS,iv:jO1VVMGa7moybagdw0HV1OpJJ0G7DCLGIJC9S0JZ7y0=,tag:awZvF+QR7KIzN/4Iqn/0hQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBuVHpIc0NmQTJqYUFSVXZK
+            Q21iL25uVEtER0pWbHRLMTU1MURPN1pIRGhVCk0wSG5RelFQTnkwc1hZUHRYcnBM
+            ZHZ0Zk42bGJUTklRaFBEcGV1YThaRXcKLS0tIG1ZZFlkZmNJVUx5ajd6NitteVpp
+            YkVmYmpRMEVydVFpSWF1N1gxbldiMTQKmR43nhFe6R/2pFUXC616JV9Fi8qvY81O
+            eVdUAgJ940KJKnfYc5coywnckTUSMgicv5rqujzvaFFks8FI8poKZA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1v6dnmkex8qstz8wrp3as58ap8yecvp5gttt67hktepc7s9kluvvsz94664
+    lastmodified: "2026-11-24T13:45:14Z"
+    mac: ENC[AES256_GCM,data:7mtb6CPud2c+VO0PnbRvGOQBjL2zWw22mVbuZe7LnvGLkVf4EXT0A5ByJKCg6lMArP0BWNl5NcL/rCLq42ifzv0ynVvXKOF6pmxI+Q0MNk0QH5zND2WoxAsaSUsf6O2KODRBBbrtX8BncDcwcQfuKC8/bUeq0dvEd3amZLwuZ4E=,iv:vp4tIJdZ8A/JJbn7sP/R1TDURTQFa4UhvNOHShAtfWY=,tag:8Dr9N3rhLBNOTg4JTr2YHg==,type:str]
+    unencrypted_regex: ^(apiVersion|metadata|kind|type|project|destination|syncPolicy|repoURL|chart|targetRevision|registry|tag|repository)$
+    version: 3.13.3
