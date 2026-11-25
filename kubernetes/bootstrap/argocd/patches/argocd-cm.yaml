@@ -31,13 +31,6 @@ data:
     - .spec.acme.solvers[]?.http01?.gatewayHTTPRoute?.parentRefs[]?.group
     - .spec.acme.solvers[]?.http01?.gatewayHTTPRoute?.parentRefs[]?.kind
   resource.exclusions: |
-    ### Network resources created by the Kubernetes control plane
-    - apiGroups:
-      - ''
-      - discovery.k8s.io
-      kinds:
-      - Endpoints
-      - EndpointSlice
     ### Internal Kubernetes resources
     - apiGroups:
       - coordination.k8s.io

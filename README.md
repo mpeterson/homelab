@@ -93,6 +93,8 @@ their private addresses are not published in plaintext.
 Home Assistant's existing Service, Endpoints, and HTTPRoute are adopted unchanged
 into GitOps. Its legacy Endpoints resource is retained to avoid disrupting the
 existing mirrored EndpointSlice; new external backends use explicit EndpointSlices.
+ArgoCD's resource exclusions allow both Endpoints and EndpointSlice resources so
+these manually configured backends are reconciled.
 Only these two application endpoints are exposed, not HA Supervisor or other
 infrastructure interfaces. Encryption conceals backend configuration in Git;
 authentication and network segmentation must still enforce access at runtime.

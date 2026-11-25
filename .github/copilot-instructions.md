@@ -144,6 +144,8 @@ When adding a new app, follow an existing app in the same tier as a template. Lo
   selectorless Services and explicitly managed EndpointSlices with matching
   service labels and port names. HA's legacy Endpoints are retained unchanged.
   CI skips encrypted resources, so validate decrypted backend changes locally.
+  ArgoCD must not exclude Endpoints or EndpointSlice resources; it manages these
+  explicit external backends as well as their Services and routes.
 - Container images are pinned with digest: `repository/image:tag@sha256:...`
 - New apps must be added to the tier's root `kustomization.yaml`
 - Most apps use the bjw-s `app-template` chart; some infra apps use dedicated charts
