@@ -21,3 +21,4 @@ spec:
       backendRefs:
         - name: music-assistant-external
           port: 8095
+          weight: 1

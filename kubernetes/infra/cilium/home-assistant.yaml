@@ -12,6 +12,11 @@ spec:
   hostnames:
     - hass.peterson.com.ar
   rules:
-    - backendRefs:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
         - name: hass-external
           port: 8123
+          weight: 1
