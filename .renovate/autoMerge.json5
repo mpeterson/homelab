@@ -23,6 +23,7 @@
         "kubernetes/apps/sonarr/**",
         "kubernetes/apps/stirling-pdf/**",
         "kubernetes/apps/tautulli/**",
+        "kubernetes/apps/trek/**",
         "kubernetes/infra/alertmanager/**",
         "kubernetes/infra/metrics-server/**",
         "kubernetes/infra/prometheus-operator/**",
