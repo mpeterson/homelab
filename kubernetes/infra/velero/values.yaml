@@ -1,7 +1,7 @@
 ---
 initContainers:
   - name: velero-plugin-for-aws
-    image: velero/velero-plugin-for-aws:v1.14.3-rc.2@sha256:5b0b46ea3c506bfca2b975b0579705dedc1aecadb69b8bd227581309eb588006
+    image: velero/velero-plugin-for-aws:v1.15.0@sha256:cb8fdbefc54e2d99b124f6611bc8cad31a1e546689dfb2a32c9307339c492750
     imagePullPolicy: IfNotPresent
     volumeMounts:
       - mountPath: /target
