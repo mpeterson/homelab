@@ -20,7 +20,7 @@ spec:
       value: app-template@4.6.2
     - name: Image
       # renovate: datasource=docker depName=ghcr.io/home-operations/prowlarr
-      value: ghcr.io/home-operations/prowlarr:2.7.0.5723@sha256:fcf7498692f97698ea8b8f7078a0f81120a16e7354e4c232b5e3810e3e783dff
+      value: ghcr.io/home-operations/prowlarr:3.1.0.5799@sha256:15b68a6e69f893a3ede6fed405594d3f5d9e9d13648246a0fefbafe4fd7f595b
 
   syncPolicy:
     syncOptions:
